@@ -1,6 +1,5 @@
-import numpy as np
 from js import document, setInterval, clearInterval
-from pyodide import create_proxy
+from pyodide.ffi import create_proxy
 
 class Panel:
     def __init__(self, title, description, image_url, link_url):

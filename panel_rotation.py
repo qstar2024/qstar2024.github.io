@@ -1,4 +1,4 @@
-from js import document, setInterval, clearInterval
+from js import document, setInterval, window
 from pyodide.ffi import create_proxy
 
 class Panel:
@@ -29,21 +29,17 @@ def create_panel_element(panel):
     """
     return panel_div
 
-def initialize_panels(grid_template_columns):
-    global container, panel_elements, current_index, display_size
+def initialize_panels():
+    global container, panel_elements, current_index, visible_columns
     container = document.getElementById("panel-container")
     panel_elements = [create_panel_element(panel) for panel in panels]
-
-    display_size = grid_template_columns
-
-    for element in panel_elements[:display_size]:
+    for element in panel_elements[:visible_columns]:
         container.appendChild(element)
-
     current_index = 0
 
 def rotate_panels():
     global current_index
-    next_index = (current_index + display_size) % len(panels)
+    next_index = (current_index + visible_columns) % len(panels)
     
     current_panel = panel_elements[current_index]
     next_panel = panel_elements[next_index]
@@ -61,5 +57,25 @@ def start_rotation():
     rotate_proxy = create_proxy(rotate_panels)
     interval_id = setInterval(rotate_proxy, 10000)  # Rotate every 10 seconds
 
-initialize_panels()
+def get_visible_columns():
+    container = document.getElementById("panel-container")
+    if window.innerWidth <= 640:
+        return int(container.getAttribute("data-columns-mobile"))
+    else:
+        return int(container.getAttribute("data-columns-desktop"))
+
+def update_visible_columns(event):
+    global visible_columns
+    new_visible_columns = get_visible_columns()
+    if new_visible_columns != visible_columns:
+        visible_columns = new_visible_columns
+        # Re-initialize panels with new column count
+        container.innerHTML = ''
+        for element in panel_elements[:visible_columns]:
+            container.appendChild(element)
+
+initialize_panels(visible_columns)
 start_rotation()
+
+# Add event listener for window resize
+window.addEventListener('resize', create_proxy(update_visible_columns))

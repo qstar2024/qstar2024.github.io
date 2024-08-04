@@ -3,92 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PyScript Landing Page</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <title>Landing Page</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+        }
+        .video-container video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translateX(-50%) translateY(-50%);
+        }
+        .header {
+            text-align: center;
+            padding: 2rem;
+            font-size: 2rem;
+        }
+        .panel-container {
+            display: flex;
+            overflow-x: hidden;
+            padding: 2rem 0;
+        }
         .panel {
-            transition: transform 0.5s ease-in-out;
+            flex: 0 0 auto;
+            width: 300px;
+            margin-right: 2rem;
+            text-align: center;
+            transition: transform 0.5s ease;
         }
-        @media (max-width: 640px) {
-            .panel-container {
-                grid-template-columns: repeat(2, 1fr);
+        .panel img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1rem;
+        }
+        .sitemap {
+            background-color: #f4f4f4;
+            padding: 2rem;
+            font-size: 0.8rem;
+        }
+        .sitemap a {
+            color: #333;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+        @media (max-width: 768px) {
+            .header {
+                font-size: 1.5rem;
             }
-        }
-        @media (min-width: 641px) {
-            .panel-container {
-                grid-template-columns: repeat(3, 1fr);
+            .panel {
+                width: 250px;
             }
         }
     </style>
-    <py-config>
-        [splashscreen]
-        enabled = false
-    </py-config>
 </head>
-
-<body class="bg-gray-100">
-    <div class="relative h-screen">
+<body>
+    <div class="video-container">
         <iframe class="w-full h-full" src="https://www.youtube-nocookie.com/embed/ywWBy6J5gz8?autoplay=1&mute=1&start=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
 
-    <header class="bg-white shadow">
-        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold text-gray-900 md:text-4xl lg:text-5xl">
-                Welcome to Our Amazing Website
-            </h1>
-        </div>
-    </header>
+    <h1 class="header">Welcome to Our Amazing Website</h1>
 
-    <main>
-        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-            <div id="panel-container" class="panel-container grid gap-4 overflow-hidden" data-columns-mobile="2" data-columns-desktop="3">
-                <!-- Panels will be dynamically inserted here -->
-            </div>
+    <div class="panel-container">
+        <div class="panel">
+            <img src="GitHub-Mark.png" alt="Logo 1">
+            <h2>Product 1</h2>
+            <p>Product description</p>
+            <a href="#">Learn More</a>
         </div>
-    </main>
+        <div class="panel">
+            <img src="GitHub-Mark.png" alt="Logo 2">
+            <h2>Product 2</h2>
+            <p>Product description</p>
+            <a href="#">Learn More</a>
+        </div>
+        <div class="panel">
+            <img src="GitHub-Mark.png" alt="Logo 3">
+            <h2>Product 3</h2>
+            <p>Product description</p>
+            <a href="#">Learn More</a>
+        </div>
+        <div class="panel">
+            <img src="GitHub-Mark.png" alt="Logo 4">
+            <h2>Product 4</h2>
+            <p>Product description</p>
+            <a href="#">Learn More</a>
+        </div>
+        <div class="panel">
+            <img src="GitHub-Mark.png" alt="Logo 5">
+            <h2>Product 5</h2>
+            <p>Product description</p>
+            <a href="#">Learn More</a>
+        </div>
+        <div class="panel">
+            <img src="GitHub-Mark.png" alt="Logo 6">
+            <h2>Product 6</h2>
+            <p>Product description</p>
+            <a href="#">Learn More</a>
+        </div>
+        <div class="panel">
+            <img src="GitHub-Mark.png" alt="Logo 7">
+            <h2>Product 7</h2>
+            <p>Product description</p>
+            <a href="#">Learn More</a>
+        </div>
+    </div>
 
-    <footer class="bg-gray-800 text-white">
-        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                    <h3 class="font-bold mb-2">About Us</h3>
-                    <ul>
-                        <li><a href="#" class="hover:text-gray-300">Our Story</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Team</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Careers</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-bold mb-2">Products</h3>
-                    <ul>
-                        <li><a href="#" class="hover:text-gray-300">Feature 1</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Feature 2</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Feature 3</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-bold mb-2">Resources</h3>
-                    <ul>
-                        <li><a href="#" class="hover:text-gray-300">Blog</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Documentation</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Support</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="font-bold mb-2">Legal</h3>
-                    <ul>
-                        <li><a href="#" class="hover:text-gray-300">Privacy Policy</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Terms of Service</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Contact Us</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
+    <footer class="sitemap">
+        <a href="#">About Us</a>
+        <a href="#">Product</a>
+        <a href="#">Documentation</a>
+        <a href="#">Contact</a>
     </footer>
 
-    <py-script src="panel_rotation.py"></py-script>
-    
+    <script>
+        const panelContainer = document.querySelector('.panel-container');
+        const panels = document.querySelectorAll('.panel');
+        let currentIndex = 0;
+
+        function rotatePanels() {
+            currentIndex = (currentIndex + 1) % panels.length;
+            panelContainer.style.transform = `translateX(-${currentIndex * (panels[0].offsetWidth + 32)}px)`;
+        }
+
+        setInterval(rotatePanels, 3000);
+
+        function adjustVisiblePanels() {
+            const containerWidth = panelContainer.offsetWidth;
+            const panelWidth = panels[0].offsetWidth;
+            const visiblePanels = Math.floor(containerWidth / panelWidth);
+
+            panels.forEach((panel, index) => {
+                if (index < visiblePanels) {
+                    panel.style.display = 'block';
+                } else {
+                    panel.style.display = 'none';
+                }
+            });
+        }
+
+        window.addEventListener('resize', adjustVisiblePanels);
+        adjustVisiblePanels();
+    </script>
 </body>
 </html>

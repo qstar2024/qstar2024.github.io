@@ -30,18 +30,20 @@ def create_panel_element(panel):
     return panel_div
 
 def initialize_panels():
-    global container, panel_elements, current_index
+    global container, panel_elements, current_index, display_size
     container = document.getElementById("panel-container")
     panel_elements = [create_panel_element(panel) for panel in panels]
 
-    for element in panel_elements[:3]:
+    display_size = 3
+
+    for element in panel_elements[:display_size]:
         container.appendChild(element)
 
     current_index = 0
 
 def rotate_panels():
     global current_index
-    next_index = (current_index + 1) % len(panels)
+    next_index = (current_index + display_size) % len(panels)
     
     current_panel = panel_elements[current_index]
     next_panel = panel_elements[next_index]
@@ -52,12 +54,12 @@ def rotate_panels():
     container.removeChild(current_panel)
     container.appendChild(next_panel)
     
-    current_index = next_index
+    current_index = (current_index + 1) % len(panels)
 
 def start_rotation():
     global rotate_proxy, interval_id
     rotate_proxy = create_proxy(rotate_panels)
-    interval_id = setInterval(rotate_proxy, 5000)  # Rotate every 5 seconds
+    interval_id = setInterval(rotate_proxy, 10000)  # Rotate every 10 seconds
 
 initialize_panels()
 start_rotation()

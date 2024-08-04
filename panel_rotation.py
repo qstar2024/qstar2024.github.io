@@ -10,11 +10,11 @@ class Panel:
         self.link_url = link_url
 
 panels = [
-    Panel("Feature 1", "Description of feature 1", "/api/placeholder/100/100", "#feature1"),
-    Panel("Feature 2", "Description of feature 2", "/api/placeholder/100/100", "#feature2"),
-    Panel("Feature 3", "Description of feature 3", "/api/placeholder/100/100", "#feature3"),
-    Panel("Feature 4", "Description of feature 4", "/api/placeholder/100/100", "#feature4"),
-    Panel("Feature 5", "Description of feature 5", "/api/placeholder/100/100", "#feature5"),
+    Panel("Feature 1", "Description of feature 1", "GitHub-Mark.png", "#feature1"),
+    Panel("Feature 2", "Description of feature 2", "GitHub-Mark.png", "#feature2"),
+    Panel("Feature 3", "Description of feature 3", "GitHub-Mark.png", "#feature3"),
+    Panel("Feature 4", "Description of feature 4", "GitHub-Mark.png", "#feature4"),
+    Panel("Feature 5", "Description of feature 5", "GitHub-Mark.png", "#feature5"),
 ]
 
 def create_panel_element(panel):

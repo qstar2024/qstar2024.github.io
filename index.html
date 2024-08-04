@@ -8,18 +8,6 @@
     <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
     <script defer src="https://pyscript.net/latest/pyscript.js"></script>
     <style>
-        #loading {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-        }
         .panel {
             transition: transform 0.5s ease-in-out;
         }
@@ -34,21 +22,18 @@
             }
         }
     </style>
+    <py-config>
+        packages = []
+    </py-config>
 </head>
 
 <body class="bg-gray-100">
     <div id="loading">
         <div class="text-white text-2xl">Loading PyScript...</div>
     </div>
-
-    <py-config>
-        packages = []
-        [[fetch]]
-        files = ["./panel_rotation.py"]
-    </py-config>
     
     <div class="relative h-screen">
-        <iframe class="w-full h-full" src="https://www.youtube-nocookie.com/embed/ywWBy6J5gz8?autoplay=1&mute=0&start=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+        <iframe class="w-full h-full" src="https://www.youtube-nocookie.com/embed/ywWBy6J5gz8?autoplay=1&mute=1&start=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     </div>
 
     <header class="bg-white shadow">
@@ -106,18 +91,7 @@
         </div>
     </footer>
 
-    <py-script>
-        import panel_rotation
-        from js import document
-        
-        def hide_loading():
-            loading = document.getElementById("loading")
-            loading.style.display = "none"
-        
-        panel_rotation.initialize_panels()
-        panel_rotation.start_rotation()
-        hide_loading()
-    </py-script>
+    <py-script src="panel_rotation.py"></py-script>
     
 </body>
 </html>

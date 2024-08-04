@@ -29,12 +29,12 @@ def create_panel_element(panel):
     """
     return panel_div
 
-def initialize_panels():
+def initialize_panels(grid_template_columns):
     global container, panel_elements, current_index, display_size
     container = document.getElementById("panel-container")
     panel_elements = [create_panel_element(panel) for panel in panels]
 
-    display_size = 3
+    display_size = grid_template_columns
 
     for element in panel_elements[:display_size]:
         container.appendChild(element)

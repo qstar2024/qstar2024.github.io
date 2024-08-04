@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PyScript Landing Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <py-config>
+        packages = ["numpy"]
+    </py-config>
+    <style>
+        .panel {
+            transition: transform 0.5s ease-in-out;
+        }
+        @media (max-width: 640px) {
+            .panel-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (min-width: 641px) {
+            .panel-container {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="relative h-screen">
+        <iframe class="w-full h-full" src="https://www.youtube.com/embed/YOUR_VIDEO_ID?autoplay=1&mute=1&loop=1&playlist=YOUR_VIDEO_ID" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+
+    <header class="bg-white shadow">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <h1 class="text-3xl font-bold text-gray-900 md:text-4xl lg:text-5xl">
+                Welcome to Our Amazing Website
+            </h1>
+        </div>
+    </header>
+
+    <main>
+        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <div id="panel-container" class="panel-container grid gap-4 overflow-hidden">
+                <!-- Panels will be dynamically inserted here -->
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                    <h3 class="font-bold mb-2">About Us</h3>
+                    <ul>
+                        <li><a href="#" class="hover:text-gray-300">Our Story</a></li>
+                        <li><a href="#" class="hover:text-gray-300">Team</a></li>
+                        <li><a href="#" class="hover:text-gray-300">Careers</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-2">Products</h3>
+                    <ul>
+                        <li><a href="#" class="hover:text-gray-300">Feature 1</a></li>
+                        <li><a href="#" class="hover:text-gray-300">Feature 2</a></li>
+                        <li><a href="#" class="hover:text-gray-300">Feature 3</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-2">Resources</h3>
+                    <ul>
+                        <li><a href="#" class="hover:text-gray-300">Blog</a></li>
+                        <li><a href="#" class="hover:text-gray-300">Documentation</a></li>
+                        <li><a href="#" class="hover:text-gray-300">Support</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-2">Legal</h3>
+                    <ul>
+                        <li><a href="#" class="hover:text-gray-300">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-gray-300">Terms of Service</a></li>
+                        <li><a href="#" class="hover:text-gray-300">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <py-script>
+import numpy as np
+from js import document, setInterval, clearInterval
+from pyodide import create_proxy
+
+class Panel:
+    def __init__(self, title, description, image_url, link_url):
+        self.title = title
+        self.description = description
+        self.image_url = image_url
+        self.link_url = link_url
+
+panels = [
+    Panel("Feature 1", "Description of feature 1", "/api/placeholder/100/100", "#feature1"),
+    Panel("Feature 2", "Description of feature 2", "/api/placeholder/100/100", "#feature2"),
+    Panel("Feature 3", "Description of feature 3", "/api/placeholder/100/100", "#feature3"),
+    Panel("Feature 4", "Description of feature 4", "/api/placeholder/100/100", "#feature4"),
+    Panel("Feature 5", "Description of feature 5", "/api/placeholder/100/100", "#feature5"),
+]
+
+def create_panel_element(panel):
+    panel_div = document.createElement("div")
+    panel_div.className = "panel bg-white rounded-lg shadow-md p-4 flex flex-col items-center"
+    panel_div.innerHTML = f"""
+        <img src="{panel.image_url}" alt="{panel.title}" class="w-24 h-24 rounded-full mb-4">
+        <h2 class="text-xl font-bold mb-2">{panel.title}</h2>
+        <p class="text-gray-600 mb-4">{panel.description}</p>
+        <a href="{panel.link_url}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+            Learn More
+        </a>
+    """
+    return panel_div
+
+container = document.getElementById("panel-container")
+panel_elements = [create_panel_element(panel) for panel in panels]
+
+for element in panel_elements[:3]:
+    container.appendChild(element)
+
+current_index = 0
+
+def rotate_panels():
+    global current_index
+    next_index = (current_index + 1) % len(panels)
+    
+    current_panel = panel_elements[current_index]
+    next_panel = panel_elements[next_index]
+    
+    current_panel.style.transform = "translateX(-100%)"
+    next_panel.style.transform = "translateX(0)"
+    
+    container.removeChild(current_panel)
+    container.appendChild(next_panel)
+    
+    current_index = next_index
+
+rotate_proxy = create_proxy(rotate_panels)
+interval_id = setInterval(rotate_proxy, 5000)  # Rotate every 5 seconds
+
+    </py-script>
+</body>
+</html>

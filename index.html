@@ -6,174 +6,382 @@
     <title>Landing Page</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" />
     <style>
-        .panel {
-            transition: transform 0.5s ease-in-out;
+        .video-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
         }
-        @media (max-width: 640px) {
-            .panel-container {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        
+        .fullscreen-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
+            z-index: 1;
         }
-        @media (min-width: 641px) {
-            .panel-container {
-                grid-template-columns: repeat(3, 1fr);
-            }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            transform: translateY(-100%);
+            transition: transform 0.3s ease-in-out;
+            z-index: 10;
+        }
+        
+        .video-container:hover .dropdown-menu {
+            transform: translateY(0);
+        }
+        
+        .flash-card {
+            perspective: 1000px;
+            transition: transform 0.6s;
+        }
+        
+        .flash-card:hover {
+            transform: rotateY(180deg);
+        }
+        
+        .flash-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .flash-card:hover .flash-card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .flash-card-front, .flash-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .flash-card-back {
+            transform: rotateY(180deg);
+        }
+        
+        .rotating-container {
+            animation: rotate 20s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: translateX(0); }
+            to { transform: translateX(-100%); }
+        }
+        
+        .scroll-trigger {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+        }
+        
+        .scroll-trigger.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
     </style>
 </head>
 
 <body class="bg-gray-100">
-    <div class="relative h-screen">
-        <iframe class="w-full h-full" src="https://www.youtube-nocookie.com/embed/ywWBy6J5gz8?autoplay=1&mute=1&start=1" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    <!-- Fullscreen Video Section -->
+    <div class="video-container">
+        <video class="fullscreen-video" autoplay muted loop>
+            <source src="video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        
+        <!-- Transparent Dropdown Menu -->
+        <div class="dropdown-menu">
+            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center py-6">
+                    <div class="flex items-center">
+                        <h1 class="text-white text-2xl font-bold">Your Brand</h1>
+                    </div>
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#home" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                            <a href="#about" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">About</a>
+                            <a href="#services" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Services</a>
+                            <a href="#portfolio" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Portfolio</a>
+                            <a href="#blog" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Blog</a>
+                            <a href="#contact" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Contact</a>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
     </div>
 
-    <header class="bg-white shadow">
-        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <h1 class="text-3xl font-bold text-gray-900 md:text-4xl lg:text-5xl">
-                Welcome to Our Amazing Website
-            </h1>
-        </div>
-    </header>
+    <!-- Flash Cards Section -->
+    <section class="py-16 bg-white scroll-trigger" id="content">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Featured Content</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                <!-- Blog Flash Card -->
+                <div class="flash-card h-64 cursor-pointer">
+                    <div class="flash-card-inner">
+                        <div class="flash-card-front bg-gradient-to-br from-blue-500 to-purple-600 text-white">
+                            <div class="text-4xl mb-4">📝</div>
+                            <h3 class="text-xl font-bold">Latest Blog Posts</h3>
+                            <p class="text-sm mt-2">Discover insights and stories</p>
+                        </div>
+                        <div class="flash-card-back bg-gradient-to-br from-purple-600 to-blue-500 text-white">
+                            <h3 class="text-lg font-bold mb-4">Recent Articles</h3>
+                            <ul class="text-sm space-y-2">
+                                <li><a href="#blog1" class="hover:underline">• Web Development Trends 2024</a></li>
+                                <li><a href="#blog2" class="hover:underline">• UI/UX Best Practices</a></li>
+                                <li><a href="#blog3" class="hover:underline">• JavaScript Performance Tips</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
 
-    <main>
-        <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-            <div id="panel-container" class="panel-container grid gap-4 overflow-hidden" data-columns-mobile="2" data-columns-desktop="3">
-                <!-- Panels will be dynamically inserted here -->
+                <!-- Code Demo Flash Card -->
+                <div class="flash-card h-64 cursor-pointer">
+                    <div class="flash-card-inner">
+                        <div class="flash-card-front bg-gradient-to-br from-green-500 to-teal-600 text-white">
+                            <div class="text-4xl mb-4">💻</div>
+                            <h3 class="text-xl font-bold">Code Demos</h3>
+                            <p class="text-sm mt-2">Interactive examples and tutorials</p>
+                        </div>
+                        <div class="flash-card-back bg-gradient-to-br from-teal-600 to-green-500 text-white">
+                            <h3 class="text-lg font-bold mb-4">Live Demos</h3>
+                            <ul class="text-sm space-y-2">
+                                <li><a href="#demo1" class="hover:underline">• React Component Library</a></li>
+                                <li><a href="#demo2" class="hover:underline">• CSS Animation Showcase</a></li>
+                                <li><a href="#demo3" class="hover:underline">• API Integration Examples</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Multimedia Flash Card -->
+                <div class="flash-card h-64 cursor-pointer">
+                    <div class="flash-card-inner">
+                        <div class="flash-card-front bg-gradient-to-br from-red-500 to-pink-600 text-white">
+                            <div class="text-4xl mb-4">🎥</div>
+                            <h3 class="text-xl font-bold">Multimedia</h3>
+                            <p class="text-sm mt-2">Videos, podcasts, and more</p>
+                        </div>
+                        <div class="flash-card-back bg-gradient-to-br from-pink-600 to-red-500 text-white">
+                            <h3 class="text-lg font-bold mb-4">Media Gallery</h3>
+                            <ul class="text-sm space-y-2">
+                                <li><a href="#video1" class="hover:underline">• Tutorial Videos</a></li>
+                                <li><a href="#podcast1" class="hover:underline">• Tech Podcast Series</a></li>
+                                <li><a href="#gallery1" class="hover:underline">• Project Showcase</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Portfolio Flash Card -->
+                <div class="flash-card h-64 cursor-pointer">
+                    <div class="flash-card-inner">
+                        <div class="flash-card-front bg-gradient-to-br from-yellow-500 to-orange-600 text-white">
+                            <div class="text-4xl mb-4">🎨</div>
+                            <h3 class="text-xl font-bold">Portfolio</h3>
+                            <p class="text-sm mt-2">Featured projects and work</p>
+                        </div>
+                        <div class="flash-card-back bg-gradient-to-br from-orange-600 to-yellow-500 text-white">
+                            <h3 class="text-lg font-bold mb-4">Recent Projects</h3>
+                            <ul class="text-sm space-y-2">
+                                <li><a href="#project1" class="hover:underline">• E-commerce Platform</a></li>
+                                <li><a href="#project2" class="hover:underline">• Mobile App Design</a></li>
+                                <li><a href="#project3" class="hover:underline">• Brand Identity System</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resources Flash Card -->
+                <div class="flash-card h-64 cursor-pointer">
+                    <div class="flash-card-inner">
+                        <div class="flash-card-front bg-gradient-to-br from-indigo-500 to-blue-600 text-white">
+                            <div class="text-4xl mb-4">📚</div>
+                            <h3 class="text-xl font-bold">Resources</h3>
+                            <p class="text-sm mt-2">Tools, guides, and downloads</p>
+                        </div>
+                        <div class="flash-card-back bg-gradient-to-br from-blue-600 to-indigo-500 text-white">
+                            <h3 class="text-lg font-bold mb-4">Free Resources</h3>
+                            <ul class="text-sm space-y-2">
+                                <li><a href="#resource1" class="hover:underline">• Design Templates</a></li>
+                                <li><a href="#resource2" class="hover:underline">• Code Snippets</a></li>
+                                <li><a href="#resource3" class="hover:underline">• Development Tools</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Community Flash Card -->
+                <div class="flash-card h-64 cursor-pointer">
+                    <div class="flash-card-inner">
+                        <div class="flash-card-front bg-gradient-to-br from-purple-500 to-indigo-600 text-white">
+                            <div class="text-4xl mb-4">👥</div>
+                            <h3 class="text-xl font-bold">Community</h3>
+                            <p class="text-sm mt-2">Connect and collaborate</p>
+                        </div>
+                        <div class="flash-card-back bg-gradient-to-br from-indigo-600 to-purple-500 text-white">
+                            <h3 class="text-lg font-bold mb-4">Join Us</h3>
+                            <ul class="text-sm space-y-2">
+                                <li><a href="#forum" class="hover:underline">• Discussion Forum</a></li>
+                                <li><a href="#discord" class="hover:underline">• Discord Server</a></li>
+                                <li><a href="#events" class="hover:underline">• Upcoming Events</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </main>
+    </section>
 
-    <footer class="bg-gray-800 text-white">
-        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+    <!-- Footer with Sitemap -->
+    <footer class="bg-gray-900 text-white scroll-trigger">
+        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <!-- Company Info -->
+                <div class="col-span-1 md:col-span-1">
+                    <h3 class="text-lg font-bold mb-4">Your Brand</h3>
+                    <p class="text-gray-400 text-sm mb-4">Creating amazing digital experiences through innovative design and development.</p>
+                    <div class="flex space-x-4">
+                        <a href="#social1" class="text-gray-400 hover:text-white transition-colors">📘</a>
+                        <a href="#social2" class="text-gray-400 hover:text-white transition-colors">🐦</a>
+                        <a href="#social3" class="text-gray-400 hover:text-white transition-colors">📷</a>
+                        <a href="#social4" class="text-gray-400 hover:text-white transition-colors">💼</a>
+                    </div>
+                </div>
+
+                <!-- Quick Links -->
                 <div>
-                    <h3 class="font-bold mb-2">About Us</h3>
-                    <ul>
-                        <li><a href="#" class="hover:text-gray-300">Our Story</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Team</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Careers</a></li>
+                    <h3 class="text-lg font-bold mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#home" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition-colors">About Us</a></li>
+                        <li><a href="#services" class="text-gray-400 hover:text-white transition-colors">Services</a></li>
+                        <li><a href="#portfolio" class="text-gray-400 hover:text-white transition-colors">Portfolio</a></li>
+                        <li><a href="#contact" class="text-gray-400 hover:text-white transition-colors">Contact</a></li>
                     </ul>
                 </div>
+
+                <!-- Content -->
                 <div>
-                    <h3 class="font-bold mb-2">Products</h3>
-                    <ul>
-                        <li><a href="#" class="hover:text-gray-300">Feature 1</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Feature 2</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Feature 3</a></li>
+                    <h3 class="text-lg font-bold mb-4">Content</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#blog" class="text-gray-400 hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="#tutorials" class="text-gray-400 hover:text-white transition-colors">Tutorials</a></li>
+                        <li><a href="#demos" class="text-gray-400 hover:text-white transition-colors">Code Demos</a></li>
+                        <li><a href="#resources" class="text-gray-400 hover:text-white transition-colors">Resources</a></li>
+                        <li><a href="#downloads" class="text-gray-400 hover:text-white transition-colors">Downloads</a></li>
                     </ul>
                 </div>
+
+                <!-- Legal -->
                 <div>
-                    <h3 class="font-bold mb-2">Resources</h3>
-                    <ul>
-                        <li><a href="#" class="hover:text-gray-300">Blog</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Documentation</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Support</a></li>
+                    <h3 class="text-lg font-bold mb-4">Legal</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#privacy" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+                        <li><a href="#terms" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
+                        <li><a href="#cookies" class="text-gray-400 hover:text-white transition-colors">Cookie Policy</a></li>
+                        <li><a href="#sitemap" class="text-gray-400 hover:text-white transition-colors">Sitemap</a></li>
+                        <li><a href="#support" class="text-gray-400 hover:text-white transition-colors">Support</a></li>
                     </ul>
                 </div>
-                <div>
-                    <h3 class="font-bold mb-2">Legal</h3>
-                    <ul>
-                        <li><a href="#" class="hover:text-gray-300">Privacy Policy</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Terms of Service</a></li>
-                        <li><a href="#" class="hover:text-gray-300">Contact Us</a></li>
-                    </ul>
-                </div>
+            </div>
+
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center">
+                <p class="text-gray-400 text-sm">&copy; 2024 Your Brand. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            class Panel {
-                constructor(title, description, imageUrl, linkUrl) {
-                    this.title = title;
-                    this.description = description;
-                    this.imageUrl = imageUrl;
-                    this.linkUrl = linkUrl;
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
                 }
-            }
+            });
+        });
 
-            const panels = [
-                new Panel("Feature 1", "Description of feature 1", "GitHub-Mark.png", "#feature1"),
-                new Panel("Feature 2", "Description of feature 2", "GitHub-Mark.png", "#feature2"),
-                new Panel("Feature 3", "Description of feature 3", "GitHub-Mark.png", "#feature3"),
-                new Panel("Feature 4", "Description of feature 4", "GitHub-Mark.png", "#feature4"),
-                new Panel("Feature 5", "Description of feature 5", "GitHub-Mark.png", "#feature5"),
-            ];
+        // Scroll animation trigger
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
 
-            function createPanelElement(panel) {
-                const panelDiv = document.createElement("div");
-                panelDiv.className = "panel bg-white rounded-lg shadow-md p-4 flex flex-col items-center";
-                panelDiv.innerHTML = `
-                    <img src="${panel.imageUrl}" alt="${panel.title}" class="w-24 h-24 rounded-full mb-4">
-                    <h2 class="text-xl font-bold mb-2">${panel.title}</h2>
-                    <p class="text-gray-600 mb-4">${panel.description}</p>
-                    <a href="${panel.linkUrl}" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
-                        Learn More
-                    </a>
-                `;
-                return panelDiv;
-            }
-
-            let container;
-            let panelElements;
-            let currentIndex;
-            let visibleColumns;
-
-            function initializePanels() {
-                container = document.getElementById("panel-container");
-                panelElements = panels.map(createPanelElement);
-                visibleColumns = getVisibleColumns();
-                for (let i = 0; i < visibleColumns; i++) {
-                    container.appendChild(panelElements[i]);
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
                 }
-                currentIndex = 0;
-            }
+            });
+        }, observerOptions);
 
-            function rotatePanels() {
-                const nextIndex = (currentIndex + visibleColumns) % panels.length;
-                
-                const currentPanel = panelElements[currentIndex];
-                const nextPanel = panelElements[nextIndex];
-                
-                currentPanel.style.transform = "translateX(-100%)";
-                nextPanel.style.transform = "translateX(0)";
-                
-                container.removeChild(currentPanel);
-                container.appendChild(nextPanel);
-                
-                currentIndex = (currentIndex + 1) % panels.length;
-            }
+        // Observe all scroll trigger elements
+        document.querySelectorAll('.scroll-trigger').forEach(el => {
+            observer.observe(el);
+        });
 
-            function startRotation() {
-                setInterval(rotatePanels, 10000); // Rotate every 10 seconds
-            }
-
-            function getVisibleColumns() {
-                const container = document.getElementById("panel-container");
-                if (window.innerWidth <= 640) {
-                    return parseInt(container.getAttribute("data-columns-mobile"));
-                } else {
-                    return parseInt(container.getAttribute("data-columns-desktop"));
-                }
-            }
-
-            function updateVisibleColumns(event) {
-                const newVisibleColumns = getVisibleColumns();
-                if (newVisibleColumns !== visibleColumns) {
-                    visibleColumns = newVisibleColumns;
-                    container.innerHTML = '';
-                    for (let i = 0; i < visibleColumns; i++) {
-                        container.appendChild(panelElements[i]);
-                    }
-                }
-            }
-
-            initializePanels();
-            startRotation();
-            window.addEventListener('resize', updateVisibleColumns);
+        // Video error handling
+        const video = document.querySelector('.fullscreen-video');
+        video.addEventListener('error', function() {
+            console.log('Video failed to load. Please ensure video.mp4 exists in the root directory.');
+            // Optionally show a fallback image or message
+            const container = document.querySelector('.video-container');
+            container.innerHTML = `
+                <div class="flex items-center justify-center h-full bg-gradient-to-br from-blue-600 to-purple-700 text-white">
+                    <div class="text-center">
+                        <h1 class="text-6xl font-bold mb-4">Welcome</h1>
+                        <p class="text-xl">Your Amazing Website</p>
+                        <div class="dropdown-menu">
+                            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                                <div class="flex justify-between items-center py-6">
+                                    <div class="flex items-center">
+                                        <h1 class="text-white text-2xl font-bold">Your Brand</h1>
+                                    </div>
+                                    <div class="hidden md:block">
+                                        <div class="ml-10 flex items-baseline space-x-4">
+                                            <a href="#home" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                                            <a href="#about" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">About</a>
+                                            <a href="#services" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Services</a>
+                                            <a href="#portfolio" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Portfolio</a>
+                                            <a href="#blog" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Blog</a>
+                                            <a href="#contact" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Contact</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            `;
         });
     </script>
-
 </body>
 </html>

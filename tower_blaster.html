@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tower Blaster</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 50%, #9b59b6 100%);
+            min-height: 100vh;
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 0;
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: clamp(1.8rem, 4vw, 3rem);
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .game-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-card {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            flex: 1;
+            align-items: start;
+        }
+
+        .tower {
+            background: rgba(0,0,0,0.2);
+            border-radius: 15px;
+            padding: 15px;
+            min-height: 400px;
+        }
+
+        .tower-title {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+
+        .tower-bricks {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .brick {
+            height: 35px;
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .brick.empty {
+            height: 35px !important;
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            border: 2px solid #654321;
+            color: transparent;
+        }
+
+        .brick:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
+        .brick.selectable {
+            border-color: #f1c40f;
+            animation: pulse 1s infinite;
+        }
+
+        .brick.hidden {
+            height: 35px !important;
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            border: 2px solid #654321;
+            color: transparent;
+            position: relative;
+        }
+
+        .brick.hidden::after {
+            content: '?';
+            color: #ccc !important;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            z-index: 1;
+        }
+
+        .brick.computer-selected {
+            border-color: #e74c3c;
+            animation: computerPulse 1s infinite;
+        }
+
+        .brick.swap-animation {
+            animation: swapMove 0.8s ease-in-out;
+        }
+
+        .tower.demolish {
+            animation: demolish 2s ease-in-out;
+        }
+
+        .computer-selected {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e) !important;
+            border: 3px solid #ff4757 !important;
+            box-shadow: 0 0 15px rgba(255, 75, 87, 0.5) !important;
+            animation: computerPulse 1s infinite;
+        }
+
+        @keyframes computerPulse {
+            0%, 100% { 
+                opacity: 1;
+                border-color: #e74c3c;
+            }
+            50% { 
+                opacity: 0.6;
+                border-color: #c0392b;
+            }
+        }
+
+        @keyframes swapMove {
+            0% { transform: translateY(0); }
+            25% { transform: translateY(-20px) scale(1.1); }
+            75% { transform: translateY(20px) scale(1.1); }
+            100% { transform: translateY(0); }
+        }
+
+        @keyframes demolish {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            25% { transform: scale(1.05) rotate(2deg); }
+            50% { transform: scale(0.95) rotate(-2deg); }
+            75% { transform: scale(1.1) rotate(5deg); opacity: 0.7; }
+            100% { transform: scale(0) rotate(180deg); opacity: 0; }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .middle-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            min-width: 150px;
+        }
+
+        .middle-bricks {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .middle-brick {
+            height: 50px;
+            width: 120px;
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .middle-brick:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+
+        .middle-brick.selected {
+            border-color: #2ecc71;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+        }
+
+        .middle-brick.computer-selected {
+            border-color: #e74c3c;
+            background: linear-gradient(45deg, #c0392b, #e74c3c);
+            animation: computerPulse 1s infinite;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+        }
+
+        .btn-skip {
+            background: linear-gradient(45deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+
+        .status-info {
+            background: rgba(52, 152, 219, 0.2);
+            border: 2px solid #3498db;
+        }
+
+        .status-success {
+            background: rgba(46, 204, 113, 0.2);
+            border: 2px solid #2ecc71;
+        }
+
+        .status-danger {
+            background: rgba(231, 76, 60, 0.2);
+            border: 2px solid #e74c3c;
+        }
+
+        .move-history {
+            background: rgba(0,0,0,0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .move-history h3 {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .move-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 5px;
+            font-size: 0.9rem;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .game-board {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
+                gap: 15px;
+            }
+
+            .middle-area {
+                order: -1;
+                min-width: auto;
+            }
+
+            .middle-bricks {
+                flex-direction: row;
+                justify-content: center;
+            }
+
+            .tower {
+                min-height: 300px;
+            }
+
+            .brick {
+                height: 30px;
+                font-size: 0.9rem;
+            }
+
+            .middle-brick {
+                height: 45px;
+                width: 100px;
+                font-size: 1rem;
+            }
+
+            .game-info {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .game-container {
+                padding: 5px;
+            }
+
+            .header {
+                padding: 15px 0;
+            }
+
+            .tower {
+                padding: 10px;
+            }
+
+            .brick {
+                height: 28px;
+                font-size: 0.8rem;
+            }
+
+            .middle-brick {
+                height: 40px;
+                width: 90px;
+                font-size: 0.9rem;
+            }
+
+            .btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 1.2rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <button class="back-button" onclick="window.location.href='index.html'">Back to Landing</button>
+            <h1>🏗️ Tower Blaster</h1>
+            <p>Build the perfect tower by sorting bricks from 1 to N!</p>
+        </div>
+
+        <div class="game-info">
+            <div class="info-card">
+                <div class="info-label">Score</div>
+                <div class="info-value" id="player-score">0</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">Rounds Won</div>
+                <div class="info-value" id="rounds-won">0</div>
+            </div>
+            <div class="info-card">
+                <div class="info-label">Current N</div>
+                <div class="info-value" id="current-n">50</div>
+            </div>
+
+            <div class="info-card">
+                <div class="info-label">AI Strategy</div>
+                <div class="info-value" id="ai-strategy">smart</div>
+            </div>
+        </div>
+
+        <div class="status-message" id="status-message"></div>
+
+        <div class="game-board">
+            <div class="tower">
+                <div class="tower-title">🧑 Your Tower</div>
+                <div class="tower-bricks" id="player-tower"></div>
+            </div>
+
+            <div class="middle-area">
+                <div class="middle-bricks" id="middle-bricks"></div>
+                <div class="controls">
+                    <button class="btn btn-primary" id="new-game-btn">New Game</button>
+                    <button class="btn btn-success" id="new-round-btn">Next Round</button>
+                    <button class="btn btn-skip" id="skip-btn" style="display: none;">Skip Turn</button>
+                </div>
+            </div>
+
+            <div class="tower">
+                <div class="tower-title">🤖 Computer Tower</div>
+                <div class="tower-bricks" id="computer-tower"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        class TowerBlasterUI {
+            constructor() {
+                this.selectedBrick = null;
+                this.gameState = null;
+                this.init();
+            }
+
+            async init() {
+                this.bindEvents();
+                await this.loadGameState();
+            }
+
+            bindEvents() {
+                document.getElementById('new-game-btn').addEventListener('click', () => this.newGame());
+                document.getElementById('new-round-btn').addEventListener('click', () => this.newRound());
+                document.getElementById('skip-btn').addEventListener('click', () => this.skipTurn());
+            }
+
+            async loadGameState() {
+                try {
+                    const response = await fetch('/api/game-state');
+                    this.gameState = await response.json();
+                    this.updateUI();
+                } catch (error) {
+                    this.showStatus('Error loading game state', 'danger');
+                }
+            }
+
+            async newGame() {
+                try {
+                    const response = await fetch('/api/new-game');
+                    const data = await response.json();
+                    if (data.success) {
+                        this.gameState = data.state;
+                        this.updateUI();
+                        this.showStatus('New game started!', 'success');
+                    }
+                } catch (error) {
+                    this.showStatus('Error starting new game', 'danger');
+                }
+            }
+
+            async newRound() {
+                try {
+                    const response = await fetch('/api/new-round');
+                    const data = await response.json();
+                    if (data.success) {
+                        this.gameState = data.state;
+                        this.updateUI();
+                        this.showStatus('New round started!', 'success');
+                    } else {
+                        this.showStatus('Game completed! Start a new game.', 'info');
+                    }
+                } catch (error) {
+                    this.showStatus('Error starting new round', 'danger');
+                }
+            }
+
+            async makeMove(brickIndex, towerLevel) {
+                try {
+                    // Show swap animation
+                    this.showSwapAnimation(brickIndex, towerLevel);
+                    
+                    const response = await fetch('/api/player-move', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            brick_index: brickIndex,
+                            tower_level: towerLevel
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        this.gameState = data.state;
+                        this.selectedBrick = null;
+                        
+                        // Wait for animation to complete
+                        setTimeout(() => {
+                            this.updateUI();
+                            
+                            if (this.gameState.round_over) {
+                                if (this.gameState.winner === 'player') {
+                                    this.showStatus('🎉 You won this round!', 'success');
+                                    this.demolishTower('computer');
+                                } else {
+                                    this.showStatus('💀 Computer won! Game Over!', 'danger');
+                                    this.demolishTower('player');
+                                }
+                            }
+                        }, 800);
+                    } else {
+                        this.showStatus('Invalid move', 'danger');
+                    }
+                } catch (error) {
+                    this.showStatus('Error making move', 'danger');
+                }
+            }
+
+            async skipTurn() {
+                try {
+                    const response = await fetch('/api/skip-turn', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    if (data.success) {
+                        this.gameState = data.state;
+                        this.selectedBrick = null;
+                        this.updateUI();
+                    }
+                } catch (error) {
+                    this.showStatus('Error skipping turn', 'danger');
+                }
+            }
+
+            showSwapAnimation(brickIndex, towerLevel) {
+                // Clear any existing animations
+                document.querySelectorAll('.swap-animation').forEach(el => {
+                    el.classList.remove('swap-animation');
+                });
+                
+                // Animate middle brick
+                const middleBricks = document.querySelectorAll('.middle-brick');
+                if (middleBricks[brickIndex]) {
+                    middleBricks[brickIndex].classList.add('swap-animation');
+                }
+                
+                // Animate tower brick
+                const towerBricks = document.querySelectorAll('#player-tower .brick');
+                if (towerBricks[towerLevel]) {
+                    towerBricks[towerLevel].classList.add('swap-animation');
+                }
+            }
+
+            showComputerMove(brickIndex, towerLevel) {
+                // Clear any existing computer selections
+                document.querySelectorAll('.computer-selected').forEach(el => {
+                    el.classList.remove('computer-selected');
+                });
+                document.querySelectorAll('.swap-animation').forEach(el => {
+                    el.classList.remove('swap-animation');
+                });
+                
+                // Highlight computer's selected brick
+                const middleBricks = document.querySelectorAll('.middle-brick');
+                if (middleBricks[brickIndex]) {
+                    middleBricks[brickIndex].classList.add('computer-selected');
+                }
+                
+                // Highlight computer's tower level
+                const computerBricks = document.querySelectorAll('#computer-tower .brick');
+                if (computerBricks[towerLevel]) {
+                    computerBricks[towerLevel].classList.add('computer-selected');
+                }
+                
+                // Show animation after delay
+                setTimeout(() => {
+                    if (middleBricks[brickIndex]) {
+                        middleBricks[brickIndex].classList.add('swap-animation');
+                    }
+                    if (computerBricks[towerLevel]) {
+                        computerBricks[towerLevel].classList.add('swap-animation');
+                    }
+                    
+                    // Clear highlights after animation
+                    setTimeout(() => {
+                        document.querySelectorAll('.computer-selected').forEach(el => {
+                            el.classList.remove('computer-selected');
+                        });
+                        document.querySelectorAll('.swap-animation').forEach(el => {
+                            el.classList.remove('swap-animation');
+                        });
+                    }, 800);
+                }, 1000);
+            }
+
+            demolishTower(player) {
+                const towerId = player === 'player' ? 'player-tower' : 'computer-tower';
+                const tower = document.getElementById(towerId).parentElement;
+                tower.classList.add('demolish');
+                
+                setTimeout(() => {
+                    tower.classList.remove('demolish');
+                }, 2000);
+            }
+
+            updateUI() {
+                if (!this.gameState) return;
+
+                // Update info cards
+                document.getElementById('player-score').textContent = this.gameState.player_score;
+                document.getElementById('rounds-won').textContent = this.gameState.rounds_won;
+                document.getElementById('current-n').textContent = this.gameState.N;
+                document.getElementById('ai-strategy').textContent = this.gameState.computer_strategy;
+
+                // Show computer move animation if available
+                if (this.gameState.last_computer_move && this.gameState.current_player === 'player') {
+                    this.showComputerMove(this.gameState.last_computer_move.brick_index, this.gameState.last_computer_move.tower_level);
+                }
+
+                // Update towers
+                this.updatePlayerTower();
+                this.updateComputerTower();
+                this.updateMiddleBricks();
+                this.updateStatus();
+                this.updateButtons();
+            }
+
+            updatePlayerTower() {
+                const container = document.getElementById('player-tower');
+                container.innerHTML = '';
+                
+                // Always show 10 bricks
+                for (let i = 0; i < 10; i++) {
+                    const brickEl = document.createElement('div');
+                    brickEl.className = 'brick';
+                    
+                    if (i < this.gameState.player_tower.length && this.gameState.player_tower[i] !== null) {
+                        // Show actual brick value
+                        brickEl.textContent = this.gameState.player_tower[i];
+                    } else {
+                        // Show empty brick
+                        brickEl.classList.add('empty');
+                        brickEl.textContent = '';
+                    }
+                    
+                    if (this.gameState.current_player === 'player' && !this.gameState.round_over && this.selectedBrick !== null) {
+                        brickEl.addEventListener('click', () => {
+                            this.makeMove(this.selectedBrick, i);
+                        });
+                        brickEl.style.cursor = 'pointer';
+                        brickEl.classList.add('selectable');
+                    }
+                    
+                    container.appendChild(brickEl);
+                }
+            }
+
+            updateComputerTower() {
+                const container = document.getElementById('computer-tower');
+                container.innerHTML = '';
+                
+                // Check if round has started (computer has any bricks)
+                const roundStarted = this.gameState.computer_tower && this.gameState.computer_tower.some(brick => brick !== null);
+                
+                // Always show 10 bricks
+                for (let i = 0; i < 10; i++) {
+                    const brickEl = document.createElement('div');
+                    brickEl.className = 'brick';
+                    
+                    if (roundStarted && i < this.gameState.computer_tower.length && this.gameState.computer_tower[i] !== null) {
+                        if (this.gameState.round_over) {
+                            // Show actual values when round is over
+                            brickEl.textContent = this.gameState.computer_tower[i];
+                        } else {
+                            // Hide values during gameplay
+                            brickEl.classList.add('hidden');
+                            brickEl.textContent = 'HIDDEN'; // Temporary: Check if text appears
+                        }
+                    } else {
+                        // Show empty brick (during initialization or empty slots)
+                        brickEl.classList.add('empty');
+                        brickEl.textContent = '';
+                    }
+                    
+                    container.appendChild(brickEl);
+                }
+            }
+
+            updateMiddleBricks() {
+                const container = document.getElementById('middle-bricks');
+                container.innerHTML = '';
+                
+                this.gameState.middle_bricks.forEach((brick, index) => {
+                    const brickEl = document.createElement('div');
+                    brickEl.className = 'middle-brick';
+                    brickEl.textContent = brick;
+                    
+                    if (this.gameState.current_player === 'player' && !this.gameState.round_over) {
+                        brickEl.addEventListener('click', () => {
+                            this.selectedBrick = index;
+                            this.updateMiddleBricks();
+                            this.updatePlayerTower();
+                        });
+                        
+                        if (this.selectedBrick === index) {
+                            brickEl.classList.add('selected');
+                        }
+                    }
+                    
+                    container.appendChild(brickEl);
+                });
+            }
+
+            updateMoveHistory() {
+                const container = document.getElementById('move-history-list');
+                container.innerHTML = '';
+                
+                this.gameState.move_history.forEach(move => {
+                    const moveEl = document.createElement('div');
+                    moveEl.className = 'move-item';
+                    const player = move.player === 'human' ? '🧑 You' : '🤖 Computer';
+                    moveEl.textContent = `${player}: Placed ${move.chosen_brick} at level ${move.tower_level + 1} (replaced ${move.old_brick})`;
+                    container.appendChild(moveEl);
+                });
+            }
+
+            updateStatus() {
+                let statusText = '';
+                let statusClass = 'info';
+                
+                if (this.gameState.game_completed) {
+                    statusText = '🏆 Congratulations! You have defeated the AI and completed all rounds!';
+                    statusClass = 'success';
+                } else if (this.gameState.round_over) {
+                    if (this.gameState.winner === 'player') {
+                        if (this.gameState.N === 10) {
+                            statusText = '🎉 You won this round! 🏆 Congratulations! You have defeated the AI!';
+                        } else {
+                            statusText = '🎉 You won this round! Click "Next Round" to continue.';
+                        }
+                        statusClass = 'success';
+                    } else {
+                        statusText = '💀 You lost this round! The computer won. Click "New Game" to restart.';
+                        statusClass = 'danger';
+                    }
+                } else {
+                    // Show computer's last move if available
+                    if (this.gameState.last_computer_move && this.gameState.current_player === 'player') {
+                        const move = this.gameState.last_computer_move;
+                        statusText = `Computer swapped brick ${this.gameState.middle_bricks[move.brick_index]} at position ${move.tower_level + 1}. `;
+                    }
+                    
+                    // Add current turn info
+                    if (this.gameState.current_player === 'player') {
+                        if (this.selectedBrick !== null) {
+                            statusText += 'Now click on a level in your tower to place the brick, or skip your turn';
+                        } else {
+                            statusText += 'Your turn! Select a brick from the middle, or skip your turn';
+                        }
+                    } else {
+                        statusText += 'Computer is thinking...';
+                    }
+                }
+                
+                this.showStatus(statusText, statusClass);
+            }
+
+            updateButtons() {
+                const newRoundBtn = document.getElementById('new-round-btn');
+                const skipBtn = document.getElementById('skip-btn');
+                
+                newRoundBtn.style.display = (this.gameState.round_over && this.gameState.winner === 'player' && !this.gameState.game_completed) ? 'block' : 'none';
+                
+                // Show skip button during player's turn
+                skipBtn.style.display = (this.gameState.current_player === 'player' && !this.gameState.round_over) ? 'block' : 'none';
+            }
+
+            showStatus(message, type) {
+                const statusEl = document.getElementById('status-message');
+                statusEl.textContent = message;
+                statusEl.className = `status-message status-${type}`;
+            }
+        }
+
+        // Initialize the game UI
+        const game = new TowerBlasterUI();
+    </script>
+</body>
+</html>

@@ -73,6 +73,8 @@
             max-width: 400px;
             margin: 0 auto 20px;
             box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            touch-action: none;
+            user-select: none;
         }
 
         .grid-container {
@@ -303,11 +305,17 @@
                 const gameBoard = document.getElementById('grid');
                 
                 gameBoard.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
                     startX = e.touches[0].clientX;
                     startY = e.touches[0].clientY;
-                }, { passive: true });
+                }, { passive: false });
+
+                gameBoard.addEventListener('touchmove', (e) => {
+                    e.preventDefault();
+                }, { passive: false });
 
                 gameBoard.addEventListener('touchend', (e) => {
+                    e.preventDefault();
                     if (!startX || !startY) return;
                     
                     const endX = e.changedTouches[0].clientX;
@@ -325,7 +333,7 @@
                     }
                     
                     startX = startY = null;
-                }, { passive: true });
+                }, { passive: false });
             }
 
             handleKeyPress(key) {

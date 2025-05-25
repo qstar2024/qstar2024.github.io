@@ -348,18 +348,30 @@
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .game-board {
-                grid-template-columns: 1fr;
-                grid-template-rows: auto auto auto;
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: auto;
                 gap: 15px;
             }
 
+            .player-tower {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
             .middle-area {
-                order: -1;
+                grid-column: 2;
+                grid-row: 1;
+                order: unset; /* Remove order to follow grid column */
                 min-width: auto;
             }
 
+            .computer-tower {
+                grid-column: 3;
+                grid-row: 1;
+            }
+
             .middle-bricks {
-                flex-direction: row;
+                flex-direction: column; /* Revert middle bricks to column layout */
                 justify-content: center;
             }
 
@@ -374,11 +386,13 @@
 
             .middle-brick {
                 height: 45px;
-                width: 100px;
+                width: 100%; /* Make middle bricks fill the column width */
                 font-size: 1rem;
             }
 
             .game-info {
+                grid-column: 1 / span 3; /* Span across all columns */
+                grid-row: 2; /* Place below the towers and middle area */
                 grid-template-columns: repeat(2, 1fr);
             }
         }

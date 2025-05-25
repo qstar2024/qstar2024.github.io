@@ -394,19 +394,33 @@
 
             .tower {
                 padding: 10px;
+                /* Align tower width with brick width */
+                width: calc((100% - 2 * 10px) / 3); /* Assuming 10px gap */
             }
 
             .brick {
                 height: 28px;
                 font-size: 0.8rem;
-                /* Adjust width to fit 3 bricks with gaps on small screens */
+                /* Make brick fill its container */
+                width: 100%;
+            }
+
+            .middle-area {
+                order: -1;
+                min-width: auto;
+                /* Align middle area width with brick width */
                 width: calc((100% - 2 * 10px) / 3); /* Assuming 10px gap */
+            }
+
+            .middle-bricks {
+                flex-direction: column; /* Stack middle bricks vertically */
+                justify-content: center;
             }
 
             .middle-brick {
                 height: 40px;
-                /* Adjust width to fit 3 bricks with gaps on small screens */
-                width: calc((100% - 2 * 10px) / 3); /* Assuming 10px gap */
+                /* Make middle brick fill its container */
+                width: 100%;
                 font-size: 0.9rem;
             }
 

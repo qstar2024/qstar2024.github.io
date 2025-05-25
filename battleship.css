@@ -109,7 +109,7 @@ button:hover {
         height: 28px;
     }
 }
-@media (max-width: 600px) {
+  @media (max-width: 600px) {
     main {
         flex-direction: column;
         gap: 1rem;
@@ -126,4 +126,18 @@ button:hover {
         width: 20px;
         height: 20px;
     }
+}
+
+@keyframes flash {
+    0% { opacity: 1; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+.flash-hit {
+    animation: flash 0.3s ease-out;
+}
+
+.flash-sunk {
+    animation: flash 0.6s ease-out; /* Longer flash for sunk */
 }

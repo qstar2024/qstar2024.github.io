@@ -50,10 +50,30 @@ document.addEventListener('DOMContentLoaded', () => {
     gameState = 'round1';
     addShootingListeners();
     document.getElementById('start-btn').style.display = 'none';
-    document.getElementById('reset-btn').addEventListener('click', resetGame);
-    // Hide placement controls
+    // Link the new 'New Game' button
+    document.getElementById('new-game-btn').addEventListener('click', startNewGame);
+    // Hide placement controls as they are not used in the current game flow
     document.getElementById('placement-controls').style.display = 'none';
 });
+
+// Function to start a new game
+function startNewGame() {
+    resetGame(); // Reset existing game state
+    // Re-initialize for a new game
+    currentGridSize = detectGridSize();
+    setShipClasses(currentGridSize);
+    renderGrid(currentGridSize); // This also clears the grid
+    humanShips = placeShipsRandomly(currentGridSize, currentShipClasses);
+    computerShips = placeShipsRandomly(currentGridSize, currentShipClasses);
+    document.getElementById('status').textContent = 'Welcome! Start shooting to find and sink all ships!';
+    gameState = 'round1'; // Set game state to human's turn
+    humanShots = 0;
+    computerShots = 0;
+    addShootingListeners(); // Add listeners for human shooting
+    // Ensure buttons are in the correct state for a new game
+    document.getElementById('start-btn').style.display = 'none'; 
+    document.getElementById('placement-controls').style.display = 'none';
+}
 
 function renderGrid(size) {
     const gameGrid = document.getElementById('game-grid');
@@ -113,21 +133,30 @@ function startGame() {
 }
 
 function resetGame() {
-    setupPlacementUI(); // Reset to placement UI
-    document.getElementById('placement-controls').style.display = 'block';
-    document.getElementById('game-section').style.display = 'block'; // Keep grid visible for placement
+    // Clear status and reset shot counts
     document.getElementById('status').textContent = '';
     humanShots = 0;
     computerShots = 0;
+    // Clear ship arrays
     humanShips = [];
     computerShips = [];
-    gameState = 'placement';
-    removeShootingListeners(); // Remove shooting listeners
-    document.getElementById('start-btn').style.display = 'block';
-    document.getElementById('rotate-btn').style.display = 'block';
-    document.getElementById('place-btn').style.display = 'block';
-    renderGrid(currentGridSize); // Clear the grid for human placement
-    setupShipsToPlaceUI(); // Display ships for human placement
+    // Reset game state
+    gameState = 'gameOver'; // Set to gameOver or a neutral state before starting new
+    // Remove existing listeners to prevent duplicates or interference
+    removeShootingListeners();
+    // No need to call removePlacementListeners if placement is fully automated
+    // Clear the grid visually
+    const gameGrid = document.getElementById('game-grid');
+    if (gameGrid) {
+        const cells = gameGrid.querySelectorAll('.cell');
+        cells.forEach(cell => {
+            cell.className = 'cell'; // Reset to default class, removing hit, miss, sunk, etc.
+            cell.textContent = ''; // Clear any text like 'X' or ship names
+            // Remove any flash classes that might be lingering
+            cell.classList.remove('flash-hit', 'flash-sunk'); 
+        });
+    }
+    // Note: renderGrid() called in startNewGame will rebuild the grid anyway.
 }
 
 function startRound1() {
@@ -393,6 +422,10 @@ function handleCellClick(event) {
     if (hitShip) {
         hitShip.hits++;
         cell.classList.add('hit-ship'); // yellow for hit but not sunk
+        // Add flash effect for hit
+        cell.classList.add('flash-hit');
+        setTimeout(() => cell.classList.remove('flash-hit'), 300); // Flash for 0.3s
+
         document.getElementById('status').textContent = 'Hit a ship!';
         // If ship is sunk
         if (hitShip.hits === hitShip.cells.length) {
@@ -401,6 +434,9 @@ function handleCellClick(event) {
                 if (sunkCell) {
                     sunkCell.classList.remove('hit-ship');
                     sunkCell.classList.add('sunk'); // red for sunk
+                    // Add flash effect for sunk ship cell
+                    sunkCell.classList.add('flash-sunk');
+                    setTimeout(() => sunkCell.classList.remove('flash-sunk'), 600); // Flash for 0.6s
                 }
             });
             document.getElementById('status').textContent = `Sank a ship: ${hitShip.name}!`;

@@ -1,0 +1,154 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    background-color: #121213; /* Dark background */
+    color: #ffffff; /* White text */
+}
+
+header {
+    border-bottom: 1px solid #3a3a3c;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+}
+
+header {
+    display: flex; /* Added to allow button positioning */
+    justify-content: space-between; /* Added to space title and button */
+    align-items: center; /* Added for vertical alignment */
+}
+
+header h1 {
+    font-size: 2.5em;
+    font-weight: bold;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.back-button {
+    padding: 8px 15px;
+    background-color: #4a5568; /* A slightly different shade of grey */
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 0.9em;
+    transition: background-color 0.2s ease;
+}
+
+.back-button:hover {
+    background-color: #2d3748; /* Darker grey on hover */
+}
+
+#game-board {
+    display: grid;
+    grid-template-rows: repeat(6, 1fr); /* Will be adjusted by JS based on word length */
+    gap: 5px;
+    margin-bottom: 30px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* Will be adjusted by JS based on word length */
+    gap: 5px;
+}
+
+.tile {
+    width: 60px;
+    height: 60px;
+    border: 2px solid #3a3a3c; /* Darker border for tiles */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2em;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: #121213; /* Tile background */
+    color: #ffffff; /* Tile text color */
+    transition: transform 0.3s ease, background-color 0.5s ease, border-color 0.5s ease;
+}
+
+.tile.filled {
+    border-color: #565758;
+}
+
+.tile.correct {
+    background-color: #538d4e; /* Green for correct letter in correct position */
+    border-color: #538d4e;
+    color: white;
+}
+
+.tile.present {
+    background-color: #b59f3b; /* Yellow for correct letter in wrong position */
+    border-color: #b59f3b;
+    color: white;
+}
+
+.tile.absent {
+    background-color: #3a3a3c; /* Dark grey for absent letter */
+    border-color: #3a3a3c;
+    color: white;
+}
+
+/* Animation for revealing tiles */
+.tile.reveal {
+    transform: rotateX(360deg);
+}
+
+#keyboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+    gap: 5px;
+    width: 100%;
+    max-width: 500px;
+}
+
+.key {
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #818384; /* Lighter grey for keys */
+    color: white;
+    font-size: 1.2em;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background-color 0.2s ease;
+}
+
+.key:hover {
+    background-color: #939597;
+}
+
+.key.large {
+    grid-column: span 2;
+    font-size: 1em;
+}
+
+.key.correct {
+    background-color: #538d4e;
+    color: white;
+}
+
+.key.present {
+    background-color: #b59f3b;
+    color: white;
+}
+
+.key.absent {
+    background-color: #3a3a3c;
+    color: white;
+}
+
+/* Message area for win/loss */
+#message-area {
+    margin-top: 20px;
+    font-size: 1.5em;
+    font-weight: bold;
+    min-height: 30px; /* Reserve space for messages */
+}

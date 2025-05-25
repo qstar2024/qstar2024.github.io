@@ -43,10 +43,16 @@ document.addEventListener('DOMContentLoaded', () => {
     currentGridSize = detectGridSize();
     setShipClasses(currentGridSize);
     renderGrid(currentGridSize);
-    setupPlacementUI(); // New function to set up placement UI
-    document.getElementById('start-btn').addEventListener('click', startGame);
+    // Randomize ship placement for both players
+    humanShips = placeShipsRandomly(currentGridSize, currentShipClasses);
+    computerShips = placeShipsRandomly(currentGridSize, currentShipClasses);
+    document.getElementById('status').textContent = 'Welcome! Start shooting to find and sink all ships!';
+    gameState = 'round1';
+    addShootingListeners();
+    document.getElementById('start-btn').style.display = 'none';
     document.getElementById('reset-btn').addEventListener('click', resetGame);
-    document.getElementById('rotate-btn').addEventListener('click', rotateShip);
+    // Hide placement controls
+    document.getElementById('placement-controls').style.display = 'none';
 });
 
 function renderGrid(size) {
@@ -376,43 +382,50 @@ function removeShootingListeners() {
 }
 
 function handleCellClick(event) {
-    if (gameState !== 'round1') return; // Only allow shooting in round 1
-
+    if (gameState !== 'round1') return;
     const cell = event.target;
     const index = parseInt(cell.dataset.index);
-
-    // Implement shooting logic
-    console.log('Human shot at index:', index);
-
-    // Prevent shooting the same cell twice
-    if (cell.classList.contains('hit') || cell.classList.contains('miss')) {
+    if (cell.classList.contains('hit') || cell.classList.contains('miss') || cell.classList.contains('sunk')) {
         return;
     }
-
     humanShots++;
-    document.getElementById('status').textContent = `Human shots: ${humanShots}`;
-
     const hitShip = computerShips.find(ship => ship.cells.includes(index));
-
     if (hitShip) {
-        cell.classList.add('hit');
         hitShip.hits++;
-        console.log(`Hit on ${hitShip.name}!`);
+        cell.classList.add('hit-ship'); // yellow for hit but not sunk
+        document.getElementById('status').textContent = 'Hit a ship!';
+        // If ship is sunk
         if (hitShip.hits === hitShip.cells.length) {
-            console.log(`${hitShip.name} sunk!`);
-            // TODO: Update cell appearance for sunk ship (e.g., add ship shape)
-            const allSunk = computerShips.every(ship => ship.hits === ship.cells.length);
-            if (allSunk) {
-                document.getElementById('status').textContent += ' All computer ships sunk! Computer\'s turn!';
-                // Transition to Computer's turn (Round 2)
-                removeShootingListeners(); // Stop human from shooting
-                gameState = 'round2'; // Set game state to computer's turn
-                setTimeout(startComputerTurn, 3000); // Wait 3 seconds before computer starts shooting
+            hitShip.cells.forEach(idx => {
+                const sunkCell = document.querySelector(`#game-grid .cell[data-index='${idx}']`);
+                if (sunkCell) {
+                    sunkCell.classList.remove('hit-ship');
+                    sunkCell.classList.add('sunk'); // red for sunk
+                }
+            });
+            document.getElementById('status').textContent = `Sank a ship: ${hitShip.name}!`;
+        }
+        // Check if all ships are sunk
+        const N = computerShips.reduce((sum, s) => sum + s.cells.length, 0);
+        if (computerShips.every(ship => ship.hits === ship.cells.length)) {
+            // Win logic
+            let status = '';
+            if (humanShots < N * 1.25) {
+                status = 'Perfect!';
+            } else if (humanShots < N * 1.5) {
+                status = 'Great Job!';
+            } else if (humanShots < N * 2) {
+                status = 'Mission Accomplished!';
+            } else {
+                status = 'Game Over. You lose!';
             }
+            document.getElementById('status').textContent = `All ships sunk! ${status} Total shots: ${humanShots}`;
+            removeShootingListeners();
+            gameState = 'gameOver';
         }
     } else {
-        cell.classList.add('miss');
-        console.log('Miss!');
+        cell.classList.add('miss'); // white for miss
+        document.getElementById('status').textContent = 'Missed!';
     }
 }
 

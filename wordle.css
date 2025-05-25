@@ -372,6 +372,8 @@ header h1 {
     #game-board {
         padding: 20px;
         margin-bottom: 30px;
+        width: 100%;
+        max-width: 400px; /* Adjust max-width as needed for mobile */
     }
     
     .tile {
@@ -419,6 +421,8 @@ header h1 {
         padding: 15px;
         margin-bottom: 25px;
         gap: 6px;
+        width: 100%;
+        max-width: 300px; /* Adjust max-width as needed for smaller mobile screens */
     }
     
     .row {

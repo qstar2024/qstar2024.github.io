@@ -353,6 +353,12 @@
                 gap: 15px;
             }
 
+            .player-tower,
+            .middle-area,
+            .computer-tower {
+                width: 100%; /* Ensure they fill their grid column */
+            }
+
             .player-tower {
                 grid-column: 1;
                 grid-row: 1;
@@ -458,7 +464,7 @@
 <body>
     <div class="game-container">
         <div class="header">
-            <button class="back-button" onclick="window.location.href='index.html'">Back to Landing</button>
+            <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
             <h1>🏗️ Tower Blaster</h1>
             <p>Build the perfect tower by sorting bricks from 1 to N!</p>
         </div>

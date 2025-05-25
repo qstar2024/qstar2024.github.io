@@ -306,12 +306,12 @@ document.addEventListener('DOMContentLoaded', () => {
          // Also try to focus on load
          window.addEventListener('load', () => {
             mobileInput.focus();
-         });
+        });
     }
 
-    // Modify physical keyboard input handling to potentially avoid double input
-    // Only listen if the mobile input is not the active element
+    // Handle physical keyboard input
     document.addEventListener('keydown', (e) => {
+        // Only process if the game is not over and the mobile input is not the active element
         if (gameOver || (mobileInput && document.activeElement === mobileInput)) return;
 
         const key = e.key.toUpperCase();

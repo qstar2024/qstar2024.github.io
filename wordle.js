@@ -272,4 +272,55 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     startGame();
+
+    // Attempt to focus the hidden input for mobile keyboard
+    const mobileInput = document.getElementById('mobile-input');
+    if (mobileInput) {
+        mobileInput.focus();
+
+        // Handle input from the hidden field
+        mobileInput.addEventListener('input', (e) => {
+            const input = e.data;
+            if (input && input.length === 1 && input.match(/[A-Z]/i)) {
+                handleKeyPress(input.toUpperCase());
+            }
+            // Clear the input field after processing
+            mobileInput.value = '';
+        });
+
+        // Handle backspace and enter from physical/mobile keyboard
+        mobileInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Backspace') {
+                handleKeyPress('BACKSPACE');
+                e.preventDefault(); // Prevent default backspace behavior
+            } else if (e.key === 'Enter') {
+                handleKeyPress('ENTER');
+                e.preventDefault(); // Prevent default enter behavior
+            }
+        });
+
+         // Keep focus on the input field, especially on mobile
+         document.body.addEventListener('click', () => {
+            mobileInput.focus();
+         });
+         // Also try to focus on load
+         window.addEventListener('load', () => {
+            mobileInput.focus();
+         });
+    }
+
+    // Modify physical keyboard input handling to potentially avoid double input
+    // Only listen if the mobile input is not the active element
+    document.addEventListener('keydown', (e) => {
+        if (gameOver || (mobileInput && document.activeElement === mobileInput)) return;
+
+        const key = e.key.toUpperCase();
+        if (key === 'ENTER') {
+            handleKeyPress('ENTER');
+        } else if (key === 'BACKSPACE') {
+            handleKeyPress('BACKSPACE');
+        } else if (key.length === 1 && key.match(/[A-Z]/i)) {
+            handleKeyPress(key);
+        }
+    });
 });

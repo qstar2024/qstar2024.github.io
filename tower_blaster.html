@@ -70,28 +70,17 @@
 
         .game-board {
             display: grid;
-            grid-template-columns: 1fr auto 1fr; /* Player Tower, Middle Area, Computer Tower */
-            gap: 30px;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            flex: 1;
             align-items: start;
-            margin-top: 30px;
-            width: 100%; /* Ensure game board takes full width */
-            max-width: 1200px; /* Optional: Set a max width for large screens */
-            margin-left: auto;
-            margin-right: auto;
         }
 
         .tower {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0,0,0,0.2);
             border-radius: 15px;
-            padding: 20px;
+            padding: 15px;
             min-height: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            width: 100%; /* Allow tower to take available grid space */
-            box-sizing: border-box;
         }
 
         .tower-title {
@@ -110,11 +99,9 @@
         }
 
         .brick {
-            height: 40px;
-            width: 90%; /* Use percentage for responsive width */
-            max-width: 80px; /* Optional: Set a max width */
-            background: linear-gradient(45deg, #3498db, #2980b9);
-            border-radius: 6px;
+            height: 35px;
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            border-radius: 5px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -122,8 +109,8 @@
             font-size: 1rem;
             color: white;
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-            cursor: pointer;
             transition: all 0.3s ease;
+            cursor: pointer;
             border: 2px solid transparent;
         }
 
@@ -361,33 +348,28 @@
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .game-board {
-                grid-template-columns: 1fr; /* Stack elements */
-                grid-template-rows: auto auto auto; /* Middle, Player, Computer */
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto;
                 gap: 15px;
             }
 
             .middle-area {
-                order: -1; /* Move middle area to the top */
+                order: -1;
                 min-width: auto;
-                width: 100%; /* Ensure middle area takes full width */
             }
 
             .middle-bricks {
                 flex-direction: row;
                 justify-content: center;
-                flex-wrap: wrap; /* Allow middle bricks to wrap */
             }
 
             .tower {
                 min-height: 300px;
-                width: 100%; /* Ensure towers take full width */
             }
 
             .brick {
                 height: 30px;
                 font-size: 0.9rem;
-                width: 95%; /* Adjust brick width for smaller screens */
-                max-width: none; /* Remove max-width constraint */
             }
 
             .middle-brick {
@@ -412,18 +394,19 @@
 
             .tower {
                 padding: 10px;
-                min-height: 250px; /* Further reduce min-height on very small screens */
             }
 
             .brick {
                 height: 28px;
                 font-size: 0.8rem;
-                width: 98%; /* Adjust brick width for very small screens */
+                /* Adjust width to fit 3 bricks with gaps on small screens */
+                width: calc((100% - 2 * 10px) / 3); /* Assuming 10px gap */
             }
 
             .middle-brick {
                 height: 40px;
-                width: 90px;
+                /* Adjust width to fit 3 bricks with gaps on small screens */
+                width: calc((100% - 2 * 10px) / 3); /* Assuming 10px gap */
                 font-size: 0.9rem;
             }
 

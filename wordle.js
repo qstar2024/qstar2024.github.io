@@ -309,18 +309,15 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Handle physical keyboard input
+    // Prevent duplicate input: only process physical keyboard if mobile input is not focused
     document.addEventListener('keydown', (e) => {
-        // Only process if the game is not over and the mobile input is not the active element
-        if (gameOver || (mobileInput && document.activeElement === mobileInput)) return;
-
-        const key = e.key.toUpperCase();
-        if (key === 'ENTER') {
-            handleKeyPress('ENTER');
-        } else if (key === 'BACKSPACE') {
-            handleKeyPress('BACKSPACE');
-        } else if (key.length === 1 && key.match(/[A-Z]/i)) {
-            handleKeyPress(key);
-        }
+        if (document.activeElement === mobileInput) return;
+        if (gameOver) return;
+        let key = e.key.toUpperCase();
+        if (key === 'ENTER') key = 'ENTER';
+        else if (key === 'BACKSPACE') key = 'BACKSPACE';
+        else if (key.length === 1 && key.match(/[A-Z]/i)) key = key;
+        else return;
+        handleKeyPress(key);
     });
 });

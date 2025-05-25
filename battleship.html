@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battleship Game</title>
+    <link rel="stylesheet" href="battleship.css">
+</head>
+<body>
+    <header>
+        <h1>Battleship: Human vs Computer</h1>
+        <div id="status"></div>
+    </header>
+    <main>
+        <section id="computer-section">
+            <h2>Computer's Grid</h2>
+            <div id="computer-grid" class="grid"></div>
+        </section>
+        <section id="human-section">
+            <h2>Your Grid</h2>
+            <div id="human-grid" class="grid"></div>
+        </section>
+        <div id="controls">
+            <button id="start-btn">Start Game</button>
+            <button id="reset-btn">Reset</button>
+        </div>
+    </main>
+    <script src="battleship.js"></script>
+</body>
+</html>

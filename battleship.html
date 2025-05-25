@@ -13,14 +13,16 @@
         <button id="home-btn" onclick="window.location.href='index.html'">Back to Home</button>
     </header>
     <main>
-        <section id="computer-section">
-            <h2>Computer's Grid</h2>
-            <div id="computer-grid" class="grid"></div>
+        <section id="game-section">
+            <h2>Game Grid</h2>
+            <div id="game-grid" class="grid"></div>
         </section>
-        <section id="human-section">
-            <h2>Your Grid</h2>
-            <div id="human-grid" class="grid"></div>
-        </section>
+        <div id="placement-controls">
+            <h3>Place Your Ships</h3>
+            <div id="ships-to-place"></div>
+            <button id="rotate-btn">Rotate Ship</button>
+            <button id="place-btn">Place Ship</button>
+        </div>
         <div id="controls">
             <button id="start-btn">Start Game</button>
             <button id="reset-btn">Reset</button>

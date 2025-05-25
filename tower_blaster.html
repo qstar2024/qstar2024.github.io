@@ -482,12 +482,13 @@
             constructor() {
                 this.selectedBrick = null;
                 this.gameState = null;
+                this.gameLogic = new TowerBlasterGame();
                 this.init();
             }
 
             async init() {
                 this.bindEvents();
-                await this.loadGameState();
+                this.loadGameState();
             }
 
             bindEvents() {
@@ -496,36 +497,33 @@
                 document.getElementById('skip-btn').addEventListener('click', () => this.skipTurn());
             }
 
-            async loadGameState() {
+            loadGameState() {
                 try {
-                    const response = await fetch('/api/game-state');
-                    this.gameState = await response.json();
+                    this.gameState = this.gameLogic.get_game_state();
                     this.updateUI();
                 } catch (error) {
                     this.showStatus('Error loading game state', 'danger');
                 }
             }
 
-            async newGame() {
+            newGame() {
                 try {
-                    const response = await fetch('/api/new-game');
-                    const data = await response.json();
-                    if (data.success) {
-                        this.gameState = data.state;
-                        this.updateUI();
-                        this.showStatus('New game started!', 'success');
-                    }
+                    this.gameLogic.reset_game();
+                    this.gameState = this.gameLogic.get_game_state();
+                    this.selectedBrick = null;
+                    this.updateUI();
+                    this.showStatus('New game started!', 'success');
                 } catch (error) {
                     this.showStatus('Error starting new game', 'danger');
                 }
             }
 
-            async newRound() {
+            newRound() {
                 try {
-                    const response = await fetch('/api/new-round');
-                    const data = await response.json();
-                    if (data.success) {
-                        this.gameState = data.state;
+                    const success = this.gameLogic.start_new_round();
+                    if (success) {
+                        this.gameState = this.gameLogic.get_game_state();
+                        this.selectedBrick = null;
                         this.updateUI();
                         this.showStatus('New round started!', 'success');
                     } else {
@@ -536,25 +534,14 @@
                 }
             }
 
-            async makeMove(brickIndex, towerLevel) {
+            makeMove(brickIndex, towerLevel) {
                 try {
                     // Show swap animation
                     this.showSwapAnimation(brickIndex, towerLevel);
                     
-                    const response = await fetch('/api/player-move', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            brick_index: brickIndex,
-                            tower_level: towerLevel
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    if (data.success) {
-                        this.gameState = data.state;
+                    const result = this.gameLogic.player_move(brickIndex, towerLevel);
+                    if (result.success) {
+                        this.gameState = this.gameLogic.get_game_state();
                         this.selectedBrick = null;
                         
                         // Wait for animation to complete
@@ -579,18 +566,11 @@
                 }
             }
 
-            async skipTurn() {
+            skipTurn() {
                 try {
-                    const response = await fetch('/api/skip-turn', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        }
-                    });
-                    
-                    const data = await response.json();
-                    if (data.success) {
-                        this.gameState = data.state;
+                    const result = this.gameLogic.skip_turn();
+                    if (result.success) {
+                        this.gameState = this.gameLogic.get_game_state();
                         this.selectedBrick = null;
                         this.updateUI();
                     }
@@ -846,6 +826,226 @@
                 const statusEl = document.getElementById('status-message');
                 statusEl.textContent = message;
                 statusEl.className = `status-message status-${type}`;
+            }
+        }
+
+        class TowerBlasterGame {
+            constructor() {
+                this.reset_game();
+            }
+
+            reset_game() {
+                this.N = 50;
+                this.player_score = 0;
+                this.rounds_won = 0;
+                this.start_new_round();
+            }
+
+            start_new_round() {
+                if (this.N <= 25) {
+                    return false; // Game completed
+                }
+
+                this.pile = Array.from({ length: this.N }, (_, i) => i + 1);
+                this.shuffle(this.pile);
+
+                this.player_tower = this.pile.splice(0, 10);
+                this.computer_tower = this.pile.splice(0, 10);
+                this.middle_bricks = this.pile.splice(0, 2);
+
+                this.current_player = 'player';
+                this.round_over = false;
+                this.winner = null;
+                this.computer_strategy = this.choose_computer_strategy();
+                this.move_history = [];
+                this.last_computer_move = null;
+
+                return true;
+            }
+
+            choose_computer_strategy() {
+                if (this.N > 45) return 'rookie';
+                if (this.N > 40) return 'random';
+                if (this.N > 30) return 'greedy';
+                return 'smart';
+            }
+
+            is_tower_sorted(tower) {
+                for (let i = 0; i < tower.length - 1; i++) {
+                    if (tower[i] > tower[i + 1]) return false;
+                }
+                return true;
+            }
+
+            player_move(chosen_brick_index, tower_level) {
+                if (this.current_player !== 'player' || this.round_over) return { success: false };
+                if (![0, 1].includes(chosen_brick_index) || tower_level < 0 || tower_level >= 10) return { success: false };
+
+                const chosen_brick = this.middle_bricks[chosen_brick_index];
+                const old_brick = this.player_tower[tower_level];
+                this.player_tower[tower_level] = chosen_brick;
+
+                const unchosen_index = 1 - chosen_brick_index;
+                const unchosen_brick = this.middle_bricks[unchosen_index];
+                this.pile.push(unchosen_brick);
+                this.shuffle(this.pile);
+                this.middle_bricks[unchosen_index] = this.pile.pop();
+                this.middle_bricks[chosen_brick_index] = old_brick;
+
+                this.move_history.push({
+                    player: 'human',
+                    chosen_brick: chosen_brick,
+                    tower_level: tower_level,
+                    old_brick: old_brick
+                });
+
+                if (this.is_tower_sorted(this.player_tower)) {
+                    this.round_over = true;
+                    this.winner = 'player';
+                    this.handle_round_end();
+                } else {
+                    this.current_player = 'computer';
+                    this.computer_move();
+                }
+                return { success: true };
+            }
+
+            skip_turn() {
+                if (this.round_over) return { success: false };
+                if (this.current_player === 'player') {
+                    this.current_player = 'computer';
+                    this.computer_move();
+                } else {
+                    this.current_player = 'player';
+                }
+                return { success: true };
+            }
+
+            computer_move() {
+                if (this.current_player !== 'computer' || this.round_over) return { success: false };
+                
+                let chosen_index, tower_level;
+                let strategy = this.computer_strategy;
+                if (strategy === 'random') {
+                    const strategies = ['smart', 'greedy', 'rookie'];
+                    this.shuffle(strategies);
+                    strategy = strategies[0];
+                }
+
+                if (strategy === 'smart') {
+                    [chosen_index, tower_level] = this.smart_computer_move();
+                } else if (strategy === 'greedy') {
+                    [chosen_index, tower_level] = this.greedy_computer_move();
+                } else { // rookie
+                    [chosen_index, tower_level] = this.rookie_computer_move();
+                }
+
+                this.last_computer_move = { brick_index: chosen_index, tower_level: tower_level };
+
+                const chosen_brick = this.middle_bricks[chosen_index];
+                const old_brick = this.computer_tower[tower_level];
+                this.computer_tower[tower_level] = chosen_brick;
+
+                const unchosen_index = 1 - chosen_index;
+                const unchosen_brick = this.middle_bricks[unchosen_index];
+                this.pile.push(unchosen_brick);
+                this.shuffle(this.pile);
+                this.middle_bricks[unchosen_index] = this.pile.pop();
+                this.middle_bricks[chosen_index] = old_brick;
+
+                this.move_history.push({
+                    player: 'computer',
+                    chosen_brick: chosen_brick,
+                    tower_level: tower_level,
+                    old_brick: old_brick
+                });
+
+                if (this.is_tower_sorted(this.computer_tower)) {
+                    this.round_over = true;
+                    this.winner = 'computer';
+                    this.handle_round_end();
+                } else {
+                    this.current_player = 'player';
+                }
+                return { success: true };
+            }
+
+            smart_computer_move() {
+                let best_score = Infinity;
+                let best_move = [0, 0];
+                for (let brick_idx of [0, 1]) {
+                    const brick = this.middle_bricks[brick_idx];
+                    for (let level = 0; level < 10; level++) {
+                        const temp_tower = [...this.computer_tower];
+                        temp_tower[level] = brick;
+                        const sorted_temp_tower = [...temp_tower].sort((a, b) => a - b);
+                        let disorder = 0;
+                        for (let i = 0; i < 10; i++) {
+                            disorder += Math.abs(temp_tower[i] - sorted_temp_tower[i]);
+                        }
+                        if (disorder < best_score) {
+                            best_score = disorder;
+                            best_move = [brick_idx, level];
+                        }
+                    }
+                }
+                return best_move;
+            }
+
+            greedy_computer_move() {
+                for (let brick_idx of [0, 1]) {
+                    const brick = this.middle_bricks[brick_idx];
+                    const temp_tower = [...this.computer_tower, brick];
+                    const sorted_tower = [...temp_tower].sort((a, b) => a - b);
+                    const target_pos = sorted_tower.indexOf(brick);
+                    if (target_pos < 10) {
+                        return [brick_idx, target_pos];
+                    }
+                }
+                return this.rookie_computer_move(); // Fallback
+            }
+
+            rookie_computer_move() {
+                return [Math.floor(Math.random() * 2), Math.floor(Math.random() * 10)];
+            }
+
+            handle_round_end() {
+                if (this.winner === 'player') {
+                    const base_score = 100 - this.N;
+                    const bonus_score = Math.min(...this.player_tower);
+                    this.player_score += base_score + bonus_score;
+                    this.rounds_won += 1;
+                    this.N -= 6;
+                } else {
+                    this.N = 50;
+                }
+            }
+
+            get_game_state() {
+                return {
+                    N: this.N,
+                    player_score: this.player_score,
+                    rounds_won: this.rounds_won,
+                    player_tower: [...this.player_tower],
+                    computer_tower: [...this.computer_tower],
+                    computer_tower_hidden: Array(this.computer_tower.length).fill('?'),
+                    computer_tower_revealed: this.round_over ? [...this.computer_tower] : null,
+                    middle_bricks: [...this.middle_bricks],
+                    current_player: this.current_player,
+                    round_over: this.round_over,
+                    winner: this.winner,
+                    computer_strategy: this.computer_strategy,
+                    move_history: this.move_history.slice(-5),
+                    last_computer_move: this.last_computer_move ? {...this.last_computer_move} : null,
+                    game_completed: this.N <= 25
+                };
+            }
+
+            shuffle(array) {
+                for (let i = array.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [array[i], array[j]] = [array[j], array[i]];
+                }
             }
         }
 

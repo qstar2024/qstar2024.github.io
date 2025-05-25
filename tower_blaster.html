@@ -414,32 +414,30 @@
 
             .tower {
                 padding: 10px;
-                /* Align tower width with brick width */
-                width: calc((100% - 2 * 10px) / 3); /* Assuming 10px gap */
+                /* Remove explicit width, let grid handle sizing */
+                width: 100%;
             }
 
             .brick {
                 height: 28px;
                 font-size: 0.8rem;
-                /* Make brick fill its container */
                 width: 100%;
             }
 
             .middle-area {
                 order: -1;
                 min-width: auto;
-                /* Align middle area width with brick width */
-                width: calc((100% - 2 * 10px) / 3); /* Assuming 10px gap */
+                /* Remove explicit width, let grid handle sizing */
+                width: 100%;
             }
 
             .middle-bricks {
-                flex-direction: column; /* Stack middle bricks vertically */
+                flex-direction: column;
                 justify-content: center;
             }
 
             .middle-brick {
                 height: 40px;
-                /* Make middle brick fill its container */
                 width: 100%;
                 font-size: 0.9rem;
             }

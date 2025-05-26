@@ -40,9 +40,11 @@ function setShipClasses(gridSize) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Set initial grid size from dropdown
     const gridSizeSelect = document.getElementById('grid-size-select');
-    currentGridSize = parseInt(gridSizeSelect.value);
+    // Set initial grid size based on screen width, default to standard if detectGridSize is not available
+    currentGridSize = typeof detectGridSize === 'function' ? detectGridSize() : GRID_SIZES.standard;
+    // Update dropdown to reflect detected size
+    gridSizeSelect.value = currentGridSize;
     setShipClasses(currentGridSize);
     renderGrid(currentGridSize);
     // Randomize ship placement for both players

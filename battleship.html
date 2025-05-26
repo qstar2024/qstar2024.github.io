@@ -9,12 +9,15 @@
 <body>
     <header>
         <h1>Battleship</h1>
-        <div id="status"></div>
         <button id="home-btn" onclick="window.location.href='index.html'">Back to Home</button>
     </header>
     <main>
+        <div id="status"></div>
         <section id="ship-info-section">
             <ul id="ship-list"></ul>
+        </section>
+        <section id="game-section">
+            <div id="game-grid"></div>
         </section>
         <div id="controls">
             <label for="grid-size-select">Grid Size:</label>
@@ -26,9 +29,6 @@
             <button id="start-btn" style="display: none;">Start Game</button>
             <button id="new-game-btn">New Game</button>
         </div>
-        <section id="game-section">
-            <div id="game-grid"></div>
-        </section>
     </main>
     <script src="battleship.js"></script>
 </body>

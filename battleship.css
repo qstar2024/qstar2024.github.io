@@ -6,14 +6,16 @@ body {
     padding: 0;
 }
 header {
-    text-align: center;
-    padding: 1rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
 }
 main {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 2rem;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
     padding: 1rem;
 }
 section {
@@ -97,7 +99,6 @@ section {
 #controls {
     width: 100%;
     text-align: center;
-    margin-top: 1rem;
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -151,13 +152,9 @@ button:hover {
         min-width: unset;
         width: 100%;
     }
-    #computer-grid, #human-grid {
-        width: 240px;
-        height: 240px;
-    }
-    .cell {
-        width: 20px;
-        height: 20px;
+    #game-grid {
+        width: min(95vw, 300px);
+        height: min(95vw, 300px);
     }
 }
 

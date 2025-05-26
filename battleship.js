@@ -503,13 +503,14 @@ function handleCellClick(event) {
         // Check if all ships are sunk
         const N = computerShips.reduce((sum, s) => sum + s.cells.length, 0);
         if (computerShips.every(ship => ship.hits === ship.cells.length)) {
-            // Win logic
+            // Win logic based on new criteria
+            const M = currentGridSize * currentGridSize;
             let status = '';
-            if (humanShots < N * 1.25) {
+            if (humanShots < N + (M - N) * 0.5) {
                 status = 'Perfect!';
-            } else if (humanShots < N * 1.5) {
+            } else if (humanShots < N + (M - N) * 0.75) {
                 status = 'Great Job!';
-            } else if (humanShots < N * 2) {
+            } else if (humanShots < N + (M - N) * 0.88) {
                 status = 'Mission Accomplished!';
             } else {
                 status = 'Game Over. You lose!';

@@ -262,6 +262,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     startGame();
 
+    // Add event listener for the restart button
+    const restartButton = document.getElementById('restart-button');
+    if (restartButton) {
+        restartButton.addEventListener('click', initializeGame);
+    }
+
     // Attempt to focus the hidden input for mobile keyboard
     const mobileInput = document.getElementById('mobile-input');
     if (mobileInput) {

@@ -70,7 +70,7 @@
 
         .game-board {
             display: grid;
-            grid-template-columns: 1fr auto 1fr;
+            grid-template-columns: repeat(3, 1fr); /* Make all columns equal width */
             gap: 20px;
             flex: 1;
             align-items: start;
@@ -112,7 +112,7 @@
             transition: all 0.3s ease;
             cursor: pointer;
             border: 2px solid transparent;
-            width: 100%;
+            width: 100%-2px;
             box-sizing: border-box;
         }
 
@@ -208,7 +208,9 @@
             flex-direction: column;
             align-items: center;
             gap: 20px;
-            min-width: 150px;
+            /* Now that the column is 1fr, adjust padding/margin for spacing */
+            padding: 0 10px; /* Add horizontal padding */
+            width: 100%-10px; /* Fill the grid column */
         }
 
         .middle-bricks {
@@ -219,8 +221,7 @@
 
         .middle-brick {
             height: 50px;
-            width: calc(100% - 20px);
-            max-width: 200px;
+            width: 100%-2px; /* Make middle bricks fill the middle area width */
             margin: 0 auto;
             background: linear-gradient(45deg, #f39c12, #e67e22);
             border-radius: 8px;

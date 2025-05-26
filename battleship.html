@@ -8,22 +8,22 @@
 </head>
 <body>
     <header>
-        <h1>Battleship: Human vs Computer</h1>
+        <h1>Battleship</h1>
         <div id="status"></div>
         <button id="home-btn" onclick="window.location.href='index.html'">Back to Home</button>
     </header>
     <main>
-        <section id="game-section">
-            <h2>Game Grid</h2>
-            <div id="game-grid" class="grid"></div>
+        <section id="ship-info-section">
+            <h2>Enemy Ships</h2>
+            <ul id="ship-list"></ul>
         </section>
-        <div id="placement-controls">
-            <h3>Place Your Ships</h3>
-            <div id="ships-to-place"></div>
-            <button id="rotate-btn">Rotate Ship</button>
-            <button id="place-btn">Place Ship</button>
-        </div>
         <div id="controls">
+            <label for="grid-size-select">Grid Size:</label>
+            <select id="grid-size-select">
+                <option value="8">Small (8x8)</option>
+                <option value="10" selected>Standard (10x10)</option>
+                <option value="13">Large (13x13)</option>
+            </select>
             <button id="start-btn" style="display: none;">Start Game</button>
             <button id="new-game-btn">New Game</button>
         </div>

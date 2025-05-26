@@ -7,11 +7,11 @@ const GRID_SIZES = {
 };
 
 const ALL_SHIP_CLASSES = [
-    { name: 'Carrier', length: 4, count: 1 },
-    { name: 'Battleship', length: 3, count: 2 },
-    { name: 'Cruiser', length: 2, count: 3 },
-    { name: 'Submarine', length: 2, count: 3 },
-    { name: 'Patrol Boat', length: 1, count: 8 }
+    { name: 'Carrier', length: 5, count: 2 },
+    { name: 'Battleship', length: 4, count: 2 },
+    { name: 'Cruiser', length: 3, count: 3 },
+    { name: 'Submarine', length: 2, count: 4 },
+    { name: 'Patrol Boat', length: 1, count: 2 }
 ];
 
 let currentGridSize = GRID_SIZES.standard;
@@ -40,31 +40,79 @@ function setShipClasses(gridSize) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    currentGridSize = detectGridSize();
+    // Set initial grid size from dropdown
+    const gridSizeSelect = document.getElementById('grid-size-select');
+    currentGridSize = parseInt(gridSizeSelect.value);
     setShipClasses(currentGridSize);
     renderGrid(currentGridSize);
     // Randomize ship placement for both players
     humanShips = placeShipsRandomly(currentGridSize, currentShipClasses);
     computerShips = placeShipsRandomly(currentGridSize, currentShipClasses);
+    updateShipListDisplay();
     document.getElementById('status').textContent = 'Welcome! Start shooting to find and sink all ships!';
     gameState = 'round1';
     addShootingListeners();
     document.getElementById('start-btn').style.display = 'none';
     // Link the new 'New Game' button
     document.getElementById('new-game-btn').addEventListener('click', startNewGame);
+    // Add grid size change listener
+    gridSizeSelect.addEventListener('change', () => {
+        currentGridSize = parseInt(gridSizeSelect.value);
+        startNewGame();
+    });
     // Hide placement controls as they are not used in the current game flow
-    document.getElementById('placement-controls').style.display = 'none';
+    if (document.getElementById('placement-controls')) {
+        document.getElementById('placement-controls').style.display = 'none';
+    }
 });
+
+function updateShipListDisplay() {
+    const shipListElement = document.getElementById('ship-list');
+    if (!shipListElement) return;
+    shipListElement.innerHTML = ''; // Clear previous list
+
+    const remainingShipsByType = {};
+    // Initialize with total counts for each ship type
+    currentShipClasses.forEach(shipClass => {
+        remainingShipsByType[shipClass.name] = shipClass.count;
+    });
+
+    // Decrement count for each sunk computer ship
+    // This check is important: computerShips might not be populated yet when called from resetGame
+    if (computerShips && computerShips.length > 0) {
+        computerShips.forEach(ship => {
+            // Ensure ship.name is valid and exists in remainingShipsByType
+            if (ship.name && remainingShipsByType.hasOwnProperty(ship.name) && ship.hits === ship.cells.length) { 
+                if (remainingShipsByType[ship.name] > 0) {
+                    remainingShipsByType[ship.name]--;
+                }
+            }
+        });
+    }
+
+    currentShipClasses.forEach(shipClass => {
+        const listItem = document.createElement('li');
+        const remainingCount = remainingShipsByType[shipClass.name];
+        listItem.textContent = `${shipClass.name} (Length: ${shipClass.length}): ${remainingCount} of ${shipClass.count} remaining`;
+        if (remainingCount === 0) {
+            listItem.style.textDecoration = 'line-through';
+            listItem.style.color = '#aaa'; // Dim sunk ships
+        }
+        shipListElement.appendChild(listItem);
+    });
+}
 
 // Function to start a new game
 function startNewGame() {
-    resetGame(); // Reset existing game state
+    resetGame(); // Reset existing game state, which also calls updateShipListDisplay for a clean slate
     // Re-initialize for a new game
-    currentGridSize = detectGridSize();
+    const gridSizeSelect = document.getElementById('grid-size-select');
+    currentGridSize = parseInt(gridSizeSelect.value);
     setShipClasses(currentGridSize);
     renderGrid(currentGridSize); // This also clears the grid
     humanShips = placeShipsRandomly(currentGridSize, currentShipClasses);
     computerShips = placeShipsRandomly(currentGridSize, currentShipClasses);
+    updateShipListDisplay(); // Update ship list AFTER computer ships are placed
     document.getElementById('status').textContent = 'Welcome! Start shooting to find and sink all ships!';
     gameState = 'round1'; // Set game state to human's turn
     humanShots = 0;
@@ -72,7 +120,9 @@ function startNewGame() {
     addShootingListeners(); // Add listeners for human shooting
     // Ensure buttons are in the correct state for a new game
     document.getElementById('start-btn').style.display = 'none'; 
-    document.getElementById('placement-controls').style.display = 'none';
+    if (document.getElementById('placement-controls')) {
+        document.getElementById('placement-controls').style.display = 'none';
+    }
 }
 
 function renderGrid(size) {
@@ -157,6 +207,11 @@ function resetGame() {
         });
     }
     // Note: renderGrid() called in startNewGame will rebuild the grid anyway.
+    // Update ship list to show all ships as remaining (since computerShips is empty now)
+    const tempComputerShips = computerShips; // Store current computerShips
+    computerShips = []; // Temporarily empty computerShips for reset display
+    updateShipListDisplay();
+    computerShips = tempComputerShips; // Restore computerShips if needed elsewhere, though startNewGame repopulates it
 }
 
 function startRound1() {
@@ -414,13 +469,16 @@ function handleCellClick(event) {
     if (gameState !== 'round1') return;
     const cell = event.target;
     const index = parseInt(cell.dataset.index);
-    if (cell.classList.contains('hit') || cell.classList.contains('miss') || cell.classList.contains('sunk')) {
-        return;
+    if (cell.classList.contains('hit-ship') || cell.classList.contains('miss') || cell.classList.contains('sunk')) {
+        return; // Prevent duplicate hits on same cell
     }
     humanShots++;
     const hitShip = computerShips.find(ship => ship.cells.includes(index));
     if (hitShip) {
-        hitShip.hits++;
+        // Only increment hits if this cell hasn't been hit before
+        if (!cell.classList.contains('hit-ship') && !cell.classList.contains('sunk')) {
+            hitShip.hits++;
+        }
         cell.classList.add('hit-ship'); // yellow for hit but not sunk
         // Add flash effect for hit
         cell.classList.add('flash-hit');
@@ -440,6 +498,7 @@ function handleCellClick(event) {
                 }
             });
             document.getElementById('status').textContent = `Sank a ship: ${hitShip.name}!`;
+            updateShipListDisplay(); // Update ship list when a ship is sunk
         }
         // Check if all ships are sunk
         const N = computerShips.reduce((sum, s) => sum + s.cells.length, 0);

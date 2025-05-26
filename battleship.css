@@ -31,18 +31,21 @@ section {
     margin: 0 auto;
 }
 #computer-grid, #human-grid {
-    width: 400px;
-    height: 400px;
+    width: min(90vw, 400px);
+    height: min(90vw, 400px);
+    max-width: 400px;
+    max-height: 400px;
 }
 .cell {
-    width: 36px;
-    height: 36px;
     background: #1976d2;
     border: 1px solid #0a2342;
     border-radius: 4px;
     cursor: pointer;
     position: relative;
     transition: background 0.2s;
+    aspect-ratio: 1;
+    min-width: 0;
+    min-height: 0;
 }
 .cell.hit {
     background: #ff5252;
@@ -84,6 +87,25 @@ section {
     width: 100%;
     text-align: center;
     margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+#grid-size-select {
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+#controls label {
+    font-weight: bold;
 }
 button {
     background: #1976d2;

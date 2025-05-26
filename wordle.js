@@ -252,18 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Handle physical keyboard input
-    document.addEventListener('keydown', (e) => {
-        if (gameOver) return;
-        const key = e.key.toUpperCase();
-        if (key === 'ENTER') {
-            handleKeyPress('ENTER');
-        } else if (key === 'BACKSPACE') {
-            handleKeyPress('BACKSPACE');
-        } else if (key.length === 1 && key.match(/[A-Z]/i)) {
-            handleKeyPress(key);
-        }
-    });
+    // This keydown listener is removed to prevent duplication with the one below
 
     async function startGame() {
         const wordsLoaded = await fetchAndProcessWords();
@@ -309,15 +298,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Prevent duplicate input: only process physical keyboard if mobile input is not focused
+    // Handle physical keyboard input (unified handler)
     document.addEventListener('keydown', (e) => {
-        if (document.activeElement === mobileInput) return;
+        if (document.activeElement === mobileInput) return; // Prevent duplicate input from mobile
         if (gameOver) return;
-        let key = e.key.toUpperCase();
-        if (key === 'ENTER') key = 'ENTER';
-        else if (key === 'BACKSPACE') key = 'BACKSPACE';
-        else if (key.length === 1 && key.match(/[A-Z]/i)) key = key;
-        else return;
-        handleKeyPress(key);
+        const key = e.key.toUpperCase();
+        if (key === 'ENTER') {
+            handleKeyPress('ENTER');
+        } else if (key === 'BACKSPACE') {
+            handleKeyPress('BACKSPACE');
+        } else if (key.length === 1 && key.match(/[A-Z]/i)) {
+            handleKeyPress(key);
+        }
     });
 });

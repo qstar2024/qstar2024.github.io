@@ -353,20 +353,14 @@
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .game-board {
-                grid-template-columns: repeat(3, 1fr);
-                grid-template-rows: auto;
-                gap: 15px;
+                grid-template-columns: repeat(2, 1fr); /* Adjust grid for smaller screens */
+                grid-template-rows: auto 1fr;
+                gap: 10px;
             }
 
             .player-tower,
-            .middle-area,
             .computer-tower {
                 width: 100%; /* Ensure they fill their grid column */
-            }
-
-            .player-tower {
-                grid-column: 1;
-                grid-row: 1;
             }
 
             .middle-area {
@@ -374,11 +368,17 @@
                 grid-row: 1;
                 order: unset; /* Remove order to follow grid column */
                 min-width: auto;
+                padding: 0 5px; /* Adjust padding for smaller screens */
+            }
+
+            .player-tower {
+                grid-column: 1;
+                grid-row: 1;
             }
 
             .computer-tower {
-                grid-column: 3;
-                grid-row: 1;
+                grid-column: 1 / span 2; /* Span across both columns */
+                grid-row: 2; /* Place below player tower and middle area */
             }
 
             .middle-bricks {
@@ -397,14 +397,14 @@
 
             .middle-brick {
                 height: 45px;
-                width: calc(100% - 10px);
-                max-width: 150px;
+                width: 100%; /* Make middle bricks fill the middle area width */
+                max-width: none; /* Remove max-width constraint */
                 margin: 0 auto;
                 font-size: 1rem;
             }
 
             .game-info {
-                grid-column: 1 / span 3; /* Span across all columns */
+                grid-column: 1 / span 2; /* Adjust span for smaller screens */
                 grid-row: 2; /* Place below the towers and middle area */
                 grid-template-columns: repeat(2, 1fr);
             }

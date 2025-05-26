@@ -112,15 +112,26 @@
             transition: all 0.3s ease;
             cursor: pointer;
             border: 2px solid transparent;
-            width: 100%-2px;
+            width: calc(100% - 2px);
             box-sizing: border-box;
         }
 
         .brick.empty {
-            height: 35px !important;
+            height: 35px;
             background: linear-gradient(45deg, #f39c12, #e67e22);
-            border: 2px solid #654321;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
             color: transparent;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            width: calc(100% - 2px);
+            box-sizing: border-box;
         }
 
         .brick:hover {
@@ -134,11 +145,21 @@
         }
 
         .brick.hidden {
-            height: 35px !important;
+            height: 35px;
             background: linear-gradient(45deg, #f39c12, #e67e22);
-            border: 2px solid #654321;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
             color: transparent;
-            position: relative;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+            width: calc(100% - 2px);
+            box-sizing: border-box;
         }
 
         .brick.hidden::after {
@@ -210,7 +231,7 @@
             gap: 20px;
             /* Now that the column is 1fr, adjust padding/margin for spacing */
             padding: 0 10px; /* Add horizontal padding */
-            width: 100%-50px; /* Fill the grid column */
+            width: calc(100% - 50px); /* Fill the grid column */
         }
 
         .middle-bricks {
@@ -221,7 +242,7 @@
 
         .middle-brick {
             height: 50px;
-            width: 100%-2px; /* Make middle bricks fill the middle area width */
+            width: calc(100% - 2px); /* Make middle bricks fill the middle area width */
             margin: 0 auto;
             background: linear-gradient(45deg, #f39c12, #e67e22);
             border-radius: 8px;
@@ -354,14 +375,21 @@
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .game-board {
-                grid-template-columns: repeat(2, 1fr); /* Adjust grid for smaller screens */
+                grid-template-columns: repeat(3, 1fr); /* Adjust grid for smaller screens */
                 grid-template-rows: auto 1fr;
                 gap: 10px;
             }
 
-            .player-tower,
+            .player-tower {
+                width: 100%; /* Ensure they fill their grid column */
+                grid-column: 1;
+                grid-row: 1;
+            }
+
             .computer-tower {
                 width: 100%; /* Ensure they fill their grid column */
+                grid-column: 3;
+                grid-row: 1;
             }
 
             .middle-area {
@@ -370,16 +398,6 @@
                 order: unset; /* Remove order to follow grid column */
                 min-width: auto;
                 padding: 0 5px; /* Adjust padding for smaller screens */
-            }
-
-            .player-tower {
-                grid-column: 1;
-                grid-row: 1;
-            }
-
-            .computer-tower {
-                grid-column: 1 / span 2; /* Span across both columns */
-                grid-row: 2; /* Place below player tower and middle area */
             }
 
             .middle-bricks {
@@ -399,7 +417,6 @@
             .middle-brick {
                 height: 45px;
                 width: 100%; /* Make middle bricks fill the middle area width */
-                max-width: none; /* Remove max-width constraint */
                 margin: 0 auto;
                 font-size: 1rem;
             }
@@ -446,7 +463,7 @@
 
             .middle-brick {
                 height: 40px;
-                width: calc(100% - 10px);
+                width: 100%;
                 max-width: 120px;
                 margin: 0 auto;
                 font-size: 0.9rem;
@@ -487,7 +504,7 @@
                 <div class="info-value" id="rounds-won">0</div>
             </div>
             <div class="info-card">
-                <div class="info-label">Current N</div>
+                <div class="info-label">Max Brick</div>
                 <div class="info-value" id="current-n">50</div>
             </div>
 

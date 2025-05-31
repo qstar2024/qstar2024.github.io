@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zen Sudoku</title>
+    <style>
+        .back-home-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            text-decoration: none;
+        }
+
+        .back-home-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+    </style>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .zen-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4a5568;
+            font-weight: 300;
+            font-size: 2.5em;
+            letter-spacing: 2px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .mode-toggle {
+            background: #48bb78;
+        }
+
+        .mode-toggle:hover {
+            box-shadow: 0 6px 20px rgba(72, 187, 120, 0.4);
+        }
+
+        .hint-btn {
+            background: #ed8936;
+        }
+
+        .hint-btn:hover {
+            box-shadow: 0 6px 20px rgba(237, 137, 54, 0.4);
+        }
+
+        .sudoku-grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            grid-template-rows: repeat(9, 1fr);
+            gap: 2px;
+            background: #4a5568;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 0 auto;
+            width: 450px;
+            height: 450px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell {
+            background: white;
+            border: none;
+            font-size: 20px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .cell:hover {
+            background: #e2e8f0;
+        }
+
+        .cell.selected {
+            background: #bee3f8;
+            box-shadow: inset 0 0 0 3px #3182ce;
+        }
+
+        .cell.given {
+            background: #f7fafc;
+            color: #2d3748;
+            font-weight: 700;
+        }
+
+        .cell.error {
+            background: #fed7d7;
+            color: #e53e3e;
+        }
+
+        .cell.hint-flash {
+            animation: hintFlash 1s ease-in-out;
+        }
+
+        @keyframes hintFlash {
+            0%, 100% { background: white; }
+            50% { background: #ffd700; box-shadow: 0 0 20px #ffd700; }
+        }
+
+        /* 3x3 box borders */
+        .cell:nth-child(3n) {
+            border-right: 3px solid #4a5568;
+        }
+
+        .cell:nth-child(n+19):nth-child(-n+27),
+        .cell:nth-child(n+46):nth-child(-n+54) {
+            border-bottom: 3px solid #4a5568;
+        }
+
+        .draft-numbers {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            font-size: 10px;
+            color: #718096;
+            pointer-events: none;
+        }
+
+        .draft-number {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 400;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 16px;
+            color: #4a5568;
+        }
+
+        .mode-indicator {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #718096;
+            font-style: italic;
+        }
+
+        @media (max-width: 600px) {
+            .sudoku-grid {
+                width: 350px;
+                height: 350px;
+            }
+            
+            .cell {
+                font-size: 16px;
+            }
+            
+            .draft-numbers {
+                font-size: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-home-btn">Back to Home</a>
+
+    <div class="zen-container">
+        <h1>Zen Sudoku</h1>
+        
+        <div class="controls">
+            <button class="btn" onclick="newGame()">New Game</button>
+            <button class="btn mode-toggle" onclick="toggleMode()" id="modeBtn">Draft Mode</button>
+            <button class="btn hint-btn" onclick="getHint()">Hint</button>
+            <button class="btn" onclick="clearCell()">Clear</button>
+            <button class="btn" onclick="checkSolution()">Check</button>
+        </div>
+        
+        <div class="mode-indicator" id="modeIndicator">Normal Mode - Click to enter numbers</div>
+        
+        <div class="sudoku-grid" id="sudokuGrid"></div>
+        
+        <div class="status" id="status">Welcome to Zen Sudoku. Find your inner peace through numbers.</div>
+    </div>
+
+    <script>
+        class ZenSudoku {
+            constructor() {
+                this.grid = Array(9).fill().map(() => Array(9).fill(0));
+                this.solution = Array(9).fill().map(() => Array(9).fill(0));
+                this.given = Array(9).fill().map(() => Array(9).fill(false));
+                this.drafts = Array(9).fill().map(() => Array(9).fill().map(() => new Set()));
+                this.selectedCell = null;
+                this.isDraftMode = false;
+                this.init();
+            }
+
+            init() {
+                this.createGrid();
+                this.generatePuzzle();
+                this.addEventListeners();
+            }
+
+            createGrid() {
+                const gridElement = document.getElementById('sudokuGrid');
+                gridElement.innerHTML = '';
+                
+                for (let i = 0; i < 81; i++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.index = i;
+                    cell.addEventListener('click', () => this.selectCell(i));
+                    gridElement.appendChild(cell);
+                }
+            }
+
+            selectCell(index) {
+                const cells = document.querySelectorAll('.cell');
+                cells.forEach(cell => cell.classList.remove('selected'));
+                
+                this.selectedCell = index;
+                cells[index].classList.add('selected');
+            }
+
+            addEventListeners() {
+                document.addEventListener('keydown', (e) => {
+                    if (this.selectedCell === null) return;
+                    
+                    const num = parseInt(e.key);
+                    if (num >= 1 && num <= 9) {
+                        this.enterNumber(num);
+                    } else if (e.key === 'Backspace' || e.key === 'Delete') {
+                        this.clearSelectedCell();
+                    }
+                });
+            }
+
+            enterNumber(num) {
+                if (this.selectedCell === null) return;
+                
+                const row = Math.floor(this.selectedCell / 9);
+                const col = this.selectedCell % 9;
+                
+                if (this.given[row][col]) return;
+
+                if (this.isDraftMode) {
+                    this.toggleDraft(row, col, num);
+                } else {
+                    if (this.isValidMove(row, col, num)) {
+                        this.grid[row][col] = num;
+                        this.drafts[row][col].clear();
+                        this.removeDraftsFromPeers(row, col, num);
+                        this.updateDisplay();
+                        this.checkCompletion();
+                    } else {
+                        this.showError(row, col);
+                    }
+                }
+            }
+
+            toggleDraft(row, col, num) {
+                if (this.drafts[row][col].has(num)) {
+                    this.drafts[row][col].delete(num);
+                } else {
+                    this.drafts[row][col].add(num);
+                }
+                this.updateDisplay();
+            }
+
+            removeDraftsFromPeers(row, col, num) {
+                // Remove from row
+                for (let c = 0; c < 9; c++) {
+                    this.drafts[row][c].delete(num);
+                }
+                
+                // Remove from column
+                for (let r = 0; r < 9; r++) {
+                    this.drafts[r][col].delete(num);
+                }
+                
+                // Remove from 3x3 box
+                const boxRow = Math.floor(row / 3) * 3;
+                const boxCol = Math.floor(col / 3) * 3;
+                for (let r = boxRow; r < boxRow + 3; r++) {
+                    for (let c = boxCol; c < boxCol + 3; c++) {
+                        this.drafts[r][c].delete(num);
+                    }
+                }
+            }
+
+            isValidMove(row, col, num) {
+                // Check row
+                for (let c = 0; c < 9; c++) {
+                    if (c !== col && this.grid[row][c] === num) return false;
+                }
+                
+                // Check column
+                for (let r = 0; r < 9; r++) {
+                    if (r !== row && this.grid[r][col] === num) return false;
+                }
+                
+                // Check 3x3 box
+                const boxRow = Math.floor(row / 3) * 3;
+                const boxCol = Math.floor(col / 3) * 3;
+                for (let r = boxRow; r < boxRow + 3; r++) {
+                    for (let c = boxCol; c < boxCol + 3; c++) {
+                        if ((r !== row || c !== col) && this.grid[r][c] === num) return false;
+                    }
+                }
+                
+                return true;
+            }
+
+            showError(row, col) {
+                const cell = document.querySelector(`[data-index="${row * 9 + col}"]`);
+                cell.classList.add('error');
+                setTimeout(() => cell.classList.remove('error'), 1000);
+                document.getElementById('status').textContent = 'Invalid move! This number conflicts with Sudoku rules.';
+            }
+
+            updateDisplay() {
+                const cells = document.querySelectorAll('.cell');
+                
+                for (let i = 0; i < 81; i++) {
+                    const row = Math.floor(i / 9);
+                    const col = i % 9;
+                    const cell = cells[i];
+                    
+                    cell.innerHTML = '';
+                    cell.className = 'cell';
+                    
+                    if (i === this.selectedCell) {
+                        cell.classList.add('selected');
+                    }
+                    
+                    if (this.given[row][col]) {
+                        cell.classList.add('given');
+                    }
+                    
+                    if (this.grid[row][col] !== 0) {
+                        cell.textContent = this.grid[row][col];
+                    } else if (this.drafts[row][col].size > 0) {
+                        const draftContainer = document.createElement('div');
+                        draftContainer.className = 'draft-numbers';
+                        
+                        for (let num = 1; num <= 9; num++) {
+                            const draftCell = document.createElement('div');
+                            draftCell.className = 'draft-number';
+                            if (this.drafts[row][col].has(num)) {
+                                draftCell.textContent = num;
+                            }
+                            draftContainer.appendChild(draftCell);
+                        }
+                        
+                        cell.appendChild(draftContainer);
+                    }
+                }
+            }
+
+            clearSelectedCell() {
+                if (this.selectedCell === null) return;
+                
+                const row = Math.floor(this.selectedCell / 9);
+                const col = this.selectedCell % 9;
+                
+                if (this.given[row][col]) return;
+                
+                this.grid[row][col] = 0;
+                this.drafts[row][col].clear();
+                this.updateDisplay();
+            }
+
+            toggleMode() {
+                this.isDraftMode = !this.isDraftMode;
+                const btn = document.getElementById('modeBtn');
+                const indicator = document.getElementById('modeIndicator');
+                
+                if (this.isDraftMode) {
+                    btn.textContent = 'Normal Mode';
+                    indicator.textContent = 'Draft Mode - Click to add/remove draft numbers';
+                } else {
+                    btn.textContent = 'Draft Mode';
+                    indicator.textContent = 'Normal Mode - Click to enter numbers';
+                }
+            }
+
+            generatePuzzle() {
+                // Generate a complete valid Sudoku solution
+                this.generateCompleteSolution();
+                
+                // Copy solution to grid
+                for (let r = 0; r < 9; r++) {
+                    for (let c = 0; c < 9; c++) {
+                        this.grid[r][c] = this.solution[r][c];
+                    }
+                }
+                
+                // Remove numbers to create puzzle (keep about 30-35 numbers)
+                const cellsToRemove = 81 - (30 + Math.floor(Math.random() * 6));
+                const positions = [];
+                for (let i = 0; i < 81; i++) positions.push(i);
+                
+                // Shuffle positions
+                for (let i = positions.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [positions[i], positions[j]] = [positions[j], positions[i]];
+                }
+                
+                // Remove numbers
+                for (let i = 0; i < cellsToRemove; i++) {
+                    const pos = positions[i];
+                    const row = Math.floor(pos / 9);
+                    const col = pos % 9;
+                    this.grid[row][col] = 0;
+                }
+                
+                // Mark given numbers
+                for (let r = 0; r < 9; r++) {
+                    for (let c = 0; c < 9; c++) {
+                        this.given[r][c] = this.grid[r][c] !== 0;
+                    }
+                }
+                
+                this.updateDisplay();
+            }
+
+            generateCompleteSolution() {
+                // Clear the solution grid
+                for (let r = 0; r < 9; r++) {
+                    for (let c = 0; c < 9; c++) {
+                        this.solution[r][c] = 0;
+                    }
+                }
+                
+                this.solveSudoku(this.solution);
+            }
+
+            solveSudoku(grid) {
+                const empty = this.findEmptyCell(grid);
+                if (!empty) return true; // Solved
+                
+                const [row, col] = empty;
+                const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                
+                // Shuffle numbers for randomness
+                for (let i = numbers.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+                }
+                
+                for (const num of numbers) {
+                    if (this.isValidPlacement(grid, row, col, num)) {
+                        grid[row][col] = num;
+                        
+                        if (this.solveSudoku(grid)) {
+                            return true;
+                        }
+                        
+                        grid[row][col] = 0;
+                    }
+                }
+                
+                return false;
+            }
+
+            findEmptyCell(grid) {
+                for (let r = 0; r < 9; r++) {
+                    for (let c = 0; c < 9; c++) {
+                        if (grid[r][c] === 0) {
+                            return [r, c];
+                        }
+                    }
+                }
+                return null;
+            }
+
+            isValidPlacement(grid, row, col, num) {
+                // Check row
+                for (let c = 0; c < 9; c++) {
+                    if (grid[row][c] === num) return false;
+                }
+                
+                // Check column
+                for (let r = 0; r < 9; r++) {
+                    if (grid[r][col] === num) return false;
+                }
+                
+                // Check 3x3 box
+                const boxRow = Math.floor(row / 3) * 3;
+                const boxCol = Math.floor(col / 3) * 3;
+                for (let r = boxRow; r < boxRow + 3; r++) {
+                    for (let c = boxCol; c < boxCol + 3; c++) {
+                        if (grid[r][c] === num) return false;
+                    }
+                }
+                
+                return true;
+            }
+
+            getHint() {
+                // Find the best move using advanced solving techniques
+                const hint = this.findBestHint();
+                
+                if (hint) {
+                    const { row, col, num } = hint;
+                    const cellIndex = row * 9 + col;
+                    const cell = document.querySelector(`[data-index="${cellIndex}"]`);
+                    
+                    // Flash the cell and show the number
+                    cell.classList.add('hint-flash');
+                    setTimeout(() => cell.classList.remove('hint-flash'), 1000);
+                    
+                    document.getElementById('status').textContent = `Hint: Try placing ${num} in row ${row + 1}, column ${col + 1}`;
+                } else {
+                    document.getElementById('status').textContent = 'No hints available. You\'re doing great!';
+                }
+            }
+
+            findBestHint() {
+                // Look for cells with only one possible value
+                for (let r = 0; r < 9; r++) {
+                    for (let c = 0; c < 9; c++) {
+                        if (this.grid[r][c] === 0) {
+                            const possibleValues = [];
+                            for (let num = 1; num <= 9; num++) {
+                                if (this.isValidMove(r, c, num)) {
+                                    possibleValues.push(num);
+                                }
+                            }
+                            
+                            if (possibleValues.length === 1) {
+                                return { row: r, col: c, num: possibleValues[0] };
+                            }
+                        }
+                    }
+                }
+                
+                // Look for numbers that can only go in one place in a row/column/box
+                return this.findHiddenSingles();
+            }
+
+            findHiddenSingles() {
+                // Check rows
+                for (let r = 0; r < 9; r++) {
+                    for (let num = 1; num <= 9; num++) {
+                        const possibleCols = [];
+                        for (let c = 0; c < 9; c++) {
+                            if (this.grid[r][c] === 0 && this.isValidMove(r, c, num)) {
+                                possibleCols.push(c);
+                            }
+                        }
+                        if (possibleCols.length === 1) {
+                            return { row: r, col: possibleCols[0], num };
+                        }
+                    }
+                }
+                
+                // Check columns
+                for (let c = 0; c < 9; c++) {
+                    for (let num = 1; num <= 9; num++) {
+                        const possibleRows = [];
+                        for (let r = 0; r < 9; r++) {
+                            if (this.grid[r][c] === 0 && this.isValidMove(r, c, num)) {
+                                possibleRows.push(r);
+                            }
+                        }
+                        if (possibleRows.length === 1) {
+                            return { row: possibleRows[0], col: c, num };
+                        }
+                    }
+                }
+                
+                // Check 3x3 boxes
+                for (let boxRow = 0; boxRow < 3; boxRow++) {
+                    for (let boxCol = 0; boxCol < 3; boxCol++) {
+                        for (let num = 1; num <= 9; num++) {
+                            const possibleCells = [];
+                            for (let r = boxRow * 3; r < boxRow * 3 + 3; r++) {
+                                for (let c = boxCol * 3; c < boxCol * 3 + 3; c++) {
+                                    if (this.grid[r][c] === 0 && this.isValidMove(r, c, num)) {
+                                        possibleCells.push({ row: r, col: c });
+                                    }
+                                }
+                            }
+                            if (possibleCells.length === 1) {
+                                return { row: possibleCells[0].row, col: possibleCells[0].col, num };
+                            }
+                        }
+                    }
+                }
+                
+                return null;
+            }
+
+            checkCompletion() {
+                // Check if puzzle is complete
+                for (let r = 0; r < 9; r++) {
+                    for (let c = 0; c < 9; c++) {
+                        if (this.grid[r][c] === 0) return;
+                    }
+                }
+                
+                // Check if solution is correct
+                if (this.isValidSolution()) {
+                    document.getElementById('status').textContent = '🎉 Congratulations! You have achieved Sudoku enlightenment! 🎉';
+                } else {
+                    document.getElementById('status').textContent = 'Puzzle complete, but there are some errors. Keep seeking the path to perfection.';
+                }
+            }
+
+            isValidSolution() {
+                // Check all rows, columns, and boxes
+                for (let i = 0; i < 9; i++) {
+                    if (!this.isValidGroup(this.getRow(i)) || 
+                        !this.isValidGroup(this.getColumn(i)) || 
+                        !this.isValidGroup(this.getBox(i))) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            getRow(r) {
+                return this.grid[r];
+            }
+
+            getColumn(c) {
+                return this.grid.map(row => row[c]);
+            }
+
+            getBox(boxIndex) {
+                const boxRow = Math.floor(boxIndex / 3) * 3;
+                const boxCol = (boxIndex % 3) * 3;
+                const box = [];
+                for (let r = boxRow; r < boxRow + 3; r++) {
+                    for (let c = boxCol; c < boxCol + 3; c++) {
+                        box.push(this.grid[r][c]);
+                    }
+                }
+                return box;
+            }
+
+            isValidGroup(group) {
+                const seen = new Set();
+                for (const num of group) {
+                    if (num !== 0) {
+                        if (seen.has(num)) return false;
+                        seen.add(num);
+                    }
+                }
+                return true;
+            }
+
+            checkSolution() {
+                let errors = 0;
+                const cells = document.querySelectorAll('.cell');
+                
+                // Clear previous error highlighting
+                cells.forEach(cell => cell.classList.remove('error'));
+                
+                for (let r = 0; r < 9; r++) {
+                    for (let c = 0; c < 9; c++) {
+                        if (this.grid[r][c] !== 0 && !this.isValidMove(r, c, this.grid[r][c])) {
+                            const cellIndex = r * 9 + c;
+                            cells[cellIndex].classList.add('error');
+                            errors++;
+                        }
+                    }
+                }
+                
+                if (errors === 0) {
+                    document.getElementById('status').textContent = 'All entries are valid! Continue on your path to enlightenment.';
+                } else {
+                    document.getElementById('status').textContent = `Found ${errors} error(s). Highlighted cells need attention.`;
+                }
+            }
+
+            newGame() {
+                this.grid = Array(9).fill().map(() => Array(9).fill(0));
+                this.solution = Array(9).fill().map(() => Array(9).fill(0));
+                this.given = Array(9).fill().map(() => Array(9).fill(false));
+                this.drafts = Array(9).fill().map(() => Array(9).fill().map(() => new Set()));
+                this.selectedCell = null;
+                this.generatePuzzle();
+                document.getElementById('status').textContent = 'New puzzle generated. May wisdom guide your moves.';
+            }
+        }
+
+        // Global functions for button clicks
+        let sudoku;
+
+        function newGame() {
+            sudoku.newGame();
+        }
+
+        function toggleMode() {
+            sudoku.toggleMode();
+        }
+
+        function getHint() {
+            sudoku.getHint();
+        }
+
+        function clearCell() {
+            sudoku.clearSelectedCell();
+        }
+
+        function checkSolution() {
+            sudoku.checkSolution();
+        }
+
+        // Initialize the game when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            sudoku = new ZenSudoku();
+        });
+    </script>
+</body>
+</html>

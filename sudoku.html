@@ -46,19 +46,20 @@
         }
 
         .zen-container {
-            background: rgba(255, 255, 255, 0.95);
+            background: #2d3748; /* Dark background */
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(10px);
             max-width: 600px;
             width: 100%;
+            color: #e2e8f0; /* Light text color for container */
         }
 
         h1 {
             text-align: center;
             margin-bottom: 30px;
-            color: #4a5568;
+            color: #e2e8f0; /* Light text color for h1 */
             font-weight: 300;
             font-size: 2.5em;
             letter-spacing: 2px;
@@ -115,17 +116,18 @@
             grid-template-columns: repeat(9, 1fr);
             grid-template-rows: repeat(9, 1fr);
             gap: 2px;
-            background: #4a5568;
+            background: #4a5568; /* Slightly lighter dark for grid background */
             border-radius: 10px;
             padding: 10px;
             margin: 0 auto;
             width: 450px;
             height: 450px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
         .cell {
-            background: white;
+            background: #1a202c; /* Dark cell background */
+            color: #e2e8f0; /* Light text in cells */
             border: none;
             font-size: 20px;
             font-weight: 600;
@@ -139,30 +141,32 @@
         }
 
         .cell:hover {
-            background: #e2e8f0;
+            background: #2d3748; /* Slightly lighter dark on hover */
         }
 
         .cell.selected {
-            background: #3b4252;
-            box-shadow: 0 0 0 3px #a3be8c;
-        }
-        .cell.highlight-number {
-            background: #23272e;
-            color: #ffd700;
-        }
-        .cell.highlight-rowcol {
-            background: #353b45;
+            background: #4a5568; /* Darker selected background */
+            box-shadow: inset 0 0 0 3px #63b3ed; /* Lighter blue shadow for dark mode */
         }
 
         .cell.given {
-            background: #f7fafc;
-            color: #2d3748;
+            background: #2c3340; /* Slightly different dark for given numbers */
+            color: #a0aec0; /* Lighter gray for given numbers */
             font-weight: 700;
         }
 
         .cell.error {
-            background: #fed7d7;
-            color: #e53e3e;
+            background: #753a3a; /* Darker red for error background */
+            color: #fed7d7; /* Light red for error text */
+        }
+
+        .cell.highlight-same-number {
+            font-weight: bold;
+            color: #90cdf4; /* Light blue for same number highlight */
+        }
+
+        .cell.highlight-row-col {
+            background-color: #353f50; /* Subtle highlight for row/col */
         }
 
         .cell.hint-flash {
@@ -175,14 +179,37 @@
         }
 
         /* 3x3 box borders */
-        .cell:nth-child(3n) {
-            border-right: 3px solid #4a5568;
+        .cell:nth-child(3n):not(:nth-child(9n)) {
+            border-right: 3px solid #718096; /* Lighter border for dark mode */
+        }
+        
+        .cell:nth-child(n+19):nth-child(-n+27):not(:nth-child(3n):nth-child(9n)),
+        .cell:nth-child(n+46):nth-child(-n+54):not(:nth-child(3n):nth-child(9n)) {
+             border-bottom: 3px solid #718096; /* Lighter border for dark mode */
         }
 
-        .cell:nth-child(n+19):nth-child(-n+27),
-        .cell:nth-child(n+46):nth-child(-n+54) {
-            border-bottom: 3px solid #4a5568;
+        /* Ensure outer borders are handled by the grid padding or a wrapper if needed */
+        .sudoku-grid > .cell:nth-child(-n+9) { border-top: 3px solid #718096; }
+        .sudoku-grid > .cell:nth-child(9n) { border-right: 3px solid #718096; }
+        .sudoku-grid > .cell:nth-child(n+73) { border-bottom: 3px solid #718096; }
+        .sudoku-grid > .cell:nth-child(9n+1) { border-left: 3px solid #718096; }
+
+        .cell:nth-child(3n) {
+            border-right-width: 3px;
+            border-right-color: #718096;
         }
+        .cell:nth-child(9n) {
+            border-right-width: 3px; /* Explicitly set for the last column in a 3x3 grid */
+            border-right-color: #718096;
+        }
+
+        .cell:nth-child(n+19):nth-child(-n+27), /* row 3 */
+        .cell:nth-child(n+46):nth-child(-n+54)  /* row 6 */
+        {
+            border-bottom-width: 3px;
+            border-bottom-color: #718096;
+        }
+
 
         .draft-numbers {
             position: absolute;
@@ -194,7 +221,7 @@
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
             font-size: 10px;
-            color: #718096;
+            color: #a0aec0; /* Lighter gray for draft numbers */
             pointer-events: none;
         }
 
@@ -209,14 +236,14 @@
             text-align: center;
             margin-top: 20px;
             font-size: 16px;
-            color: #4a5568;
+            color: #cbd5e0; /* Light gray for status text */
         }
 
         .mode-indicator {
             text-align: center;
             margin-bottom: 15px;
             font-size: 14px;
-            color: #718096;
+            color: #a0aec0; /* Lighter gray for mode indicator */
             font-style: italic;
         }
 
@@ -247,7 +274,7 @@
             <button class="btn mode-toggle" onclick="toggleMode()" id="modeBtn">Draft Mode</button>
             <button class="btn hint-btn" onclick="getHint()">Hint</button>
             <button class="btn" onclick="clearCell()">Clear</button>
-            <button class="btn" onclick="checkSolution()">Check</button>
+            <!-- <button class="btn" onclick="checkSolution()">Check</button> --> <!-- Check button removed -->
         </div>
         
         <div class="mode-indicator" id="modeIndicator">Normal Mode - Click to enter numbers</div>
@@ -266,6 +293,7 @@
                 this.drafts = Array(9).fill().map(() => Array(9).fill().map(() => new Set()));
                 this.selectedCell = null;
                 this.isDraftMode = false;
+                this.history = []; // For Clear button functionality
                 this.init();
             }
 
@@ -290,10 +318,36 @@
 
             selectCell(index) {
                 const cells = document.querySelectorAll('.cell');
-                cells.forEach(cell => cell.classList.remove('selected'));
+                cells.forEach(cell => {
+                    cell.classList.remove('selected');
+                    cell.classList.remove('highlight-same-number');
+                    cell.classList.remove('highlight-row-col');
+                });
                 
                 this.selectedCell = index;
                 cells[index].classList.add('selected');
+
+                const row = Math.floor(index / 9);
+                const col = index % 9;
+                const num = this.grid[row][col];
+
+                if (num !== 0) {
+                    // Highlight same numbers
+                    for (let i = 0; i < 81; i++) {
+                        const r = Math.floor(i / 9);
+                        const c = i % 9;
+                        if (this.grid[r][c] === num) {
+                            cells[i].classList.add('highlight-same-number');
+                        }
+                    }
+                    // Highlight row and column
+                    for (let i = 0; i < 9; i++) {
+                        cells[row * 9 + i].classList.add('highlight-row-col');
+                        cells[i * 9 + col].classList.add('highlight-row-col');
+                    }
+                    // Re-apply selected to the current cell as highlight-row-col might overwrite it
+                    cells[index].classList.add('selected'); 
+                }
             }
 
             addEventListeners() {
@@ -320,15 +374,21 @@
                 if (this.isDraftMode) {
                     this.toggleDraft(row, col, num);
                 } else {
-                    if (this.isValidMove(row, col, num)) {
-                        this.grid[row][col] = num;
-                        this.drafts[row][col].clear();
-                        this.removeDraftsFromPeers(row, col, num);
-                        this.updateDisplay();
-                        this.checkCompletion();
-                    } else {
-                        this.showError(row, col);
+                    // Store current state for undo
+                    this.history.push(JSON.parse(JSON.stringify({grid: this.grid, drafts: this.drafts})));
+                    if (this.history.length > 20) {
+                        this.history.shift(); // Keep only last 20 moves
                     }
+
+                    this.grid[row][col] = num;
+                    this.drafts[row][col].clear();
+                    this.removeDraftsFromPeers(row, col, num);
+                    this.updateDisplay();
+                    this.runValidation(); // Run validation instead of just showError
+                    this.checkCompletion(); // Check if game is complete
+                    
+                    // After successful number entry, re-apply highlights for the new number
+                    this.selectCell(this.selectedCell);
                 }
             }
 
@@ -385,7 +445,39 @@
                 return true;
             }
 
-            showError(row, col) {
+            runValidation() {
+                let errors = 0;
+                const cells = document.querySelectorAll('.cell');
+                
+                // Clear previous error highlighting from non-given cells
+                cells.forEach((cell, index) => {
+                    const r = Math.floor(index / 9);
+                    const c = index % 9;
+                    if (!this.given[r][c]) {
+                        cell.classList.remove('error');
+                    }
+                });
+                
+                for (let r = 0; r < 9; r++) {
+                    for (let c = 0; c < 9; c++) {
+                        if (this.grid[r][c] !== 0 && !this.given[r][c] && !this.isValidMove(r, c, this.grid[r][c])) {
+                            const cellIndex = r * 9 + c;
+                            cells[cellIndex].classList.add('error');
+                            errors++;
+                        }
+                    }
+                }
+                
+                if (errors > 0) {
+                    document.getElementById('status').textContent = `Found ${errors} error(s). Highlighted cells need attention.`;
+                } else {
+                    // Only update status if no errors, otherwise keep the error message
+                    // Or, if you want to clear it: document.getElementById('status').textContent = 'Looking good!';
+                }
+                return errors === 0;
+            }
+
+            showError(row, col) { // showError is now simplified as runValidation handles detailed checks
                 const cell = document.querySelector(`[data-index="${row * 9 + col}"]`);
                 cell.classList.add('error');
                 setTimeout(() => cell.classList.remove('error'), 1000);
@@ -432,16 +524,24 @@
             }
 
             clearSelectedCell() {
-                if (this.selectedCell === null) return;
-                
-                const row = Math.floor(this.selectedCell / 9);
-                const col = this.selectedCell % 9;
-                
-                if (this.given[row][col]) return;
-                
-                this.grid[row][col] = 0;
-                this.drafts[row][col].clear();
-                this.updateDisplay();
+                if (this.history.length > 0) {
+                    const lastState = this.history.pop();
+                    this.grid = JSON.parse(JSON.stringify(lastState.grid));
+                    this.drafts = JSON.parse(JSON.stringify(lastState.drafts));
+                    // Restore drafts Sets from arrays if necessary (JSON stringify converts Sets to arrays)
+                    for(let r=0; r<9; r++) {
+                        for(let c=0; c<9; c++) {
+                            this.drafts[r][c] = new Set(this.drafts[r][c]);
+                        }
+                    }
+                    this.updateDisplay();
+                    this.runValidation(); // Re-validate after undoing
+                    if (this.selectedCell !== null) {
+                         this.selectCell(this.selectedCell); // Re-apply highlights
+                    }
+                } else {
+                     document.getElementById('status').textContent = 'Nothing to clear/undo.';
+                }
             }
 
             toggleMode() {
@@ -725,29 +825,7 @@
                 return true;
             }
 
-            checkSolution() {
-                let errors = 0;
-                const cells = document.querySelectorAll('.cell');
-                
-                // Clear previous error highlighting
-                cells.forEach(cell => cell.classList.remove('error'));
-                
-                for (let r = 0; r < 9; r++) {
-                    for (let c = 0; c < 9; c++) {
-                        if (this.grid[r][c] !== 0 && !this.isValidMove(r, c, this.grid[r][c])) {
-                            const cellIndex = r * 9 + c;
-                            cells[cellIndex].classList.add('error');
-                            errors++;
-                        }
-                    }
-                }
-                
-                if (errors === 0) {
-                    document.getElementById('status').textContent = 'All entries are valid! Continue on your path to enlightenment.';
-                } else {
-                    document.getElementById('status').textContent = `Found ${errors} error(s). Highlighted cells need attention.`;
-                }
-            }
+            /* checkSolution() function is removed as per requirement. Validation is now automatic. */
 
             newGame() {
                 this.grid = Array(9).fill().map(() => Array(9).fill(0));
@@ -779,9 +857,7 @@
             sudoku.clearSelectedCell();
         }
 
-        function checkSolution() {
-            sudoku.checkSolution();
-        }
+        /* function checkSolution() is removed */
 
         // Initialize the game when page loads
         document.addEventListener('DOMContentLoaded', () => {

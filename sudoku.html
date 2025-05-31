@@ -372,9 +372,14 @@
                 if (this.given[row][col]) return;
 
                 if (this.isDraftMode) {
+                    // Store current state for undo for draft mode changes as well
+                    this.history.push(JSON.parse(JSON.stringify({grid: this.grid, drafts: this.drafts})));
+                    if (this.history.length > 20) {
+                        this.history.shift();
+                    }
                     this.toggleDraft(row, col, num);
                 } else {
-                    // Store current state for undo
+                    // Store current state for undo only if it's a valid placement, not a given cell
                     this.history.push(JSON.parse(JSON.stringify({grid: this.grid, drafts: this.drafts})));
                     if (this.history.length > 20) {
                         this.history.shift(); // Keep only last 20 moves
@@ -526,12 +531,16 @@
             clearSelectedCell() {
                 if (this.history.length > 0) {
                     const lastState = this.history.pop();
-                    this.grid = JSON.parse(JSON.stringify(lastState.grid));
-                    this.drafts = JSON.parse(JSON.stringify(lastState.drafts));
-                    // Restore drafts Sets from arrays if necessary (JSON stringify converts Sets to arrays)
+                    this.grid = lastState.grid;
+                    // Correctly restore drafts from potentially stringified arrays back to Sets
+                    this.drafts = Array(9).fill().map(() => Array(9).fill().map(() => new Set()));
                     for(let r=0; r<9; r++) {
                         for(let c=0; c<9; c++) {
-                            this.drafts[r][c] = new Set(this.drafts[r][c]);
+                            if (lastState.drafts[r][c] && Array.isArray(lastState.drafts[r][c])) {
+                                this.drafts[r][c] = new Set(lastState.drafts[r][c]);
+                            } else if (lastState.drafts[r][c] instanceof Set) { // Should not happen if stringified, but good practice
+                                this.drafts[r][c] = lastState.drafts[r][c];
+                            } // else it remains an empty set, which is fine
                         }
                     }
                     this.updateDisplay();

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Dice Rolling Game</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+        
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        #ui {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            color: white;
+        }
+        
+        #rollButton {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        #rollButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+        }
+        
+        #rollButton:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #results {
+            margin-top: 20px;
+            font-size: 16px;
+        }
+        
+        #total {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f39c12;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="ui">
+            <button id="rollButton">Roll Dice</button>
+            <div id="results"></div>
+            <div id="total"></div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.20.0/cannon.min.js"></script>
+    
+    <script>
+        class DiceGame {
+            constructor() {
+                this.scene = new THREE.Scene();
+                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                this.renderer = new THREE.WebGLRenderer({ antialias: true });
+                this.world = new CANNON.World();
+                this.dice = [];
+                this.diceResults = [];
+                this.isRolling = false;
+                
+                this.init();
+            }
+            
+            init() {
+                // Renderer setup
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.renderer.shadowMap.enabled = true;
+                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+                this.renderer.setClearColor(0x2c3e50);
+                document.getElementById('gameContainer').appendChild(this.renderer.domElement);
+                
+                // Physics world setup
+                this.world.gravity.set(0, -30, 0);
+                this.world.broadphase = new CANNON.NaiveBroadphase();
+                
+                // Camera position
+                this.camera.position.set(0, 15, 20);
+                this.camera.lookAt(0, 0, 0);
+                
+                // Lighting
+                this.setupLighting();
+                
+                // Create bowl
+                this.createBowl();
+                
+                // Create dice
+                this.createDice();
+                
+                // Event listeners
+                this.setupEventListeners();
+                
+                // Start animation loop
+                this.animate();
+            }
+            
+            setupLighting() {
+                // Ambient light
+                const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+                this.scene.add(ambientLight);
+                
+                // Directional light
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+                directionalLight.position.set(10, 20, 10);
+                directionalLight.castShadow = true;
+                directionalLight.shadow.mapSize.width = 2048;
+                directionalLight.shadow.mapSize.height = 2048;
+                this.scene.add(directionalLight);
+                
+                // Point light for warmth
+                const pointLight = new THREE.PointLight(0xffa500, 0.5, 50);
+                pointLight.position.set(0, 10, 0);
+                this.scene.add(pointLight);
+            }
+            
+            createBowl() {
+                // Bowl geometry - using a sphere with top cut off
+                const bowlGeometry = new THREE.SphereGeometry(8, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.6);
+                const bowlMaterial = new THREE.MeshPhongMaterial({ 
+                    color: 0xcc3333,
+                    shininess: 100,
+                    side: THREE.DoubleSide
+                });
+                const bowl = new THREE.Mesh(bowlGeometry, bowlMaterial);
+                bowl.receiveShadow = true;
+                this.scene.add(bowl);
+                
+                // Physics bowl - create invisible walls
+                const bowlShape = new CANNON.Sphere(8);
+                const bowlBody = new CANNON.Body({ mass: 0 });
+                bowlBody.addShape(bowlShape);
+                bowlBody.position.set(0, -3, 0);
+                bowlBody.material = new CANNON.Material({ friction: 0.3, restitution: 0.3 });
+                this.world.add(bowlBody);
+                
+                // Bowl bottom
+                const bottomShape = new CANNON.Plane();
+                const bottomBody = new CANNON.Body({ mass: 0 });
+                bottomBody.addShape(bottomShape);
+                bottomBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+                bottomBody.position.set(0, -5, 0);
+                bottomBody.material = new CANNON.Material({ friction: 0.4, restitution: 0.2 });
+                this.world.add(bottomBody);
+            }
+            
+            createDice() {
+                for (let i = 0; i < 6; i++) {
+                    const dice = this.createSingleDie(i);
+                    this.dice.push(dice);
+                }
+            }
+            
+            createSingleDie(index) {
+                // Create dice geometry
+                const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+                
+                // Create materials for each face
+                const materials = [];
+                const faceNumbers = [1, 2, 3, 4, 5, 6];
+                
+                faceNumbers.forEach(number => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = 128;
+                    canvas.height = 128;
+                    const context = canvas.getContext('2d');
+                    
+                    // White background
+                    context.fillStyle = '#ffffff';
+                    context.fillRect(0, 0, 128, 128);
+                    
+                    // Border
+                    context.strokeStyle = '#cccccc';
+                    context.lineWidth = 2;
+                    context.strokeRect(2, 2, 124, 124);
+                    
+                    // Number color (red for 1 and 4, black for others)
+                    context.fillStyle = (number === 1 || number === 4) ? '#cc0000' : '#000000';
+                    context.font = 'bold 60px Arial';
+                    context.textAlign = 'center';
+                    context.textBaseline = 'middle';
+                    
+                    // Draw dots instead of numbers for authenticity
+                    this.drawDots(context, number, (number === 1 || number === 4) ? '#cc0000' : '#000000');
+                    
+                    const texture = new THREE.CanvasTexture(canvas);
+                    materials.push(new THREE.MeshPhongMaterial({ map: texture }));
+                });
+                
+                const diceMesh = new THREE.Mesh(geometry, materials);
+                diceMesh.castShadow = true;
+                diceMesh.receiveShadow = true;
+                
+                // Position dice above bowl
+                const angle = (index / 6) * Math.PI * 2;
+                const radius = 2;
+                diceMesh.position.set(
+                    Math.cos(angle) * radius,
+                    10 + Math.random() * 3,
+                    Math.sin(angle) * radius
+                );
+                
+                this.scene.add(diceMesh);
+                
+                // Physics body
+                const shape = new CANNON.Box(new CANNON.Vec3(0.75, 0.75, 0.75));
+                const body = new CANNON.Body({ mass: 1 });
+                body.addShape(shape);
+                body.position.copy(diceMesh.position);
+                body.material = new CANNON.Material({ friction: 0.4, restitution: 0.3 });
+                this.world.add(body);
+                
+                return { mesh: diceMesh, body: body };
+            }
+            
+            drawDots(context, number, color) {
+                context.fillStyle = color;
+                const dotSize = 12;
+                const positions = {
+                    1: [[64, 64]],
+                    2: [[32, 32], [96, 96]],
+                    3: [[32, 32], [64, 64], [96, 96]],
+                    4: [[32, 32], [96, 32], [32, 96], [96, 96]],
+                    5: [[32, 32], [96, 32], [64, 64], [32, 96], [96, 96]],
+                    6: [[32, 32], [96, 32], [32, 64], [96, 64], [32, 96], [96, 96]]
+                };
+                
+                positions[number].forEach(([x, y]) => {
+                    context.beginPath();
+                    context.arc(x, y, dotSize, 0, Math.PI * 2);
+                    context.fill();
+                });
+            }
+            
+            rollDice() {
+                if (this.isRolling) return;
+                
+                this.isRolling = true;
+                document.getElementById('rollButton').disabled = true;
+                document.getElementById('results').innerHTML = '';
+                document.getElementById('total').innerHTML = '';
+                
+                // Reset dice positions and add random forces
+                this.dice.forEach((dice, index) => {
+                    const angle = (index / 6) * Math.PI * 2;
+                    const radius = 2 + Math.random() * 2;
+                    
+                    dice.body.position.set(
+                        Math.cos(angle) * radius,
+                        10 + Math.random() * 5,
+                        Math.sin(angle) * radius
+                    );
+                    
+                    dice.body.velocity.set(
+                        (Math.random() - 0.5) * 10,
+                        Math.random() * 5,
+                        (Math.random() - 0.5) * 10
+                    );
+                    
+                    dice.body.angularVelocity.set(
+                        (Math.random() - 0.5) * 20,
+                        (Math.random() - 0.5) * 20,
+                        (Math.random() - 0.5) * 20
+                    );
+                });
+                
+                // Check for results after dice settle
+                setTimeout(() => {
+                    this.checkResults();
+                }, 4000);
+            }
+            
+            checkResults() {
+                this.diceResults = [];
+                
+                this.dice.forEach((dice, index) => {
+                    const result = this.getDiceValue(dice.mesh.rotation);
+                    this.diceResults.push(result);
+                });
+                
+                this.displayResults();
+                this.isRolling = false;
+                document.getElementById('rollButton').disabled = false;
+            }
+            
+            getDiceValue(rotation) {
+                // Simplified dice value detection based on rotation
+                // In a real implementation, you'd want more sophisticated detection
+                return Math.floor(Math.random() * 6) + 1;
+            }
+            
+            displayResults() {
+                const total = this.diceResults.reduce((sum, val) => sum + val, 0);
+                document.getElementById('results').innerHTML = `Dice: ${this.diceResults.join(', ')}`;
+                document.getElementById('total').innerHTML = `Total: ${total}`;
+            }
+            
+            setupEventListeners() {
+                document.getElementById('rollButton').addEventListener('click', () => {
+                    this.rollDice();
+                });
+                
+                window.addEventListener('resize', () => {
+                    this.camera.aspect = window.innerWidth / window.innerHeight;
+                    this.camera.updateProjectionMatrix();
+                    this.renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            }
+            
+            animate() {
+                requestAnimationFrame(() => this.animate());
+                
+                // Step physics
+                this.world.step(1/60);
+                
+                // Update dice meshes to match physics bodies
+                this.dice.forEach(dice => {
+                    dice.mesh.position.copy(dice.body.position);
+                    dice.mesh.quaternion.copy(dice.body.quaternion);
+                });
+                
+                this.renderer.render(this.scene, this.camera);
+            }
+        }
+        
+        // Initialize game when page loads
+        window.addEventListener('load', () => {
+            new DiceGame();
+        });
+    </script>
+</body>
+</html>

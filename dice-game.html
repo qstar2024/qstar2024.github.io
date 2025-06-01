@@ -72,12 +72,15 @@
         </div>
     </div>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r144/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/1.17.1/cannon.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r144/three.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
     
-    <script>
-        window.addEventListener('load', () => {
-            class DiceGame {
+    <script defer>
+        // Ensure THREE and CANNON are loaded before starting the game
+        // The 'defer' attribute on this script and the library scripts should handle this,
+        // but as an extra precaution, we could add a check here if issues persist.
+
+        class DiceGame {
             constructor() {
                 this.scene = new THREE.Scene();
                 this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -364,9 +367,8 @@
             }
         }
         
-            // Initialize game
-            new DiceGame();
-        });
+        // Initialize game
+        new DiceGame();
     </script>
 </body>
 </html>

@@ -62,6 +62,17 @@
             margin-top: 10px;
         }
     </style>
+    
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.159.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.159.0/examples/jsm/",
+                "cannon-es": "https://cdn.jsdelivr.net/npm/cannon-es@0.20.0/dist/cannon-es.min.js"
+            }
+        }
+    </script>
+
 </head>
 <body>
     <div id="gameContainer">
@@ -71,14 +82,11 @@
             <div id="total"></div>
         </div>
     </div>
-    
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r144/three.min.js"></script>
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
-    
-    <script defer>
+
+    <script defer type="module">
         // Ensure THREE and CANNON are loaded before starting the game
-        // The 'defer' attribute on this script and the library scripts should handle this,
-        // but as an extra precaution, we could add a check here if issues persist.
+        import * as THREE from "three";
+        import * as CANNON from "cannon-es";
 
         class DiceGame {
             constructor() {
@@ -175,7 +183,7 @@
                         Math.sin(angle) * radius
                     );
                     wallBody.material = new CANNON.Material({ friction: 0.3, restitution: 0.3 });
-                    this.world.add(wallBody);
+                    this.world.addBody(wallBody);
                 }
                 
                 // Bowl bottom
@@ -185,7 +193,7 @@
                 bottomBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
                 bottomBody.position.set(0, -5, 0);
                 bottomBody.material = new CANNON.Material({ friction: 0.4, restitution: 0.2 });
-                this.world.add(bottomBody);
+                this.world.addBody(bottomBody);
             }
             
             createDice() {
@@ -252,7 +260,7 @@
                 body.addShape(shape);
                 body.position.copy(diceMesh.position);
                 body.material = new CANNON.Material({ friction: 0.4, restitution: 0.3 });
-                this.world.add(body);
+                this.world.addBody(body);
                 
                 return { mesh: diceMesh, body: body };
             }

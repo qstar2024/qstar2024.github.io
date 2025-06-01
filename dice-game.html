@@ -122,6 +122,9 @@
                 // Lighting
                 this.setupLighting();
                 
+                // Create table surface
+                this.createTable();
+                
                 // Create bowl
                 this.createBowl();
                 
@@ -154,46 +157,135 @@
                 this.scene.add(pointLight);
             }
             
+            createTable() {
+                // Create round table surface
+                const tableRadius = 25;
+                const tableHeight = 1;
+                
+                // Table geometry
+                const tableGeometry = new THREE.CylinderGeometry(tableRadius, tableRadius, tableHeight, 32);
+                const tableMaterial = new THREE.MeshPhongMaterial({ 
+                    color: 0x8B4513, // Brown wood color
+                    shininess: 30
+                });
+                
+                const table = new THREE.Mesh(tableGeometry, tableMaterial);
+                table.receiveShadow = true;
+                table.castShadow = true;
+                table.position.set(0, -12, 0); // Position below the bowl
+                this.scene.add(table);
+                
+                // Table physics
+                const tableShape = new CANNON.Cylinder(tableRadius, tableRadius, tableHeight, 8);
+                const tableBody = new CANNON.Body({ mass: 0 }); // Static body
+                tableBody.addShape(tableShape);
+                tableBody.position.set(0, -12, 0);
+                tableBody.material = new CANNON.Material({ friction: 0.6, restitution: 0.1 });
+                this.world.addBody(tableBody);
+            }
+            
             createBowl() {
-                // Bowl geometry - using a sphere with top cut off
-                const bowlGeometry = new THREE.SphereGeometry(8, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.6);
+                // Create a larger, thicker concave bowl
+                const bowlRadius = 12;
+                const bowlThickness = 0.8;
+                
+                // Outer bowl geometry
+                const outerBowlGeometry = new THREE.SphereGeometry(bowlRadius, 64, 32, 0, Math.PI * 2, 0, Math.PI * 0.55);
+                // Inner bowl geometry (slightly smaller for thickness)
+                const innerBowlGeometry = new THREE.SphereGeometry(bowlRadius - bowlThickness, 64, 32, 0, Math.PI * 2, 0, Math.PI * 0.55);
+                
+                // Create bowl material
                 const bowlMaterial = new THREE.MeshPhongMaterial({ 
                     color: 0xcc3333,
                     shininess: 100,
-                    side: THREE.DoubleSide
+                    side: THREE.FrontSide
                 });
-                const bowl = new THREE.Mesh(bowlGeometry, bowlMaterial);
-                bowl.receiveShadow = true;
-                this.scene.add(bowl);
                 
-                // Create circular wall physics bodies
-                const wallHeight = 3;
-                const wallThickness = 0.5;
-                const radius = 7.5;
-                const numWalls = 16;
+                // Create outer bowl
+                const outerBowl = new THREE.Mesh(outerBowlGeometry, bowlMaterial);
+                outerBowl.receiveShadow = true;
+                outerBowl.castShadow = true;
+                outerBowl.position.set(0, -6, 0);
+                outerBowl.rotation.x = Math.PI; // Make it concave upwards
+                this.scene.add(outerBowl);
                 
-                for (let i = 0; i < numWalls; i++) {
-                    const angle = (i / numWalls) * Math.PI * 2;
-                    const wallShape = new CANNON.Box(new CANNON.Vec3(wallThickness, wallHeight, wallThickness));
+                // Create inner bowl (inverted to create hollow effect)
+                const innerBowlMaterial = new THREE.MeshPhongMaterial({ 
+                    color: 0xcc3333,
+                    shininess: 100,
+                    side: THREE.BackSide
+                });
+                const innerBowl = new THREE.Mesh(innerBowlGeometry, innerBowlMaterial);
+                innerBowl.receiveShadow = true;
+                innerBowl.position.set(0, -6, 0);
+                innerBowl.rotation.x = Math.PI;
+                this.scene.add(innerBowl);
+                
+                // Physics: Create concave bowl using multiple angled planes
+                const numSegments = 24;
+                const bowlPhysicsRadius = bowlRadius - bowlThickness / 2;
+                const bowlDepth = 6;
+                
+                for (let i = 0; i < numSegments; i++) {
+                    const angle = (i / numSegments) * Math.PI * 2;
+                    const nextAngle = ((i + 1) / numSegments) * Math.PI * 2;
+                    
+                    // Create angled wall segments
+                    const wallShape = new CANNON.Plane();
                     const wallBody = new CANNON.Body({ mass: 0 });
                     wallBody.addShape(wallShape);
-                    wallBody.position.set(
-                        Math.cos(angle) * radius,
-                        -2,
-                        Math.sin(angle) * radius
-                    );
-                    wallBody.material = new CANNON.Material({ friction: 0.3, restitution: 0.3 });
+                    
+                    // Position and orient the wall segment
+                    const x = Math.cos(angle) * bowlPhysicsRadius;
+                    const z = Math.sin(angle) * bowlPhysicsRadius;
+                    wallBody.position.set(x * 0.7, -6 + bowlDepth * 0.3, z * 0.7);
+                    
+                    // Rotate wall to face inward and angle downward
+                    const wallQuaternion = new CANNON.Quaternion();
+                    wallQuaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), angle + Math.PI);
+                    const tiltQuaternion = new CANNON.Quaternion();
+                    tiltQuaternion.setFromAxisAngle(new CANNON.Vec3(Math.sin(angle), 0, -Math.cos(angle)), Math.PI * 0.25);
+                    wallBody.quaternion = wallQuaternion.mult(tiltQuaternion);
+                    
+                    wallBody.material = new CANNON.Material({ friction: 0.4, restitution: 0.2 });
                     this.world.addBody(wallBody);
                 }
                 
-                // Bowl bottom
-                const bottomShape = new CANNON.Plane();
-                const bottomBody = new CANNON.Body({ mass: 0 });
-                bottomBody.addShape(bottomShape);
-                bottomBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
-                bottomBody.position.set(0, -5, 0);
-                bottomBody.material = new CANNON.Material({ friction: 0.4, restitution: 0.2 });
-                this.world.addBody(bottomBody);
+                // Bowl bottom - curved surface using multiple small planes
+                const bottomSegments = 16;
+                for (let i = 0; i < bottomSegments; i++) {
+                    for (let j = 0; j < bottomSegments; j++) {
+                        const x = (i - bottomSegments/2) * 1.2;
+                        const z = (j - bottomSegments/2) * 1.2;
+                        const distance = Math.sqrt(x*x + z*z);
+                        
+                        if (distance < bowlPhysicsRadius * 0.8) {
+                            const bottomShape = new CANNON.Plane();
+                            const bottomBody = new CANNON.Body({ mass: 0 });
+                            bottomBody.addShape(bottomShape);
+                            
+                            // Create curved bottom by angling planes
+                            const curvature = distance / (bowlPhysicsRadius * 0.8);
+                            const yOffset = -6 - bowlDepth + curvature * curvature * 2;
+                            bottomBody.position.set(x, yOffset, z);
+                            
+                            // Angle the plane based on position
+                            if (distance > 0.5) {
+                                const tiltAngle = curvature * 0.3;
+                                const tiltQuaternion = new CANNON.Quaternion();
+                                tiltQuaternion.setFromAxisAngle(new CANNON.Vec3(-z/distance, 0, x/distance), tiltAngle);
+                                const baseQuaternion = new CANNON.Quaternion();
+                                baseQuaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+                                bottomBody.quaternion = baseQuaternion.mult(tiltQuaternion);
+                            } else {
+                                bottomBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+                            }
+                            
+                            bottomBody.material = new CANNON.Material({ friction: 0.5, restitution: 0.1 });
+                            this.world.addBody(bottomBody);
+                        }
+                    }
+                }
             }
             
             createDice() {
@@ -243,12 +335,12 @@
                 diceMesh.castShadow = true;
                 diceMesh.receiveShadow = true;
                 
-                // Position dice above bowl
+                // Position dice statically in the bowl at initialization
                 const angle = (index / 6) * Math.PI * 2;
-                const radius = 2;
+                const radius = 3 + Math.random() * 2; // Random radius within bowl
                 diceMesh.position.set(
                     Math.cos(angle) * radius,
-                    5 + Math.random() * 2,
+                    -4, // Place dice at bottom of bowl
                     Math.sin(angle) * radius
                 );
                 
@@ -260,6 +352,13 @@
                 body.addShape(shape);
                 body.position.copy(diceMesh.position);
                 body.material = new CANNON.Material({ friction: 0.4, restitution: 0.3 });
+                
+                // Start with dice at rest (no initial velocity)
+                body.velocity.set(0, 0, 0);
+                body.angularVelocity.set(0, 0, 0);
+                body.linearDamping = 0.1;
+                body.angularDamping = 0.2;
+                
                 this.world.addBody(body);
                 
                 return { mesh: diceMesh, body: body };
@@ -292,41 +391,70 @@
                 document.getElementById('results').innerHTML = '';
                 document.getElementById('total').innerHTML = '';
                 
-                // Reset dice positions and add random forces
+                // Phase 1: Lift dice slightly above the bowl
                 this.dice.forEach((dice, index) => {
+                    const currentPos = dice.body.position;
                     const angle = (index / 6) * Math.PI * 2;
-                    const radius = 2 + Math.random() * 2;
+                    const radius = 3 + Math.random() * 2;
                     
+                    // Lift dice just above the bowl rim (small height)
                     dice.body.position.set(
                         Math.cos(angle) * radius,
-                        10 + Math.random() * 5,
+                        -1 + Math.random() * 0.5, // Just above bowl rim
                         Math.sin(angle) * radius
                     );
                     
-                    dice.body.velocity.set(
-                        (Math.random() - 0.5) * 10,
-                        Math.random() * 5,
-                        (Math.random() - 0.5) * 10
-                    );
+                    // Reset velocities for controlled lift
+                    dice.body.velocity.set(0, 0, 0);
+                    dice.body.angularVelocity.set(0, 0, 0);
                     
-                    dice.body.angularVelocity.set(
-                        (Math.random() - 0.5) * 20,
-                        (Math.random() - 0.5) * 20,
-                        (Math.random() - 0.5) * 20
-                    );
+                    // Random orientation for each dice
+                    dice.body.quaternion.set(
+                        Math.random() - 0.5,
+                        Math.random() - 0.5,
+                        Math.random() - 0.5,
+                        Math.random() - 0.5
+                    ).normalize();
                 });
+                
+                // Phase 2: After a brief pause, release dice with physics
+                setTimeout(() => {
+                    this.dice.forEach((dice, index) => {
+                        // Add small random impulse to start the rolling
+                        const randomImpulse = new CANNON.Vec3(
+                            (Math.random() - 0.5) * 2,
+                            Math.random() * 1,
+                            (Math.random() - 0.5) * 2
+                        );
+                        
+                        dice.body.velocity.copy(randomImpulse);
+                        
+                        // Add random spinning with varying intensity (1-3 seconds worth)
+                        const spinIntensity = 10 + Math.random() * 15;
+                        dice.body.angularVelocity.set(
+                            (Math.random() - 0.5) * spinIntensity,
+                            (Math.random() - 0.5) * spinIntensity,
+                            (Math.random() - 0.5) * spinIntensity
+                        );
+                        
+                        // Set damping for gradual settling
+                        dice.body.linearDamping = 0.15;
+                        dice.body.angularDamping = 0.25;
+                    });
+                }, 300); // 300ms pause before releasing
                 
                 // Check for results after dice settle
                 setTimeout(() => {
                     this.checkResults();
-                }, 4000);
+                }, 4500); // Total time: 300ms lift + 4200ms settling
             }
             
             checkResults() {
                 this.diceResults = [];
                 
                 this.dice.forEach((dice, index) => {
-                    const result = this.getDiceValue(dice.mesh.rotation);
+                    // Use the physics body for accurate face detection
+                    const result = this.getDiceValue(dice.body);
                     this.diceResults.push(result);
                 });
                 
@@ -335,16 +463,156 @@
                 document.getElementById('rollButton').disabled = false;
             }
             
-            getDiceValue(rotation) {
-                // Simplified dice value detection based on rotation
-                // In a real implementation, you'd want more sophisticated detection
-                return Math.floor(Math.random() * 6) + 1;
+            getDiceValue(diceBody) {
+                // Get the dice's current rotation quaternion
+                const quaternion = diceBody.quaternion;
+                
+                // Define the face normal vectors for a standard die
+                // Face 1: +Y (top), Face 6: -Y (bottom)
+                // Face 2: +Z (front), Face 5: -Z (back) 
+                // Face 3: +X (right), Face 4: -X (left)
+                const faceNormals = [
+                    new CANNON.Vec3(0, 1, 0),   // Face 1 (top)
+                    new CANNON.Vec3(0, 0, 1),   // Face 2 (front)
+                    new CANNON.Vec3(1, 0, 0),   // Face 3 (right)
+                    new CANNON.Vec3(-1, 0, 0),  // Face 4 (left)
+                    new CANNON.Vec3(0, 0, -1),  // Face 5 (back)
+                    new CANNON.Vec3(0, -1, 0)   // Face 6 (bottom)
+                ];
+                
+                // World up vector
+                const worldUp = new CANNON.Vec3(0, 1, 0);
+                
+                let maxDot = -1;
+                let topFace = 1;
+                
+                // Check which face normal is most aligned with world up
+                faceNormals.forEach((normal, index) => {
+                    // Rotate the face normal by the dice's current rotation
+                    const rotatedNormal = quaternion.vmult(normal);
+                    
+                    // Calculate dot product with world up vector
+                    const dot = rotatedNormal.dot(worldUp);
+                    
+                    // The face with the highest dot product is facing up
+                    if (dot > maxDot) {
+                        maxDot = dot;
+                        topFace = index + 1;
+                    }
+                });
+                
+                return topFace;
             }
             
             displayResults() {
-                const total = this.diceResults.reduce((sum, val) => sum + val, 0);
-                document.getElementById('results').innerHTML = `Dice: ${this.diceResults.join(', ')}`;
-                document.getElementById('total').innerHTML = `Total: ${total}`;
+                const pattern = this.getDicePattern(this.diceResults);
+                document.getElementById('results').innerHTML = `骰子: ${this.diceResults.join(', ')}`;
+                document.getElementById('total').innerHTML = `结果: ${pattern}`;
+            }
+
+            getDicePattern(diceResults) {
+                const counts = {};
+                diceResults.forEach(num => {
+                    counts[num] = (counts[num] || 0) + 1;
+                });
+
+                const num4s = counts[4] || 0;
+                const uniqueNumbers = Object.keys(counts).length;
+                const sortedResults = [...diceResults].sort((a, b) => a - b);
+
+                // Helper to check for N same numbers
+                const hasNofSame = (n) => {
+                    for (const num in counts) {
+                        if (counts[num] === n) return true;
+                    }
+                    return false;
+                };
+
+                // Helper to get a number that appears N times
+                const getNumWithNCount = (n) => {
+                    for (const num in counts) {
+                        if (counts[num] === n) return parseInt(num);
+                    }
+                    return null;
+                };
+
+                // Helper to check for specific counts of numbers
+                const checkCounts = (targetCounts) => {
+                    const currentCounts = {};
+                    diceResults.forEach(num => {
+                        currentCounts[num] = (currentCounts[num] || 0) + 1;
+                    });
+                    for (const num in targetCounts) {
+                        if (currentCounts[num] !== targetCounts[num]) return false;
+                    }
+                    for (const num in currentCounts) {
+                        if (!targetCounts[num] && currentCounts[num] > 0) return false; // Ensure no extra numbers
+                    }
+                    return true;
+                };
+
+                // 状元插金花
+                if (num4s === 4 && counts[1] === 2) return "狀元插金花";
+
+                // 六殕紅
+                if (num4s === 6) return "六殕紅";
+
+                // 六殕烏
+                if (hasNofSame(6)) return "六殕烏";
+
+                // 五红带X
+                if (num4s === 5) {
+                    if (counts[6] === 1) return "五紅帶六";
+                    if (counts[5] === 1) return "五紅帶五";
+                    if (counts[3] === 1) return "五紅帶三";
+                    if (counts[2] === 1) return "五紅帶二";
+                    if (counts[1] === 1) return "五紅帶一";
+                }
+
+                // 状元带X
+                if (num4s === 4) {
+                    const remaining = diceResults.filter(d => d !== 4).sort((a, b) => a - b);
+                    if (remaining.length === 2) {
+                        if (remaining[0] === 6 && remaining[1] === 6) return "狀元帶十二";
+                        if (remaining[0] === 5 && remaining[1] === 6) return "狀元帶十一";
+                        if (remaining[0] === 5 && remaining[1] === 5) return "狀元帶十";
+                        if (remaining[0] === 3 && remaining[1] === 6) return "狀元帶九";
+                        if (remaining[0] === 2 && remaining[1] === 6) return "狀元帶八";
+                        if (remaining[0] === 3 && remaining[1] === 5) return "狀元帶八";
+                        if (remaining[0] === 1 && remaining[1] === 6) return "狀元帶七";
+                        if (remaining[0] === 2 && remaining[1] === 5) return "狀元帶七";
+                        if (remaining[0] === 1 && remaining[1] === 5) return "狀元帶六";
+                        if (remaining[0] === 3 && remaining[1] === 3) return "狀元帶六";
+                        if (remaining[0] === 2 && remaining[1] === 3) return "狀元帶五";
+                        if (remaining[0] === 1 && remaining[1] === 3) return "狀元帶四";
+                        if (remaining[0] === 2 && remaining[1] === 2) return "狀元帶四";
+                        if (remaining[0] === 1 && remaining[1] === 2) return "狀元帶三";
+                    }
+                }
+
+                // 对堂
+                if (uniqueNumbers === 6) return "對堂";
+
+                // 三红
+                if (num4s === 3) return "三紅";
+
+                // 四进
+                if (hasNofSame(4)) {
+                    const numWith4Count = getNumWithNCount(4);
+                    if (numWith4Count !== 4) { // Not a 4-of-a-kind of 4s
+                        if (num4s === 2) return "四進帶二舉";
+                        if (num4s === 1) return "四進帶一秀";
+                        return "四進";
+                    }
+                }
+
+                // 二举
+                if (num4s === 2) return "二舉";
+
+                // 一秀
+                if (num4s === 1) return "一秀";
+
+                return "無";
             }
             
             setupEventListeners() {

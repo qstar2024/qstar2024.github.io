@@ -72,8 +72,8 @@
         </div>
     </div>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.20.0/cannon.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r144/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/1.17.1/cannon.min.js"></script>
     
     <script>
         class DiceGame {
@@ -100,6 +100,8 @@
                 // Physics world setup
                 this.world.gravity.set(0, -30, 0);
                 this.world.broadphase = new CANNON.NaiveBroadphase();
+                this.world.defaultContactMaterial.friction = 0.4;
+                this.world.defaultContactMaterial.restitution = 0.3;
                 
                 // Camera position
                 this.camera.position.set(0, 15, 20);
@@ -152,13 +154,25 @@
                 bowl.receiveShadow = true;
                 this.scene.add(bowl);
                 
-                // Physics bowl - create invisible walls
-                const bowlShape = new CANNON.Sphere(8);
-                const bowlBody = new CANNON.Body({ mass: 0 });
-                bowlBody.addShape(bowlShape);
-                bowlBody.position.set(0, -3, 0);
-                bowlBody.material = new CANNON.Material({ friction: 0.3, restitution: 0.3 });
-                this.world.add(bowlBody);
+                // Create circular wall physics bodies
+                const wallHeight = 3;
+                const wallThickness = 0.5;
+                const radius = 7.5;
+                const numWalls = 16;
+                
+                for (let i = 0; i < numWalls; i++) {
+                    const angle = (i / numWalls) * Math.PI * 2;
+                    const wallShape = new CANNON.Box(new CANNON.Vec3(wallThickness, wallHeight, wallThickness));
+                    const wallBody = new CANNON.Body({ mass: 0 });
+                    wallBody.addShape(wallShape);
+                    wallBody.position.set(
+                        Math.cos(angle) * radius,
+                        -2,
+                        Math.sin(angle) * radius
+                    );
+                    wallBody.material = new CANNON.Material({ friction: 0.3, restitution: 0.3 });
+                    this.world.add(wallBody);
+                }
                 
                 // Bowl bottom
                 const bottomShape = new CANNON.Plane();
@@ -222,7 +236,7 @@
                 const radius = 2;
                 diceMesh.position.set(
                     Math.cos(angle) * radius,
-                    10 + Math.random() * 3,
+                    5 + Math.random() * 2,
                     Math.sin(angle) * radius
                 );
                 

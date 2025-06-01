@@ -76,7 +76,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/1.17.1/cannon.min.js"></script>
     
     <script>
-        class DiceGame {
+        window.addEventListener('load', () => {
+            class DiceGame {
             constructor() {
                 this.scene = new THREE.Scene();
                 this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -363,8 +364,7 @@
             }
         }
         
-        // Initialize game when page loads
-        window.addEventListener('load', () => {
+            // Initialize game
             new DiceGame();
         });
     </script>

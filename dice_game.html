@@ -8,7 +8,8 @@
         body {
             margin: 0;
             padding: 0;
-            background: linear-gradient(135deg, #2c3e50, #34495e);
+            background: url('bgp_dice.png') no-repeat center center fixed;
+            background-size: cover;
             font-family: 'Arial', sans-serif;
             overflow: hidden;
         }
@@ -25,9 +26,26 @@
             left: 20px;
             z-index: 100;
             color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
+        }
+
+        #backToHome {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            z-index: 101;
+            transition: background-color 0.3s ease;
+        }
+
+        #backToHome:hover {
+            background-color: rgba(255, 255, 255, 0.4);
         }
         
         #rollButton {
@@ -53,27 +71,8 @@
             transform: none;
         }
         
-        #backToHome {
-            background: linear-gradient(45deg, #3498db, #2980b9);
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-            transition: all 0.3s ease;
-            z-index: 101;
-            margin-bottom: 10px; /* Space between buttons */
-        }
-
-        #backToHome:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
-        }
-
         #results {
-            margin-top: 10px; /* Adjusted margin */
+            margin-top: 20px;
             font-size: 16px;
         }
         
@@ -81,7 +80,7 @@
             font-size: 24px;
             font-weight: bold;
             color: #f39c12;
-            margin-top: 5px; /* Adjusted margin */
+            margin-top: 10px;
         }
     </style>
     
@@ -98,8 +97,8 @@
 </head>
 <body>
     <div id="gameContainer">
+        <a href="index.html" id="backToHome">Back to Home</a>
         <div id="ui">
-            <button id="backToHome">Back to Home</button>
             <button id="rollButton">Roll Dice</button>
             <div id="results"></div>
             <div id="total"></div>
@@ -129,7 +128,8 @@
                 this.renderer.setSize(window.innerWidth, window.innerHeight);
                 this.renderer.shadowMap.enabled = true;
                 this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-                this.renderer.setClearColor(0x2c3e50);
+                this.renderer.setClearColor(0x000000, 0); // Set clear color to transparent
+                this.renderer.setPixelRatio(window.devicePixelRatio); // Handle high-DPI displays
                 document.getElementById('gameContainer').appendChild(this.renderer.domElement);
                 
                 // Physics world setup
@@ -145,8 +145,7 @@
                 // Lighting
                 this.setupLighting();
                 
-                // Create table surface
-                this.createTable();
+
                 
                 // Create bowl
                 this.createBowl();
@@ -155,12 +154,7 @@
                 this.createDice();
                 
                 // Event listeners
-        this.setupEventListeners();
-
-        // Back to Home button event listener
-        document.getElementById('backToHome').addEventListener('click', () => {
-            window.location.href = 'index.html';
-        });
+                this.setupEventListeners();
                 
                 // Start animation loop
                 this.animate();
@@ -183,33 +177,6 @@
                 const pointLight = new THREE.PointLight(0xffa500, 0.5, 50);
                 pointLight.position.set(0, 10, 0);
                 this.scene.add(pointLight);
-            }
-            
-            createTable() {
-                // Create round table surface
-                const tableRadius = 25;
-                const tableHeight = 1;
-                
-                // Table geometry
-                const tableGeometry = new THREE.CylinderGeometry(tableRadius, tableRadius, tableHeight, 32);
-                const tableMaterial = new THREE.MeshPhongMaterial({ 
-                    color: 0x8B4513, // Brown wood color
-                    shininess: 30
-                });
-                
-                const table = new THREE.Mesh(tableGeometry, tableMaterial);
-                table.receiveShadow = true;
-                table.castShadow = true;
-                table.position.set(0, -12, 0); // Position below the bowl
-                this.scene.add(table);
-                
-                // Table physics
-                const tableShape = new CANNON.Cylinder(tableRadius, tableRadius, tableHeight, 8);
-                const tableBody = new CANNON.Body({ mass: 0 }); // Static body
-                tableBody.addShape(tableShape);
-                tableBody.position.set(0, -12, 0);
-                tableBody.material = new CANNON.Material({ friction: 0.6, restitution: 0.1 });
-                this.world.addBody(tableBody);
             }
             
             createBowl() {

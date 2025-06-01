@@ -119,7 +119,6 @@
                 this.dice = [];
                 this.diceResults = [];
                 this.isRolling = false;
-                
                 this.init();
             }
             
@@ -133,7 +132,7 @@
                 document.getElementById('gameContainer').appendChild(this.renderer.domElement);
                 
                 // Physics world setup
-                this.world.gravity.set(0, -30, 0);
+                this.world.gravity.set(0, -20, 0);
                 this.world.broadphase = new CANNON.NaiveBroadphase();
                 this.world.defaultContactMaterial.friction = 0.4;
                 this.world.defaultContactMaterial.restitution = 0.3;
@@ -144,8 +143,6 @@
                 
                 // Lighting
                 this.setupLighting();
-                
-
                 
                 // Create bowl
                 this.createBowl();
@@ -181,8 +178,8 @@
             
             createBowl() {
                 // Create a larger, thicker concave bowl
-                const bowlRadius = 12;
-                const bowlThickness = 0.8;
+                const bowlRadius = 10;
+                const bowlThickness = 0.5;
                 
                 // Outer bowl geometry
                 const outerBowlGeometry = new THREE.SphereGeometry(bowlRadius, 64, 32, 0, Math.PI * 2, 0, Math.PI * 0.55);
@@ -200,7 +197,7 @@
                 const outerBowl = new THREE.Mesh(outerBowlGeometry, bowlMaterial);
                 outerBowl.receiveShadow = true;
                 outerBowl.castShadow = true;
-                outerBowl.position.set(0, -6, 0);
+                outerBowl.position.set(0, -20, 0);
                 outerBowl.rotation.x = Math.PI; // Make it concave upwards
                 this.scene.add(outerBowl);
                 
@@ -212,7 +209,7 @@
                 });
                 const innerBowl = new THREE.Mesh(innerBowlGeometry, innerBowlMaterial);
                 innerBowl.receiveShadow = true;
-                innerBowl.position.set(0, -6, 0);
+                innerBowl.position.set(0, -20, 0);
                 innerBowl.rotation.x = Math.PI;
                 this.scene.add(innerBowl);
                 
@@ -334,9 +331,9 @@
                 const angle = (index / 6) * Math.PI * 2;
                 const radius = 3 + Math.random() * 2; // Random radius within bowl
                 diceMesh.position.set(
-                    Math.cos(angle) * radius,
-                    -4, // Place dice at bottom of bowl
-                    Math.sin(angle) * radius
+                    0, //Math.cos(angle) * radius,
+                    -20, // Place dice at bottom of bowl
+                    0 //Math.sin(angle) * radius
                 );
                 
                 this.scene.add(diceMesh);
@@ -351,7 +348,7 @@
                 // Start with dice at rest (no initial velocity)
                 body.velocity.set(0, 0, 0);
                 body.angularVelocity.set(0, 0, 0);
-                body.linearDamping = 0.1;
+                body.linearDamping = 0.2;
                 body.angularDamping = 0.2;
                 
                 this.world.addBody(body);
@@ -379,7 +376,7 @@
             }
             
             rollDice() {
-                if (this.isRolling) return;
+                //if (this.isRolling) return;
                 
                 this.isRolling = true;
                 document.getElementById('rollButton').disabled = true;
@@ -394,9 +391,9 @@
                     
                     // Lift dice just above the bowl rim (small height)
                     dice.body.position.set(
-                        Math.cos(angle) * radius,
-                        -1 + Math.random() * 0.5, // Just above bowl rim
-                        Math.sin(angle) * radius
+                        0, //Math.cos(angle) * radius,
+                        -15, // Just above bowl rim
+                        0 //Math.sin(angle) * radius
                     );
                     
                     // Reset velocities for controlled lift
@@ -425,7 +422,7 @@
                         dice.body.velocity.copy(randomImpulse);
                         
                         // Add random spinning with varying intensity (1-3 seconds worth)
-                        const spinIntensity = 10 + Math.random() * 15;
+                        const spinIntensity = 2 + Math.random() * 3;
                         dice.body.angularVelocity.set(
                             (Math.random() - 0.5) * spinIntensity,
                             (Math.random() - 0.5) * spinIntensity,
@@ -433,8 +430,8 @@
                         );
                         
                         // Set damping for gradual settling
-                        dice.body.linearDamping = 0.15;
-                        dice.body.angularDamping = 0.25;
+                        dice.body.linearDamping = 0.5;
+                        dice.body.angularDamping = 0.5;
                     });
                 }, 300); // 300ms pause before releasing
                 

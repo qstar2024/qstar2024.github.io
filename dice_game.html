@@ -25,6 +25,9 @@
             left: 20px;
             z-index: 100;
             color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
         }
         
         #rollButton {
@@ -50,8 +53,27 @@
             transform: none;
         }
         
+        #backToHome {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+            transition: all 0.3s ease;
+            z-index: 101;
+            margin-bottom: 10px; /* Space between buttons */
+        }
+
+        #backToHome:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.4);
+        }
+
         #results {
-            margin-top: 20px;
+            margin-top: 10px; /* Adjusted margin */
             font-size: 16px;
         }
         
@@ -59,7 +81,7 @@
             font-size: 24px;
             font-weight: bold;
             color: #f39c12;
-            margin-top: 10px;
+            margin-top: 5px; /* Adjusted margin */
         }
     </style>
     
@@ -77,10 +99,10 @@
 <body>
     <div id="gameContainer">
         <div id="ui">
-            <button id="backToHome" style="position: absolute; top: 20px; left: 20px; background: linear-gradient(45deg, #3498db, #2980b9); border: none; color: white; padding: 10px 20px; font-size: 16px; border-radius: 8px; cursor: pointer; box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3); transition: all 0.3s ease; z-index: 101;">Back to Home</button>
-            <button id="rollButton" style="position: absolute; top: 20px; left: 180px;">Roll Dice</button>
-            <div id="results" style="position: absolute; top: 80px; left: 20px;"></div>
-            <div id="total" style="position: absolute; top: 120px; left: 20px;"></div>
+            <button id="backToHome">Back to Home</button>
+            <button id="rollButton">Roll Dice</button>
+            <div id="results"></div>
+            <div id="total"></div>
         </div>
     </div>
 

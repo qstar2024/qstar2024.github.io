@@ -427,7 +427,7 @@
                     // apply random impluses
                     const force = 3 + 5 * Math.random();
                     d.body.applyImpulse(
-                        new CANNON.Vec3(-force, force, 0),
+                        new CANNON.Vec3(-force * 0.5, force, 0),
                         new CANNON.Vec3(0, 0, .2) // point of application of force is shifted from the center of mass
                     );
                     // track body velocity again for new throw

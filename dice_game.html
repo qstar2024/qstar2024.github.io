@@ -19,6 +19,14 @@
             width: 100vw;
             height: 100vh;
         }
+
+        canvas {
+            position: relative;
+            width: 80vw;
+            height: 100vh;
+            display: block;
+            z-index: 1;
+        }
         
         #ui {
             position: absolute;
@@ -103,403 +111,346 @@
             <div id="results"></div>
             <div id="total"></div>
         </div>
+        <canvas></canvas> <!-- Add this line -->
     </div>
 
     <script defer type="module">
         // Ensure THREE and CANNON are loaded before starting the game
         import * as THREE from "three";
         import * as CANNON from "cannon-es";
+        // mergeVertices() requires the import of BufferGeometryUtils file
+        import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
 
         class DiceGame {
             constructor() {
+                // https://tympanus.net/codrops/2023/01/25/crafting-a-dice-roller-with-three-js-and-cannon-es/
+                // https://github.com/uuuulala/Threejs-rolling-dice-tutorial
+                // params
+                this.numberOfDice = 6;
+                this.segments = 40,
+                this.edgeRadius = .07,
+                this.notchRadius = .12,
+                this.notchDepth = .1,
+                // scene & physics
                 this.scene = new THREE.Scene();
-                this.camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-                this.renderer = new THREE.WebGLRenderer({ antialias: true });
-                this.world = new CANNON.World();
-                this.dice = [];
+                const canvasEl = document.querySelector('#gameContainer canvas'); // Add this line
+                this.renderer = new THREE.WebGLRenderer({alpha: true, antialias: true, canvas: canvasEl,});
+                this.camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, .1, 300);
+                this.world = new CANNON.World({gravity: new CANNON.Vec3(0, -20, 0), allowSleep: true,});
+                this.initPhysics();
+                this.diceArray = [];
                 this.diceResults = [];
-                this.isRolling = false;
-                this.init();
+                this.diceMesh = this.createDiceMesh();
+                this.initScene();
             }
             
-            init() {
-                // Renderer setup
-                this.renderer.setSize(window.innerWidth, window.innerHeight);
-                this.renderer.shadowMap.enabled = true;
-                this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-                this.renderer.setClearColor(0x000000, 0); // Set clear color to transparent
-                this.renderer.setPixelRatio(window.devicePixelRatio); // Handle high-DPI displays
-                document.getElementById('gameContainer').appendChild(this.renderer.domElement);
-                
-                // Physics world setup
-                this.world.gravity.set(0, -20, 0);
-                this.world.broadphase = new CANNON.NaiveBroadphase();
-                this.world.defaultContactMaterial.friction = 0.4;
-                this.world.defaultContactMaterial.restitution = 0.3;
-                
-                // Camera position
-                this.camera.position.set(0, 15, 20);
-                this.camera.lookAt(0, 0, 0);
-                
-                // Lighting
-                this.setupLighting();
-                
-                // Create bowl
-                this.createBowl();
-                
-                // Create dice
-                this.createDice();
-                
-                // Event listeners
-                this.setupEventListeners();
-                
-                // Start animation loop
-                this.animate();
+            initPhysics() {
+                this.world.defaultContactMaterial.restitution = .3;
             }
-            
-            setupLighting() {
-                // Ambient light
-                const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+
+            initScene() {
+                this.renderer.shadowMap.enabled = true
+                this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+                this.camera.position.set(0, .5, 4).multiplyScalar(7);
+
+                this.updateSceneSize();
+
+                const ambientLight = new THREE.AmbientLight(0xffffff, .5);
                 this.scene.add(ambientLight);
+                const topLight = new THREE.PointLight(0xffffff, .5);
+                topLight.position.set(20, 25, 0);
+                topLight.castShadow = true;
+                topLight.shadow.mapSize.width = 2048;
+                topLight.shadow.mapSize.height = 2048;
+                topLight.shadow.camera.near = 5;
+                topLight.shadow.camera.far = 400;
+                this.scene.add(topLight);
                 
-                // Directional light
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-                directionalLight.position.set(10, 20, 10);
-                directionalLight.castShadow = true;
-                directionalLight.shadow.mapSize.width = 2048;
-                directionalLight.shadow.mapSize.height = 2048;
-                this.scene.add(directionalLight);
-                
-                // Point light for warmth
-                const pointLight = new THREE.PointLight(0xffa500, 0.5, 50);
-                pointLight.position.set(0, 10, 0);
-                this.scene.add(pointLight);
+                this.createFloor();
+
+                this.setupEventListeners(); // Setup event listeners
+
+                this.render();
             }
-            
-            createBowl() {
-                // Create a larger, thicker concave bowl
-                const bowlRadius = 10;
-                const bowlThickness = 0.5;
-                
-                // Outer bowl geometry
-                const outerBowlGeometry = new THREE.SphereGeometry(bowlRadius, 64, 32, 0, Math.PI * 2, 0, Math.PI * 0.55);
-                // Inner bowl geometry (slightly smaller for thickness)
-                const innerBowlGeometry = new THREE.SphereGeometry(bowlRadius - bowlThickness, 64, 32, 0, Math.PI * 2, 0, Math.PI * 0.55);
-                
-                // Create bowl material
-                const bowlMaterial = new THREE.MeshPhongMaterial({ 
-                    color: 0xcc3333,
-                    shininess: 100,
-                    side: THREE.FrontSide
-                });
-                
-                // Create outer bowl
-                const outerBowl = new THREE.Mesh(outerBowlGeometry, bowlMaterial);
-                outerBowl.receiveShadow = true;
-                outerBowl.castShadow = true;
-                outerBowl.position.set(0, -20, 0);
-                outerBowl.rotation.x = Math.PI; // Make it concave upwards
-                this.scene.add(outerBowl);
-                
-                // Create inner bowl (inverted to create hollow effect)
-                const innerBowlMaterial = new THREE.MeshPhongMaterial({ 
-                    color: 0xcc3333,
-                    shininess: 100,
-                    side: THREE.BackSide
-                });
-                const innerBowl = new THREE.Mesh(innerBowlGeometry, innerBowlMaterial);
-                innerBowl.receiveShadow = true;
-                innerBowl.position.set(0, -20, 0);
-                innerBowl.rotation.x = Math.PI;
-                this.scene.add(innerBowl);
-                
-                // Physics: Create concave bowl using multiple angled planes
-                const numSegments = 24;
-                const bowlPhysicsRadius = bowlRadius - bowlThickness / 2;
-                const bowlDepth = 6;
-                
-                for (let i = 0; i < numSegments; i++) {
-                    const angle = (i / numSegments) * Math.PI * 2;
-                    const nextAngle = ((i + 1) / numSegments) * Math.PI * 2;
-                    
-                    // Create angled wall segments
-                    const wallShape = new CANNON.Plane();
-                    const wallBody = new CANNON.Body({ mass: 0 });
-                    wallBody.addShape(wallShape);
-                    
-                    // Position and orient the wall segment
-                    const x = Math.cos(angle) * bowlPhysicsRadius;
-                    const z = Math.sin(angle) * bowlPhysicsRadius;
-                    wallBody.position.set(x * 0.7, -6 + bowlDepth * 0.3, z * 0.7);
-                    
-                    // Rotate wall to face inward and angle downward
-                    const wallQuaternion = new CANNON.Quaternion();
-                    wallQuaternion.setFromAxisAngle(new CANNON.Vec3(0, 1, 0), angle + Math.PI);
-                    const tiltQuaternion = new CANNON.Quaternion();
-                    tiltQuaternion.setFromAxisAngle(new CANNON.Vec3(Math.sin(angle), 0, -Math.cos(angle)), Math.PI * 0.25);
-                    wallBody.quaternion = wallQuaternion.mult(tiltQuaternion);
-                    
-                    wallBody.material = new CANNON.Material({ friction: 0.4, restitution: 0.2 });
-                    this.world.addBody(wallBody);
-                }
-                
-                // Bowl bottom - curved surface using multiple small planes
-                const bottomSegments = 16;
-                for (let i = 0; i < bottomSegments; i++) {
-                    for (let j = 0; j < bottomSegments; j++) {
-                        const x = (i - bottomSegments/2) * 1.2;
-                        const z = (j - bottomSegments/2) * 1.2;
-                        const distance = Math.sqrt(x*x + z*z);
-                        
-                        if (distance < bowlPhysicsRadius * 0.8) {
-                            const bottomShape = new CANNON.Plane();
-                            const bottomBody = new CANNON.Body({ mass: 0 });
-                            bottomBody.addShape(bottomShape);
-                            
-                            // Create curved bottom by angling planes
-                            const curvature = distance / (bowlPhysicsRadius * 0.8);
-                            const yOffset = -6 - bowlDepth + curvature * curvature * 2;
-                            bottomBody.position.set(x, yOffset, z);
-                            
-                            // Angle the plane based on position
-                            if (distance > 0.5) {
-                                const tiltAngle = curvature * 0.3;
-                                const tiltQuaternion = new CANNON.Quaternion();
-                                tiltQuaternion.setFromAxisAngle(new CANNON.Vec3(-z/distance, 0, x/distance), tiltAngle);
-                                const baseQuaternion = new CANNON.Quaternion();
-                                baseQuaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
-                                bottomBody.quaternion = baseQuaternion.mult(tiltQuaternion);
-                            } else {
-                                bottomBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
-                            }
-                            
-                            bottomBody.material = new CANNON.Material({ friction: 0.5, restitution: 0.1 });
-                            this.world.addBody(bottomBody);
+
+            addDiceEvents(dice) {
+                dice.body.addEventListener('sleep', (e) => {
+
+                    dice.body.allowSleep = false;
+
+                    const euler = new CANNON.Vec3();
+                    e.target.quaternion.toEuler(euler);
+
+                    const eps = .1;
+                    let isZero = (angle) => Math.abs(angle) < eps;
+                    let isHalfPi = (angle) => Math.abs(angle - .5 * Math.PI) < eps;
+                    let isMinusHalfPi = (angle) => Math.abs(.5 * Math.PI + angle) < eps;
+                    let isPiOrMinusPi = (angle) => (Math.abs(Math.PI - angle) < eps || Math.abs(Math.PI + angle) < eps);
+
+                    if (isZero(euler.z)) {
+                        if (isZero(euler.x)) {
+                            this.diceResults.push(1);
+                        } else if (isHalfPi(euler.x)) {
+                            this.diceResults.push(4);
+                        } else if (isMinusHalfPi(euler.x)) {
+                            this.diceResults.push(3);
+                        } else if (isPiOrMinusPi(euler.x)) {
+                            this.diceResults.push(6);
+                        } else {
+                            // landed on edge => wait to fall on side and fire the event again
+                            dice.body.allowSleep = true;
                         }
+                    } else if (isHalfPi(euler.z)) {
+                        this.diceResults.push(2);
+                    } else if (isMinusHalfPi(euler.z)) {
+                        this.diceResults.push(5);
+                    } else {
+                        // landed on edge => wait to fall on side and fire the event again
+                        dice.body.allowSleep = true;
                     }
-                }
+                });
+            }
+
+            createFloor() {
+                // Three.js (visible) object
+                const floor = new THREE.Mesh(
+                    new THREE.PlaneGeometry(1000, 1000),
+                    new THREE.ShadowMaterial({
+                        opacity: .1
+                    })
+                )
+                floor.receiveShadow = true;
+                floor.position.y = -4; //-7
+                floor.quaternion.setFromAxisAngle(new THREE.Vector3(-1, 0, 0), Math.PI * .5);
+                this.scene.add(floor);
+
+                // Cannon-es (physical) object
+                const floorBody = new CANNON.Body({
+                    type: CANNON.Body.STATIC,
+                    shape: new CANNON.Plane(),
+                });
+                floorBody.position.copy(floor.position);
+                floorBody.quaternion.copy(floor.quaternion);
+                this.world.addBody(floorBody);
             }
             
             createDice() {
-                for (let i = 0; i < 6; i++) {
-                    const dice = this.createSingleDie(i);
-                    this.dice.push(dice);
-                }
-            }
-            
-            createSingleDie(index) {
-                // Create dice geometry
-                const geometry = new THREE.BoxGeometry(1.5, 1.5, 1.5);
-                
-                // Create materials for each face
-                const materials = [];
-                const faceNumbers = [1, 2, 3, 4, 5, 6];
-                
-                faceNumbers.forEach(number => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 128;
-                    canvas.height = 128;
-                    const context = canvas.getContext('2d');
-                    
-                    // White background
-                    context.fillStyle = '#ffffff';
-                    context.fillRect(0, 0, 128, 128);
-                    
-                    // Border
-                    context.strokeStyle = '#cccccc';
-                    context.lineWidth = 2;
-                    context.strokeRect(2, 2, 124, 124);
-                    
-                    // Number color (red for 1 and 4, black for others)
-                    context.fillStyle = (number === 1 || number === 4) ? '#cc0000' : '#000000';
-                    context.font = 'bold 60px Arial';
-                    context.textAlign = 'center';
-                    context.textBaseline = 'middle';
-                    
-                    // Draw dots instead of numbers for authenticity
-                    this.drawDots(context, number, (number === 1 || number === 4) ? '#cc0000' : '#000000');
-                    
-                    const texture = new THREE.CanvasTexture(canvas);
-                    materials.push(new THREE.MeshPhongMaterial({ map: texture }));
+                const mesh = this.diceMesh.clone();
+                this.scene.add(mesh);
+
+                const body = new CANNON.Body({
+                    mass: 1,
+                    shape: new CANNON.Box(new CANNON.Vec3(.5, .5, .5)),
+                    sleepTimeLimit: .1 // change from default 1 sec to 100ms
                 });
-                
-                const diceMesh = new THREE.Mesh(geometry, materials);
-                diceMesh.castShadow = true;
-                diceMesh.receiveShadow = true;
-                
-                // Position dice statically in the bowl at initialization
-                const angle = (index / 6) * Math.PI * 2;
-                const radius = 3 + Math.random() * 2; // Random radius within bowl
-                diceMesh.position.set(
-                    0, //Math.cos(angle) * radius,
-                    -20, // Place dice at bottom of bowl
-                    0 //Math.sin(angle) * radius
-                );
-                
-                this.scene.add(diceMesh);
-                
-                // Physics body
-                const shape = new CANNON.Box(new CANNON.Vec3(0.75, 0.75, 0.75));
-                const body = new CANNON.Body({ mass: 1 });
-                body.addShape(shape);
-                body.position.copy(diceMesh.position);
-                body.material = new CANNON.Material({ friction: 0.4, restitution: 0.3 });
-                
-                // Start with dice at rest (no initial velocity)
-                body.velocity.set(0, 0, 0);
-                body.angularVelocity.set(0, 0, 0);
-                body.linearDamping = 0.2;
-                body.angularDamping = 0.2;
-                
                 this.world.addBody(body);
-                
-                return { mesh: diceMesh, body: body };
+
+                return {mesh, body};
             }
-            
-            drawDots(context, number, color) {
-                context.fillStyle = color;
-                const dotSize = 12;
-                const positions = {
-                    1: [[64, 64]],
-                    2: [[32, 32], [96, 96]],
-                    3: [[32, 32], [64, 64], [96, 96]],
-                    4: [[32, 32], [96, 32], [32, 96], [96, 96]],
-                    5: [[32, 32], [96, 32], [64, 64], [32, 96], [96, 96]],
-                    6: [[32, 32], [96, 32], [32, 64], [96, 64], [32, 96], [96, 96]]
-                };
-                
-                positions[number].forEach(([x, y]) => {
-                    context.beginPath();
-                    context.arc(x, y, dotSize, 0, Math.PI * 2);
-                    context.fill();
-                });
+
+            createBoxGeometry() {
+                let boxGeometry = new THREE.BoxGeometry(1, 1, 1, this.segments, this.segments, this.segments);
+
+                const positionAttr = boxGeometry.attributes.position;
+                const subCubeHalfSize = .5 - this.edgeRadius;
+
+                for (let i = 0; i < positionAttr.count; i++) {
+
+                    let position = new THREE.Vector3().fromBufferAttribute(positionAttr, i);
+
+                    const subCube = new THREE.Vector3(Math.sign(position.x), Math.sign(position.y), Math.sign(position.z)).multiplyScalar(subCubeHalfSize);
+                    const addition = new THREE.Vector3().subVectors(position, subCube);
+
+                    if (Math.abs(position.x) > subCubeHalfSize && Math.abs(position.y) > subCubeHalfSize && Math.abs(position.z) > subCubeHalfSize) {
+                        addition.normalize().multiplyScalar(this.edgeRadius);
+                        position = subCube.add(addition);
+                    } else if (Math.abs(position.x) > subCubeHalfSize && Math.abs(position.y) > subCubeHalfSize) {
+                        addition.z = 0;
+                        addition.normalize().multiplyScalar(this.edgeRadius);
+                        position.x = subCube.x + addition.x;
+                        position.y = subCube.y + addition.y;
+                    } else if (Math.abs(position.x) > subCubeHalfSize && Math.abs(position.z) > subCubeHalfSize) {
+                        addition.y = 0;
+                        addition.normalize().multiplyScalar(this.edgeRadius);
+                        position.x = subCube.x + addition.x;
+                        position.z = subCube.z + addition.z;
+                    } else if (Math.abs(position.y) > subCubeHalfSize && Math.abs(position.z) > subCubeHalfSize) {
+                        addition.x = 0;
+                        addition.normalize().multiplyScalar(this.edgeRadius);
+                        position.y = subCube.y + addition.y;
+                        position.z = subCube.z + addition.z;
+                    }
+
+                    const notchWave = (v) => {
+                        v = (1 / this.notchRadius) * v;
+                        v = Math.PI * Math.max(-1, Math.min(1, v));
+                        return this.notchDepth * (Math.cos(v) + 1.);
+                    }
+                    const notch = (pos) => notchWave(pos[0]) * notchWave(pos[1]);
+
+                    const offset = .23;
+
+                    if (position.y === .5) {
+                        position.y -= notch([position.x, position.z]);
+                    } else if (position.x === .5) {
+                        position.x -= notch([position.y + offset, position.z + offset]);
+                        position.x -= notch([position.y - offset, position.z - offset]);
+                    } else if (position.z === .5) {
+                        position.z -= notch([position.x - offset, position.y + offset]);
+                        position.z -= notch([position.x, position.y]);
+                        position.z -= notch([position.x + offset, position.y - offset]);
+                    } else if (position.z === -.5) {
+                        position.z += notch([position.x + offset, position.y + offset]);
+                        position.z += notch([position.x + offset, position.y - offset]);
+                        position.z += notch([position.x - offset, position.y + offset]);
+                        position.z += notch([position.x - offset, position.y - offset]);
+                    } else if (position.x === -.5) {
+                        position.x += notch([position.y + offset, position.z + offset]);
+                        position.x += notch([position.y + offset, position.z - offset]);
+                        position.x += notch([position.y, position.z]);
+                        position.x += notch([position.y - offset, position.z + offset]);
+                        position.x += notch([position.y - offset, position.z - offset]);
+                    } else if (position.y === -.5) {
+                        position.y += notch([position.x + offset, position.z + offset]);
+                        position.y += notch([position.x + offset, position.z]);
+                        position.y += notch([position.x + offset, position.z - offset]);
+                        position.y += notch([position.x - offset, position.z + offset]);
+                        position.y += notch([position.x - offset, position.z]);
+                        position.y += notch([position.x - offset, position.z - offset]);
+                    }
+
+                    positionAttr.setXYZ(i, position.x, position.y, position.z);
+                }
+
+
+                boxGeometry.deleteAttribute('normal');
+                boxGeometry.deleteAttribute('uv');
+                boxGeometry = BufferGeometryUtils.mergeVertices(boxGeometry);
+
+                boxGeometry.computeVertexNormals();
+
+                return boxGeometry;
             }
-            
-            rollDice() {
-                //if (this.isRolling) return;
-                
-                this.isRolling = true;
+
+            createInnerGeometry() {
+                // keep the plane size equal to flat surface of cube
+                const baseGeometry = new THREE.PlaneGeometry(1 - 2 * this.edgeRadius, 1 - 2 * this.edgeRadius);
+                // place planes a bit behind the box sides
+                const offset = .48;
+                // and merge them as we already have BufferGeometryUtils file loaded :)
+                return BufferGeometryUtils.mergeGeometries([
+                    baseGeometry.clone().translate(0, 0, offset),
+                    baseGeometry.clone().translate(0, 0, -offset),
+                    baseGeometry.clone().rotateX(.5 * Math.PI).translate(0, -offset, 0),
+                    baseGeometry.clone().rotateX(.5 * Math.PI).translate(0, offset, 0),
+                    baseGeometry.clone().rotateY(.5 * Math.PI).translate(-offset, 0, 0),
+                    baseGeometry.clone().rotateY(.5 * Math.PI).translate(offset, 0, 0),
+                ], false);
+            }
+
+            createDiceMesh() {
+                const boxMaterialOuter = new THREE.MeshStandardMaterial({
+                    color: 0xeeeeee,
+                })
+                const boxMaterialInner = new THREE.MeshStandardMaterial({
+                    color: 0x000000,
+                    roughness: 0,
+                    metalness: 1,
+                    side: THREE.DoubleSide
+                })
+
+                const diceMesh = new THREE.Group();
+                const innerMesh = new THREE.Mesh(this.createInnerGeometry(), boxMaterialInner);
+                const outerMesh = new THREE.Mesh(this.createBoxGeometry(), boxMaterialOuter);
+                diceMesh.add(innerMesh, outerMesh);
+
+                return diceMesh;
+            }
+
+            updateSceneSize() {
+                this.renderer.setSize(window.innerWidth, window.innerHeight);
+                this.camera.aspect = window.innerWidth / window.innerHeight;
+                this.camera.updateProjectionMatrix();
+            }
+
+            render() {
+                // recalculate the physics world
+                this.world.fixedStep();
+                // apply recalculated values to visible elements 
+                for (const dice of this.diceArray) {
+                    dice.mesh.position.copy(dice.body.position);
+                    dice.mesh.quaternion.copy(dice.body.quaternion);
+                }
+                // redraw the scene
+                this.renderer.render(this.scene, this.camera);
+                requestAnimationFrame(this.render.bind(this));
+            }
+
+            throwDice() {
+                this.diceResults = [];
                 document.getElementById('rollButton').disabled = true;
-                document.getElementById('results').innerHTML = '';
-                document.getElementById('total').innerHTML = '';
-                
-                // Phase 1: Lift dice slightly above the bowl
-                this.dice.forEach((dice, index) => {
-                    const currentPos = dice.body.position;
-                    const angle = (index / 6) * Math.PI * 2;
-                    const radius = 3 + Math.random() * 2;
-                    
-                    // Lift dice just above the bowl rim (small height)
-                    dice.body.position.set(
-                        0, //Math.cos(angle) * radius,
-                        -15, // Just above bowl rim
-                        0 //Math.sin(angle) * radius
-                    );
-                    
-                    // Reset velocities for controlled lift
-                    dice.body.velocity.set(0, 0, 0);
-                    dice.body.angularVelocity.set(0, 0, 0);
-                    
-                    // Random orientation for each dice
-                    dice.body.quaternion.set(
-                        Math.random() - 0.5,
-                        Math.random() - 0.5,
-                        Math.random() - 0.5,
-                        Math.random() - 0.5
-                    ).normalize();
+
+                // Clear existing dice from the scene
+                this.diceArray.forEach(dice => {
+                    this.scene.remove(dice.mesh);
+                    this.world.removeBody(dice.body);
                 });
-                
-                // Phase 2: After a brief pause, release dice with physics
-                setTimeout(() => {
-                    this.dice.forEach((dice, index) => {
-                        // Add small random impulse to start the rolling
-                        const randomImpulse = new CANNON.Vec3(
-                            (Math.random() - 0.5) * 2,
-                            Math.random() * 1,
-                            (Math.random() - 0.5) * 2
-                        );
-                        
-                        dice.body.velocity.copy(randomImpulse);
-                        
-                        // Add random spinning with varying intensity (1-3 seconds worth)
-                        const spinIntensity = 2 + Math.random() * 3;
-                        dice.body.angularVelocity.set(
-                            (Math.random() - 0.5) * spinIntensity,
-                            (Math.random() - 0.5) * spinIntensity,
-                            (Math.random() - 0.5) * spinIntensity
-                        );
-                        
-                        // Set damping for gradual settling
-                        dice.body.linearDamping = 0.5;
-                        dice.body.angularDamping = 0.5;
-                    });
-                }, 300); // 300ms pause before releasing
-                
-                // Check for results after dice settle
-                setTimeout(() => {
-                    this.checkResults();
-                }, 4500); // Total time: 300ms lift + 4200ms settling
+                this.diceArray = [];
+
+                // Create new dice and add them to the scene
+                for (let i = 0; i < this.numberOfDice; i++) {
+                    const newDice = this.createDice();
+                    this.diceArray.push(newDice);
+                    this.addDiceEvents(newDice);
+                }
+
+                this.diceArray.forEach((d, dIdx) => {
+                    // to reset the velocity dice got on the previous throw
+                    d.body.velocity.setZero();
+                    d.body.angularVelocity.setZero();
+                    // set initial position
+                    d.body.position = new CANNON.Vec3(5, dIdx * 1.5, 0); // the floor is placed at y = -7
+                    d.mesh.position.copy(d.body.position);
+                    // set initial rotation
+                    d.mesh.rotation.set(2 * Math.PI * Math.random(), 0, 2 * Math.PI * Math.random())
+                    d.body.quaternion.copy(d.mesh.quaternion);
+                    // apply random impluses
+                    const force = 3 + 5 * Math.random();
+                    d.body.applyImpulse(
+                        new CANNON.Vec3(-force, force, 0),
+                        new CANNON.Vec3(0, 0, .2) // point of application of force is shifted from the center of mass
+                    );
+                    // track body velocity again for new throw
+                    d.body.allowSleep = true;
+                });
             }
             
             checkResults() {
-                this.diceResults = [];
-                
-                this.dice.forEach((dice, index) => {
-                    // Use the physics body for accurate face detection
-                    const result = this.getDiceValue(dice.body);
-                    this.diceResults.push(result);
-                });
-                
-                this.displayResults();
-                this.isRolling = false;
-                document.getElementById('rollButton').disabled = false;
-            }
-            
-            getDiceValue(diceBody) {
-                // Get the dice's current rotation quaternion
-                const quaternion = diceBody.quaternion;
-                
-                // Define the face normal vectors for a standard die
-                // Face 1: +Y (top), Face 6: -Y (bottom)
-                // Face 2: +Z (front), Face 5: -Z (back) 
-                // Face 3: +X (right), Face 4: -X (left)
-                const faceNormals = [
-                    new CANNON.Vec3(0, 1, 0),   // Face 1 (top)
-                    new CANNON.Vec3(0, 0, 1),   // Face 2 (front)
-                    new CANNON.Vec3(1, 0, 0),   // Face 3 (right)
-                    new CANNON.Vec3(-1, 0, 0),  // Face 4 (left)
-                    new CANNON.Vec3(0, 0, -1),  // Face 5 (back)
-                    new CANNON.Vec3(0, -1, 0)   // Face 6 (bottom)
-                ];
-                
-                // World up vector
-                const worldUp = new CANNON.Vec3(0, 1, 0);
-                
-                let maxDot = -1;
-                let topFace = 1;
-                
-                // Check which face normal is most aligned with world up
-                faceNormals.forEach((normal, index) => {
-                    // Rotate the face normal by the dice's current rotation
-                    const rotatedNormal = quaternion.vmult(normal);
-                    
-                    // Calculate dot product with world up vector
-                    const dot = rotatedNormal.dot(worldUp);
-                    
-                    // The face with the highest dot product is facing up
-                    if (dot > maxDot) {
-                        maxDot = dot;
-                        topFace = index + 1;
+                const checkInterval = setInterval(() => {
+                    if (this.diceResults.length === this.numberOfDice) {
+                        clearInterval(checkInterval);
+                        this.displayResults();
                     }
-                });
-                
-                return topFace;
+                }, 100);
             }
             
             displayResults() {
                 const pattern = this.getDicePattern(this.diceResults);
-                document.getElementById('results').innerHTML = `骰子: ${this.diceResults.join(', ')}`;
-                document.getElementById('total').innerHTML = `结果: ${pattern}`;
+                document.getElementById('results').innerHTML = `🎲 ${this.diceResults.join(', ')}`;
+                document.getElementById('total').innerHTML = `🍀 ${pattern}`;
+                document.getElementById('rollButton').disabled = false;
+            }
+
+            setupEventListeners() {
+                document.getElementById('rollButton').addEventListener('click', () => {
+                    this.throwDice();
+                    this.checkResults();
+                });
+
+                window.addEventListener('resize', () => {
+                    this.updateSceneSize();
+                });
             }
 
             getDicePattern(diceResults) {
@@ -605,33 +556,6 @@
                 if (num4s === 1) return "一秀";
 
                 return "無";
-            }
-            
-            setupEventListeners() {
-                document.getElementById('rollButton').addEventListener('click', () => {
-                    this.rollDice();
-                });
-                
-                window.addEventListener('resize', () => {
-                    this.camera.aspect = window.innerWidth / window.innerHeight;
-                    this.camera.updateProjectionMatrix();
-                    this.renderer.setSize(window.innerWidth, window.innerHeight);
-                });
-            }
-            
-            animate() {
-                requestAnimationFrame(() => this.animate());
-                
-                // Step physics
-                this.world.step(1/60);
-                
-                // Update dice meshes to match physics bodies
-                this.dice.forEach(dice => {
-                    dice.mesh.position.copy(dice.body.position);
-                    dice.mesh.quaternion.copy(dice.body.quaternion);
-                });
-                
-                this.renderer.render(this.scene, this.camera);
             }
         }
         

@@ -3,12 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zen Sudoku</title>
+    <title>Sudoku</title>
     <style>
+        .top-controls {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 600px; /* Should match zen-container max-width */
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
         .back-home-btn {
-            position: absolute;
-            top: 20px;
-            left: 20px;
+            /* position: absolute; */ /* Removed absolute positioning */
+            /* top: 20px; */
+            /* left: 20px; */
             background: #667eea;
             color: white;
             border: none;
@@ -26,7 +35,59 @@
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
         }
+
+        .new-game-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #8BC34A 100%); /* Green gradient for New Game */
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .new-game-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .number-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1vw;
+            margin: 2vw 0 0 0;
+        }
+        .number-btn {
+            width: 8vw;
+            height: 8vw;
+            max-width: 48px;
+            max-height: 48px;
+            min-width: 28px;
+            min-height: 28px;
+            border-radius: 50%;
+            background: #fff6;
+            border: 2px solid #bbb;
+            font-size: clamp(16px, 4vw, 28px);
+            font-weight: bold;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px #0002;
+            cursor: pointer;
+            transition: background 0.2s, border 0.2s, box-shadow 0.2s;
+            user-select: none;
+        }
+        .number-btn:active, .number-btn.selected {
+            background: #e0eaff;
+            border-color: #4a90e2;
+            box-shadow: 0 4px 16px #4a90e233;
+        }
     </style>
+    
     <style>
         * {
             margin: 0;
@@ -52,7 +113,7 @@
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(10px);
             max-width: 600px;
-            width: 100%;
+            width: 100%; /* Ensure it takes full width up to max-width */
             color: #e2e8f0; /* Light text color for container */
         }
 
@@ -120,8 +181,9 @@
             border-radius: 10px;
             padding: 10px;
             margin: 0 auto;
-            width: 450px;
-            height: 450px;
+            width: 100%; /* Take max width of zen-container */
+            height: auto; /* Allow height to adjust based on content and aspect ratio */
+            aspect-ratio: 1 / 1; /* Maintain aspect ratio for square grid */
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
 
@@ -129,12 +191,26 @@
             background: #1a202c; /* Dark cell background */
             color: #e2e8f0; /* Light text in cells */
             border: none;
-            font-size: 20px;
+            font-size: clamp(12px, 5vw, 24px); /* Adaptive font size with min and max limits */
             font-weight: 600;
             text-align: center;
             cursor: pointer;
             transition: all 0.2s ease;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1; /* Ensure line height doesn't add extra space */
+            height: 100%; /* Let the cell take full height of the grid for flex centering */
+            position: relative;
+        }
+
+        .cell > * {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%; /* Ensure the content wrapper takes full height */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -171,11 +247,6 @@
 
         .cell.hint-flash {
             animation: hintFlash 1s ease-in-out;
-        }
-
-        @keyframes hintFlash {
-            0%, 100% { background: white; }
-            50% { background: #ffd700; box-shadow: 0 0 20px #ffd700; }
         }
 
         /* 3x3 box borders */
@@ -264,24 +335,39 @@
     </style>
 </head>
 <body>
-    <a href="index.html" class="back-home-btn">Back to Home</a>
+    <div class="top-controls">
+        <a href="index.html" class="back-home-btn">Back to Home</a>
+        <button class="btn new-game-btn" onclick="newGame()">New Game</button>
+    </div>
 
     <div class="zen-container">
-        <h1>Zen Sudoku</h1>
+        <h2>Zen Sudoku</h2>
+        
+        <div class="status" id="status">Find your inner peace through numbers.</div>
         
         <div class="controls">
-            <button class="btn" onclick="newGame()">New Game</button>
-            <button class="btn mode-toggle" onclick="toggleMode()" id="modeBtn">Draft Mode</button>
+            <!-- <button class="btn" onclick="newGame()">New Game</button> -->
+            <button class="btn mode-toggle" onclick="toggleMode()" id="modeBtn">Draft</button>
             <button class="btn hint-btn" onclick="getHint()">Hint</button>
-            <button class="btn" onclick="clearCell()">Clear</button>
+            <button class="btn" onclick="clearCell()">Undo</button>
             <!-- <button class="btn" onclick="checkSolution()">Check</button> --> <!-- Check button removed -->
         </div>
         
-        <div class="mode-indicator" id="modeIndicator">Normal Mode - Click to enter numbers</div>
-        
         <div class="sudoku-grid" id="sudokuGrid"></div>
+        <div class="number-buttons" id="numberButtons">
+            <button class="number-btn" data-number="1">1</button>
+            <button class="number-btn" data-number="2">2</button>
+            <button class="number-btn" data-number="3">3</button>
+            <button class="number-btn" data-number="4">4</button>
+            <button class="number-btn" data-number="5">5</button>
+            <button class="number-btn" data-number="6">6</button>
+            <button class="number-btn" data-number="7">7</button>
+            <button class="number-btn" data-number="8">8</button>
+            <button class="number-btn" data-number="9">9</button>
+        </div>
+
+        <div class="mode-indicator" id="modeIndicator">Normal Edit Mode - Click to enter numbers</div>
         
-        <div class="status" id="status">Welcome to Zen Sudoku. Find your inner peace through numbers.</div>
     </div>
 
     <script>
@@ -559,11 +645,11 @@
                 const indicator = document.getElementById('modeIndicator');
                 
                 if (this.isDraftMode) {
-                    btn.textContent = 'Normal Mode';
+                    btn.textContent = 'Edit';
                     indicator.textContent = 'Draft Mode - Click to add/remove draft numbers';
                 } else {
-                    btn.textContent = 'Draft Mode';
-                    indicator.textContent = 'Normal Mode - Click to enter numbers';
+                    btn.textContent = 'Draft';
+                    indicator.textContent = 'Normal Edit Mode - Click to enter numbers';
                 }
             }
 
@@ -868,9 +954,22 @@
 
         /* function checkSolution() is removed */
 
-        // Initialize the game when page loads
+        // Add event listeners for number buttons
         document.addEventListener('DOMContentLoaded', () => {
             sudoku = new ZenSudoku();
+            const numberButtons = document.querySelectorAll('.number-btn');
+            numberButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const num = parseInt(btn.dataset.number);
+                    if (sudoku.selectedCell !== null) {
+                        sudoku.enterNumber(num);
+                    }
+                    // Visual feedback for selected button
+                    numberButtons.forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    setTimeout(() => btn.classList.remove('selected'), 150);
+                });
+            });
         });
     </script>
 </body>

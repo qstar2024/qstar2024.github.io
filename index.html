@@ -6,6 +6,29 @@
     <title>Landing Page</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" />
     <style>
+        :root {
+            --glass-bg-light: rgba(255, 255, 255, 0.15);
+            --glass-bg-dark: rgba(0, 0, 0, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --glass-shadow-hover: 0 16px 64px rgba(0, 0, 0, 0.15);
+            --blur-intensity: 20px;
+            --border-radius: 20px;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --glass-bg-light: rgba(255, 255, 255, 0.1);
+                --glass-bg-dark: rgba(0, 0, 0, 0.4);
+                --glass-border: rgba(255, 255, 255, 0.15);
+            }
+        }
+
+        body {
+            background: linear-gradient(135deg, #a7c8a3 0%, #7d6380 100%);
+            min-height: 100vh;
+        }
+        
         .video-container {
             position: relative;
             width: 100vw;
@@ -23,6 +46,23 @@
             height: auto;
             transform: translate(-50%, -50%);
             z-index: 1;
+            filter: brightness(0.8) contrast(1.1);
+        }
+        
+        .glass-panel {
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(var(--blur-intensity));
+            -webkit-backdrop-filter: blur(var(--blur-intensity));
+            border-radius: var(--border-radius);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-panel:hover {
+            box-shadow: var(--glass-shadow-hover);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.3);
         }
         
         .dropdown-menu {
@@ -30,10 +70,12 @@
             top: 0;
             left: 0;
             right: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(10px);
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-bottom: 1px solid var(--glass-border);
             transform: translateY(-100%);
-            transition: transform 0.3s ease-in-out;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 10;
         }
         
@@ -41,72 +83,162 @@
             transform: translateY(0);
         }
         
-        .flash-card {
+        .liquid-card {
             position: relative;
             overflow: hidden;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(var(--blur-intensity));
+            -webkit-backdrop-filter: blur(var(--blur-intensity));
+            border-radius: var(--border-radius);
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
         }
         
-        .flash-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        .liquid-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            border-color: rgba(255, 255, 255, 0.4);
         }
         
-        .flash-card-inner {
+        .liquid-card-inner {
             position: relative;
             width: 100%;
             height: 100%;
             text-align: center;
+            perspective: 1000px;
         }
         
-        .flash-card-front, .flash-card-back {
+        .liquid-card-front, .liquid-card-back {
             position: absolute;
             width: 100%;
             height: 100%;
-            border-radius: 12px;
+            border-radius: calc(var(--border-radius) - 1px);
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            padding: 20px;
-            transition: transform 0.4s ease;
+            padding: 24px;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            backface-visibility: hidden;
         }
         
-        .flash-card-back {
+        .liquid-card-back {
             transform: translateY(100%);
         }
         
-        .flash-card:hover .flash-card-front {
+        .liquid-card:hover .liquid-card-front {
             transform: translateY(-100%);
         }
         
-        .flash-card:hover .flash-card-back {
+        .liquid-card:hover .liquid-card-back {
             transform: translateY(0);
         }
         
-        .rotating-container {
-            animation: rotate 20s linear infinite;
+        .glass-button {
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px 24px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
         }
         
-        @keyframes rotate {
-            from { transform: translateX(0); }
-            to { transform: translateX(-100%); }
+        .floating-element {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .glow-effect {
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glow-effect::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+        }
+        
+        .glow-effect:hover::before {
+            animation: shine 0.8s ease-in-out;
+        }
+        
+        @keyframes shine {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); opacity: 0; }
         }
         
         .scroll-trigger {
             opacity: 0;
             transform: translateY(50px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         .scroll-trigger.visible {
             opacity: 1;
             transform: translateY(0);
         }
+
+        .vibrancy-primary {
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .vibrancy-secondary {
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .vibrancy-tertiary {
+            color: rgba(255, 255, 255, 0.65);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+        }
+
+        .glass-footer {
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(var(--blur-intensity));
+            -webkit-backdrop-filter: blur(var(--blur-intensity));
+            border-top: 1px solid var(--glass-border);
+        }
+
+        .content-section {
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--glass-border);
+            margin: 20px;
+            box-shadow: var(--glass-shadow);
+        }
     </style>
 </head>
 
-<body style="background-color: #1a202c;">
+<body id="top">
     <!-- Fullscreen Video Section -->
     <div class="video-container">
         <video class="fullscreen-video" autoplay muted loop>
@@ -119,16 +251,13 @@
             <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center py-6">
                     <div class="flex items-center">
-                        <h1 class="text-white text-2xl font-bold">Your Brand</h1>
+                        <h1 class="text-white text-2xl font-bold">Q*</h1>
                     </div>
                     <div class="hidden md:block">
                         <div class="ml-10 flex items-baseline space-x-4">
-                            <a href="#home" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Home</a>
-                            <a href="#about" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">About</a>
-                            <a href="#services" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Services</a>
-                            <a href="#portfolio" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Portfolio</a>
-                            <a href="#blog" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Blog</a>
-                            <a href="#contact" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Contact</a>
+                            <a href="#demos" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Cool Stuffs</a>
+                            <a href="#contact" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Boring Stuffs</a>
+                            <a href="#contact" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Ask Me Anything</a>
                         </div>
                     </div>
                 </div>
@@ -136,173 +265,167 @@
         </div>
     </div>
 
-    <!-- Flash Cards Section -->
-    <section class="py-16 bg-white scroll-trigger" id="content">
+    <!-- Liquid Glass Cards Section -->
+    <section class="py-16 scroll-trigger content-section" id="demos">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-4xl font-bold text-center text-gray-900 mb-12">Featured Content</h2>
-            
+            <h2 class="text-4xl font-bold text-center vibrancy-primary mb-12 floating-element">Vibe Coding Roadshow</h2>
+
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
-                <!-- 2048 Game Flash Card -->
-                <div class="flash-card h-64 cursor-pointer" onclick="window.location.href='2048.html'">
-                    <div class="flash-card-inner">
-                        <div class="flash-card-front text-white" style="background: linear-gradient(to bottom right, #4E79A7, #A0CBE8);">
-                            <div class="text-4xl mb-4">🎮</div>
-                            <h3 class="text-xl font-bold">2048 Game</h3>
-                            <p class="text-sm mt-2">Play the addictive puzzle game</p>
+                <!-- 2048 Game Liquid Card -->
+                <div class="liquid-card h-64 cursor-pointer glow-effect floating-element" onclick="window.location.href='2048.html'" style="animation-delay: 0s;">
+                    <div class="liquid-card-inner">
+                        <div class="liquid-card-front vibrancy-primary" style="background: linear-gradient(135deg, rgba(78, 121, 167, 0.8), rgba(160, 203, 232, 0.6));">
+                            <div class="text-5xl mb-4 floating-element" style="animation-delay: 0.2s;">🎮</div>
+                            <h3 class="text-xl font-bold vibrancy-primary">2048 Game</h3>
+                            <p class="text-sm mt-2 vibrancy-secondary">Play the addictive puzzle game</p>
                         </div>
-                        <div class="flash-card-back text-white" style="background: linear-gradient(to bottom right, #A0CBE8, #4E79A7);">
-                            <h3 class="text-lg font-bold mb-4">About 2048</h3>
-                            <p class="text-sm mb-2">🎯 <strong>Goal:</strong> Reach the 2048 tile!</p>
-                            <p class="text-sm mb-2">⌨️ <strong>Controls:</strong> Arrow keys or swipe</p>
-                            <p class="text-sm mb-2">🧠 <strong>Strategy:</strong> Merge tiles with same numbers</p>
+                        <div class="liquid-card-back vibrancy-primary" style="background: linear-gradient(135deg, rgba(160, 203, 232, 0.8), rgba(78, 121, 167, 0.6));">
+                            <h3 class="text-lg font-bold mb-4 vibrancy-primary">About 2048</h3>
+                            <p class="text-sm mb-2 vibrancy-secondary">🎯 <strong>Goal:</strong> Reach the 2048 tile!</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">⌨️ <strong>Controls:</strong> Arrow keys or swipe</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">🧠 <strong>Strategy:</strong> Merge tiles with same numbers</p>
                             <p class="text-sm font-bold">Click to play now!</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tower Blaster Game Flash Card -->
-                <div class="flash-card h-64 cursor-pointer" onclick="window.location.href='tower_blaster.html'">
-                    <div class="flash-card-inner">
-                        <div class="flash-card-front text-white" style="background: linear-gradient(to bottom right, #F28E2B, #FFBE7D);">
-                            <div class="text-4xl mb-4">🧱</div>
-                            <h3 class="text-xl font-bold">Tower Blaster Game</h3>
-                            <p class="text-sm mt-2">A strategic brick stacking game</p>
+                <!-- Tower Blaster Game Liquid Card -->
+                <div class="liquid-card h-64 cursor-pointer glow-effect floating-element" onclick="window.location.href='tower_blaster.html'" style="animation-delay: 0.3s;">
+                    <div class="liquid-card-inner">
+                        <div class="liquid-card-front vibrancy-primary" style="background: linear-gradient(135deg, rgba(242, 142, 43, 0.8), rgba(255, 190, 125, 0.6));">
+                            <div class="text-5xl mb-4 floating-element" style="animation-delay: 0.5s;">🧱</div>
+                            <h3 class="text-xl font-bold vibrancy-primary">Tower Blaster Game</h3>
+                            <p class="text-sm mt-2 vibrancy-secondary">A strategic brick stacking game</p>
                         </div>
-                        <div class="flash-card-back text-white" style="background: linear-gradient(to bottom right, #FFBE7D, #F28E2B);">
-                            <h3 class="text-lg font-bold mb-4">About Tower Blaster</h3>
-                            <p class="text-sm mb-2">🏗️ <strong>Goal:</strong> Build a stable tower!</p>
-                            <p class="text-sm mb-2">🧠 <strong>Strategy:</strong> Choose bricks wisely</p>
-                            <p class="text-sm mb-2">🆚 <strong>Opponent:</strong> Play against an AI</p>
+                        <div class="liquid-card-back vibrancy-primary" style="background: linear-gradient(135deg, rgba(255, 190, 125, 0.8), rgba(242, 142, 43, 0.6));">
+                            <h3 class="text-lg font-bold mb-4 vibrancy-primary">About Tower Blaster</h3>
+                            <p class="text-sm mb-2 vibrancy-secondary">🏗️ <strong>Goal:</strong> Build a stable tower!</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">🧠 <strong>Strategy:</strong> Choose bricks wisely</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">🆚 <strong>Opponent:</strong> Play against an AI</p>
                             <p class="text-sm font-bold">Click to play now!</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Wordle Game Flash Card -->
-                <div class="flash-card h-64 cursor-pointer" onclick="window.location.href='wordle.html'">
-                    <div class="flash-card-inner">
-                        <div class="flash-card-front text-white" style="background: linear-gradient(to bottom right, #59A14F, #8CD17D);">
-                            <div class="text-4xl mb-4">📝</div>
-                            <h3 class="text-xl font-bold">Wordle Game</h3>
-                            <p class="text-sm mt-2">Guess the hidden word!</p>
+                <!-- Wordle Game Liquid Card -->
+                <div class="liquid-card h-64 cursor-pointer glow-effect floating-element" onclick="window.location.href='wordle.html'" style="animation-delay: 0.6s;">
+                    <div class="liquid-card-inner">
+                        <div class="liquid-card-front vibrancy-primary" style="background: linear-gradient(135deg, rgba(89, 161, 79, 0.8), rgba(140, 209, 125, 0.6));">
+                            <div class="text-5xl mb-4 floating-element" style="animation-delay: 0.8s;">📝</div>
+                            <h3 class="text-xl font-bold vibrancy-primary">Wordle Game</h3>
+                            <p class="text-sm mt-2 vibrancy-secondary">Guess the hidden word!</p>
                         </div>
-                        <div class="flash-card-back text-white" style="background: linear-gradient(to bottom right, #8CD17D, #59A14F);">
-                            <h3 class="text-lg font-bold mb-4">About Wordle</h3>
-                            <p class="text-sm mb-2">🎯 <strong>Goal:</strong> Guess the word in limited tries.</p>
-                            <p class="text-sm mb-2">⌨️ <strong>Controls:</strong> Use your keyboard to type.</p>
-                            <p class="text-sm mb-2">💡 <strong>Strategy:</strong> Use letter clues to narrow down.</p>
+                        <div class="liquid-card-back vibrancy-primary" style="background: linear-gradient(135deg, rgba(140, 209, 125, 0.8), rgba(89, 161, 79, 0.6));">
+                            <h3 class="text-lg font-bold mb-4 vibrancy-primary">About Wordle</h3>
+                            <p class="text-sm mb-2 vibrancy-secondary">🎯 <strong>Goal:</strong> Guess the word in limited tries.</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">⌨️ <strong>Controls:</strong> Use your keyboard to type.</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">💡 <strong>Strategy:</strong> Use letter clues to narrow down.</p>
                             <p class="text-sm font-bold">Click to play now!</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Battleship Game Flash Card -->
-                <div class="flash-card h-64 cursor-pointer" onclick="window.location.href='battleship.html'">
-                    <div class="flash-card-inner">
-                        <div class="flash-card-front text-white" style="background: linear-gradient(to bottom right, #AF7AA0, #D4A6C8);">
-                            <div class="text-4xl mb-4">🚢</div>
-                            <h3 class="text-xl font-bold">Battleship Game</h3>
-                            <p class="text-sm mt-2">Sink the enemy fleet!</p>
+                <!-- Battleship Game Liquid Card -->
+                <div class="liquid-card h-64 cursor-pointer glow-effect floating-element" onclick="window.location.href='battleship.html'" style="animation-delay: 0.9s;">
+                    <div class="liquid-card-inner">
+                        <div class="liquid-card-front vibrancy-primary" style="background: linear-gradient(135deg, rgba(175, 122, 160, 0.8), rgba(212, 166, 200, 0.6));">
+                            <div class="text-5xl mb-4 floating-element" style="animation-delay: 1.1s;">🚢</div>
+                            <h3 class="text-xl font-bold vibrancy-primary">Battleship Game</h3>
+                            <p class="text-sm mt-2 vibrancy-secondary">Sink the enemy fleet!</p>
                         </div>
-                        <div class="flash-card-back text-white" style="background: linear-gradient(to bottom right, #D4A6C8, #AF7AA0);">
-                            <h3 class="text-lg font-bold mb-4">About Battleship</h3>
-                            <p class="text-sm mb-2">🎯 <strong>Goal:</strong> Destroy all enemy ships.</p>
-                            <p class="text-sm mb-2">🖱️ <strong>Controls:</strong> Click to target cells.</p>
-                            <p class="text-sm mb-2">🌊 <strong>Strategy:</strong> Locate and sink ships.</p>
+                        <div class="liquid-card-back vibrancy-primary" style="background: linear-gradient(135deg, rgba(212, 166, 200, 0.8), rgba(175, 122, 160, 0.6));">
+                            <h3 class="text-lg font-bold mb-4 vibrancy-primary">About Battleship</h3>
+                            <p class="text-sm mb-2 vibrancy-secondary">🎯 <strong>Goal:</strong> Destroy all enemy ships.</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">🖱️ <strong>Controls:</strong> Click to target cells.</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">🌊 <strong>Strategy:</strong> Locate and sink ships.</p>
                             <p class="text-sm font-bold">Click to play now!</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sudoku Game Flash Card -->
-                <div class="flash-card h-64 cursor-pointer" onclick="window.location.href='sudoku.html'">
-                    <div class="flash-card-inner">
-                        <div class="flash-card-front text-white" style="background: linear-gradient(to bottom right, #6B46C1, #9F7AEA);">
-                            <div class="text-4xl mb-4">🔢</div>
-                            <h3 class="text-xl font-bold">Sudoku Game</h3>
-                            <p class="text-sm mt-2">Find your inner peace through numbers</p>
+                <!-- Sudoku Game Liquid Card -->
+                <div class="liquid-card h-64 cursor-pointer glow-effect floating-element" onclick="window.location.href='sudoku.html'" style="animation-delay: 1.2s;">
+                    <div class="liquid-card-inner">
+                        <div class="liquid-card-front vibrancy-primary" style="background: linear-gradient(135deg, rgba(107, 70, 193, 0.8), rgba(159, 122, 234, 0.6));">
+                            <div class="text-5xl mb-4 floating-element" style="animation-delay: 1.4s;">🔢</div>
+                            <h3 class="text-xl font-bold vibrancy-primary">Sudoku Game</h3>
+                            <p class="text-sm mt-2 vibrancy-secondary">Find your inner peace through numbers</p>
                         </div>
-                        <div class="flash-card-back text-white" style="background: linear-gradient(to bottom right, #9F7AEA, #6B46C1);">
-                            <h3 class="text-lg font-bold mb-4">About Sudoku</h3>
-                            <p class="text-sm mb-2">🎯 <strong>Goal:</strong> Fill the grid with numbers 1-9.</p>
-                            <p class="text-sm mb-2">🧠 <strong>Strategy:</strong> Use logic to solve the puzzle.</p>
-                            <p class="text-sm mb-2">💡 <strong>Features:</strong> Draft mode, hints, and validation.</p>
+                        <div class="liquid-card-back vibrancy-primary" style="background: linear-gradient(135deg, rgba(159, 122, 234, 0.8), rgba(107, 70, 193, 0.6));">
+                            <h3 class="text-lg font-bold mb-4 vibrancy-primary">About Sudoku</h3>
+                            <p class="text-sm mb-2 vibrancy-secondary">🎯 <strong>Goal:</strong> Fill the grid with numbers 1-9.</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">🧠 <strong>Strategy:</strong> Use logic to solve the puzzle.</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">💡 <strong>Features:</strong> Draft mode, hints, and validation.</p>
                             <p class="text-sm font-bold">Click to play now!</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Dice Game Flash Card -->
-                <div class="flash-card h-64 cursor-pointer" onclick="window.location.href='dice_game.html'">
-                    <div class="flash-card-inner">
-                        <div class="flash-card-front text-white" style="background: linear-gradient(to bottom right, #E15759, #FF9D9A);">
-                            <div class="text-4xl mb-4">🎲</div>
-                            <h3 class="text-xl font-bold">Dice Game</h3>
-                            <p class="text-sm mt-2">Roll the dice and wish you good luck!</p>
+                <!-- Dice Game Liquid Card -->
+                <div class="liquid-card h-64 cursor-pointer glow-effect floating-element" onclick="window.location.href='dice_game.html'" style="animation-delay: 1.5s;">
+                    <div class="liquid-card-inner">
+                        <div class="liquid-card-front vibrancy-primary" style="background: linear-gradient(135deg, rgba(225, 87, 89, 0.8), rgba(255, 157, 154, 0.6));">
+                            <div class="text-5xl mb-4 floating-element" style="animation-delay: 1.7s;">🎲</div>
+                            <h3 class="text-xl font-bold vibrancy-primary">Dice Game</h3>
+                            <p class="text-sm mt-2 vibrancy-secondary">Roll the dice and wish you good luck!</p>
                         </div>
-                        <div class="flash-card-back text-white" style="background: linear-gradient(to bottom right, #FF9D9A, #E15759);">
-                            <h3 class="text-lg font-bold mb-4">About Dice Game</h3>
-                            <p class="text-sm mb-2">🎯 <strong>Goal:</strong> Score points by rolling dice.</p>
-                            <p class="text-sm mb-2">🎲 <strong>Gameplay:</strong> Simple and engaging dice rolls.</p>
-                            <p class="text-sm mb-2">🍀 <strong>Luck:</strong> Best wishes for Mid-Autumn Festival!</p>
+                        <div class="liquid-card-back vibrancy-primary" style="background: linear-gradient(135deg, rgba(255, 157, 154, 0.8), rgba(225, 87, 89, 0.6));">
+                            <h3 class="text-lg font-bold mb-4 vibrancy-primary">About Dice Game</h3>
+                            <p class="text-sm mb-2 vibrancy-secondary">🎯 <strong>Goal:</strong> Score points by rolling dice.</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">🎲 <strong>Gameplay:</strong> Simple and engaging dice rolls.</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">🍀 <strong>Luck:</strong> Best wishes for Mid-Autumn Festival!</p>
                             <p class="text-sm font-bold">Click to play now!</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Portfolio Flash Card -->
-                <div class="flash-card h-64 cursor-pointer">
-                    <div class="flash-card-inner">
-                        <div class="flash-card-front text-white" style="background: linear-gradient(to bottom right, #F28E2B, #FFBE7D);">
-                            <div class="text-4xl mb-4">🎨</div>
-                            <h3 class="text-xl font-bold">Portfolio</h3>
-                            <p class="text-sm mt-2">Featured projects and work</p>
+                <!-- Portfolio Liquid Card -->
+                <div class="liquid-card h-64 cursor-pointer glow-effect floating-element" style="animation-delay: 1.8s;">
+                    <div class="liquid-card-inner">
+                        <div class="liquid-card-front vibrancy-primary" style="background: linear-gradient(135deg, rgba(242, 142, 43, 0.8), rgba(255, 190, 125, 0.6));">
+                            <div class="text-5xl mb-4 floating-element" style="animation-delay: 2.0s;">🎨</div>
+                            <h3 class="text-xl font-bold vibrancy-primary">Portfolio</h3>
+                            <p class="text-sm mt-2 vibrancy-secondary">Featured projects and work</p>
                         </div>
-                        <div class="flash-card-back text-white" style="background: linear-gradient(to bottom right, #FFBE7D, #F28E2B);">
-                            <h3 class="text-lg font-bold mb-4">Recent Projects</h3>
-                            <ul class="text-sm space-y-2">
-                                <li><a href="#project1" class="hover:underline">• E-commerce Platform</a></li>
-                                <li><a href="#project2" class="hover:underline">• Mobile App Design</a></li>
-                                <li><a href="#project3" class="hover:underline">• Brand Identity System</a></li>
-                            </ul>
+                        <div class="liquid-card-back vibrancy-primary" style="background: linear-gradient(135deg, rgba(255, 190, 125, 0.8), rgba(242, 142, 43, 0.6));">
+                            <h3 class="text-lg font-bold mb-4 vibrancy-primary">Recent Projects</h3>
+                            <p class="text-sm mb-2 vibrancy-secondary">E-commerce Platform</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">Mobile App Design</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">Brand Identity</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Resources Flash Card -->
-                <div class="flash-card h-64 cursor-pointer">
-                    <div class="flash-card-inner">
-                        <div class="flash-card-front text-white" style="background: linear-gradient(to bottom right, #76B7B2, #B5E1DF);">
-                            <div class="text-4xl mb-4">📚</div>
-                            <h3 class="text-xl font-bold">Resources</h3>
-                            <p class="text-sm mt-2">Tools, guides, and downloads</p>
+                <!-- Resources Liquid Card -->
+                <div class="liquid-card h-64 cursor-pointer glow-effect floating-element" style="animation-delay: 2.1s;">
+                    <div class="liquid-card-inner">
+                        <div class="liquid-card-front vibrancy-primary" style="background: linear-gradient(135deg, rgba(118, 183, 178, 0.8), rgba(181, 225, 223, 0.6));">
+                            <div class="text-5xl mb-4 floating-element" style="animation-delay: 2.3s;">📚</div>
+                            <h3 class="text-xl font-bold vibrancy-primary">Resources</h3>
+                            <p class="text-sm mt-2 vibrancy-secondary">Tools, guides, and downloads</p>
                         </div>
-                        <div class="flash-card-back text-white" style="background: linear-gradient(to bottom right, #B5E1DF, #76B7B2);">
-                            <h3 class="text-lg font-bold mb-4">Free Resources</h3>
-                            <ul class="text-sm space-y-2">
-                                <li><a href="#resource1" class="hover:underline">• Design Templates</a></li>
-                                <li><a href="#resource2" class="hover:underline">• Code Snippets</a></li>
-                                <li><a href="#resource3" class="hover:underline">• Development Tools</a></li>
-                            </ul>
+                        <div class="liquid-card-back vibrancy-primary" style="background: linear-gradient(135deg, rgba(181, 225, 223, 0.8), rgba(118, 183, 178, 0.6));">
+                            <h3 class="text-lg font-bold mb-4 vibrancy-primary">Free Resources</h3>
+                            <p class="text-sm mb-2 vibrancy-secondary">Design Templates</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">Code Snippets</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">Development Tools</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Community Flash Card -->
-                <div class="flash-card h-64 cursor-pointer">
-                    <div class="flash-card-inner">
-                        <div class="flash-card-front text-white" style="background: linear-gradient(to bottom right, #B07AA1, #D4A6C8);">
-                            <div class="text-4xl mb-4">👥</div>
-                            <h3 class="text-xl font-bold">Community</h3>
-                            <p class="text-sm mt-2">Connect and collaborate</p>
+                <!-- Community Liquid Card -->
+                <div class="liquid-card h-64 cursor-pointer glow-effect floating-element" style="animation-delay: 2.4s;">
+                    <div class="liquid-card-inner">
+                        <div class="liquid-card-front vibrancy-primary" style="background: linear-gradient(135deg, rgba(176, 122, 161, 0.8), rgba(212, 166, 200, 0.6));">
+                            <div class="text-5xl mb-4 floating-element" style="animation-delay: 2.6s;">👥</div>
+                            <h3 class="text-xl font-bold vibrancy-primary">Community</h3>
+                            <p class="text-sm mt-2 vibrancy-secondary">Connect and collaborate</p>
                         </div>
-                        <div class="flash-card-back text-white" style="background: linear-gradient(to bottom right, #D4A6C8, #B07AA1);">
-                            <h3 class="text-lg font-bold mb-4">Join Us</h3>
-                            <ul class="text-sm space-y-2">
-                                <li><a href="#forum" class="hover:underline">• Discussion Forum</a></li>
-                                <li><a href="#discord" class="hover:underline">• Discord Server</a></li>
-                                <li><a href="#events" class="hover:underline">• Upcoming Events</a></li>
-                            </ul>
+                        <div class="liquid-card-back vibrancy-primary" style="background: linear-gradient(135deg, rgba(212, 166, 200, 0.8), rgba(176, 122, 161, 0.6));">
+                            <h3 class="text-lg font-bold mb-4 vibrancy-primary">Join Us</h3>
+                            <p class="text-sm mb-2 vibrancy-secondary">Discussion Forum</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">Discord Server</p>
+                            <p class="text-sm mb-2 vibrancy-secondary">Upcoming Events</p>
                         </div>
                     </div>
                 </div>
@@ -312,60 +435,59 @@
     </section>
 
     <!-- Footer with Sitemap -->
-    <footer class="bg-gray-900 text-white scroll-trigger">
+    <footer class="bg-gray-900 text-white scroll-trigger" id="contact">
         <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <!-- Company Info -->
-                <div class="col-span-1 md:col-span-1">
-                    <h3 class="text-lg font-bold mb-4">Your Brand</h3>
-                    <p class="text-gray-400 text-sm mb-4">Creating amazing digital experiences through innovative design and development.</p>
-                    <div class="flex space-x-4">
-                        <a href="#social1" class="text-gray-400 hover:text-white transition-colors">📘</a>
-                        <a href="#social2" class="text-gray-400 hover:text-white transition-colors">🐦</a>
-                        <a href="#social3" class="text-gray-400 hover:text-white transition-colors">📷</a>
-                        <a href="#social4" class="text-gray-400 hover:text-white transition-colors">💼</a>
-                    </div>
+            <div class="grid grid-cols-2 md:grid-cols-2 gap-8">
+                <div class="col-span-1 md:col-span-1 glass-panel p-6 rounded-xl floating-element" style="animation-delay: 3.0s;">
+                    <h3 class="text-lg font-bold mb-4 vibrancy-primary">Vibe Coding Roadshow</h3>
+                    <a href="#demos" class="vibrancy-secondary text-sm mb-4">Creating amazing digital experiences through innovative design and development.
+                        <p class="text-sm font-bold">Go!</p>
+                    </a>
                 </div>
 
-                <!-- Quick Links -->
-                <div>
-                    <h3 class="text-lg font-bold mb-4">Quick Links</h3>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#home" class="text-gray-400 hover:text-white transition-colors">Home</a></li>
-                        <li><a href="#about" class="text-gray-400 hover:text-white transition-colors">About Us</a></li>
-                        <li><a href="#services" class="text-gray-400 hover:text-white transition-colors">Services</a></li>
-                        <li><a href="#portfolio" class="text-gray-400 hover:text-white transition-colors">Portfolio</a></li>
-                        <li><a href="#contact" class="text-gray-400 hover:text-white transition-colors">Contact</a></li>
+                <div class="col-span-1 md:col-span-1 glass-panel p-6 rounded-xl floating-element" style="animation-delay: 3.2s;">
+                    <h3 class="text-lg font-bold mb-4 vibrancy-primary">Financial Alchemistry</h3>
+                    <a href="#posts" class="vibrancy-secondary text-sm mb-4">Documenting my learning notes on various quantitative research topics in this blog.
+                        <p class="text-sm font-bold">Go!</p>
+                    </a>
+                </div>
+
+                <div class="col-span-1 md:col-span-1 glass-panel p-6 rounded-xl floating-element" style="animation-delay: 3.4s;">
+                    <h3 class="text-lg font-bold mb-4 vibrancy-primary">Back to Top</h3>
+                    <a href="#top" class="vibrancy-secondary text-sm mb-4">Did you notice the video is about Lantingji Xu?
+                        <p href="#top" class="text-sm font-bold">Go!</p>
+                    </a>
+                </div>
+
+                <div class="glass-panel p-6 rounded-xl floating-element" style="animation-delay: 3.6s;">
+                    <h3 class="text-lg font-bold mb-4 vibrancy-primary">Ask Me Anything</h3>
+                    <ul class="flex space-x-2 text-sm">
+                        <li><a href="https://github.com/qstar2024" target="_blank" rel="noopener noreferrer me" title="Vibe Coder🧑🏻‍💻" class="vibrancy-tertiary hover:vibrancy-primary transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+                                </path>
+                            </svg>
+                        </a></li>
+                        <li><a href="https://x.com/tianq2024" target="_blank" rel="noopener noreferrer me" title="Financial Alchemist🧙🏻‍♂️" class="vibrancy-tertiary hover:vibrancy-primary transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z">
+                                </path>
+                            </svg>
+                        </a></li>
+                        <li><a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer me" title="Meme Addict😅" class="vibrancy-tertiary hover:vibrancy-primary transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                                <line x1="17.5" y1="6.5" x2="17.5" y2="6.5"></line>
+                            </svg>
+                        </a></li>
                     </ul>
                 </div>
 
-                <!-- Content -->
-                <div>
-                    <h3 class="text-lg font-bold mb-4">Content</h3>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#blog" class="text-gray-400 hover:text-white transition-colors">Blog</a></li>
-                        <li><a href="#tutorials" class="text-gray-400 hover:text-white transition-colors">Tutorials</a></li>
-                        <li><a href="#demos" class="text-gray-400 hover:text-white transition-colors">Code Demos</a></li>
-                        <li><a href="#resources" class="text-gray-400 hover:text-white transition-colors">Resources</a></li>
-                        <li><a href="#downloads" class="text-gray-400 hover:text-white transition-colors">Downloads</a></li>
-                    </ul>
-                </div>
-
-                <!-- Legal -->
-                <div>
-                    <h3 class="text-lg font-bold mb-4">Legal</h3>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#privacy" class="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
-                        <li><a href="#terms" class="text-gray-400 hover:text-white transition-colors">Terms of Service</a></li>
-                        <li><a href="#cookies" class="text-gray-400 hover:text-white transition-colors">Cookie Policy</a></li>
-                        <li><a href="#sitemap" class="text-gray-400 hover:text-white transition-colors">Sitemap</a></li>
-                        <li><a href="#support" class="text-gray-400 hover:text-white transition-colors">Support</a></li>
-                    </ul>
-                </div>
             </div>
 
             <div class="border-t border-gray-800 mt-8 pt-8 text-center">
-                <p class="text-gray-400 text-sm">&copy; 2024 Your Brand. All rights reserved.</p>
+                <p class="text-gray-400 text-sm">&copy; 2025 Q*. All rights reserved.</p>
             </div>
         </div>
     </footer>

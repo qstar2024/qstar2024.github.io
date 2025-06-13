@@ -337,12 +337,11 @@
 <body>
     <div class="top-controls">
         <a href="index.html" class="back-home-btn">Back to Home</a>
+        <h2>Zen Sudoku</h2>
         <button class="btn new-game-btn" onclick="newGame()">New Game</button>
     </div>
 
     <div class="zen-container">
-        <h2>Zen Sudoku</h2>
-        
         <div class="status" id="status">Find your inner peace through numbers.</div>
         
         <div class="controls">
@@ -873,7 +872,7 @@
                 if (this.isValidSolution()) {
                     document.getElementById('status').textContent = '🎉 Congratulations! You have achieved Sudoku enlightenment! 🎉';
                 } else {
-                    document.getElementById('status').textContent = 'Puzzle complete, but there are some errors. Keep seeking the path to perfection.';
+                    document.getElementById('status').textContent = 'Notice some errors. Keep seeking the path to perfection.';
                 }
             }
 
@@ -929,7 +928,7 @@
                 this.drafts = Array(9).fill().map(() => Array(9).fill().map(() => new Set()));
                 this.selectedCell = null;
                 this.generatePuzzle();
-                document.getElementById('status').textContent = 'New puzzle generated. May wisdom guide your moves.';
+                document.getElementById('status').textContent = 'New Puzzle: May wisdom guide your moves.';
             }
         }
 

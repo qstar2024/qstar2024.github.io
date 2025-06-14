@@ -97,7 +97,8 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: url('bgp_zen.png') no-repeat center center fixed;
+            background-size: cover;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -107,7 +108,7 @@
         }
 
         .zen-container {
-            background: #2d3748; /* Dark background */
+            background: rgba(210, 180, 140, 0.5); /* Light brown bamboo/wood color, half transparent */
             border-radius: 20px;
             padding: 5px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
@@ -177,7 +178,7 @@
             grid-template-columns: repeat(9, 1fr);
             grid-template-rows: repeat(9, 1fr);
             gap: 1px;
-            background: #4a5568; /* Slightly lighter dark for grid background */
+            background: #5e3415; /* Dark yellow/brown for grid background */
             border-radius: 1px;
             padding: 1px;
             margin: 0 auto;
@@ -188,7 +189,7 @@
         }
 
         .cell {
-            background: #1a202c; /* Dark cell background */
+            background: #846d23; /* Dark yellow/brown cell background */
             color: #e2e8f0; /* Light text in cells */
             border: none;
             font-size: clamp(12px, 5vw, 24px); /* Adaptive font size with min and max limits */
@@ -217,32 +218,33 @@
         }
 
         .cell:hover {
-            background: #2d3748; /* Slightly lighter dark on hover */
+            background: #dba33b; /* Slightly lighter dark on hover */
         }
 
         .cell.selected {
-            background: #4a5568; /* Darker selected background */
-            box-shadow: inset 0 0 0 3px #63b3ed; /* Lighter blue shadow for dark mode */
+            background: #b79d39; /* Darker selected background */
+            box-shadow: inset 0 0 0 3px #cfed63; /* Lighter blue shadow for dark mode */
         }
 
         .cell.given {
-            background: #2c3340; /* Slightly different dark for given numbers */
-            color: #a0aec0; /* Lighter gray for given numbers */
+            background: #8c774d; /* Slightly different dark for given numbers */
+            color: #2f280d; /* Lighter gray for given numbers */
             font-weight: 700;
         }
 
         .cell.error {
-            background: #753a3a; /* Darker red for error background */
-            color: #fed7d7; /* Light red for error text */
+            background: #a85b20; /* Darker red for error background */
+            color: #2f280d; /* Light red for error text */
         }
 
         .cell.highlight-same-number {
             font-weight: bold;
-            color: #90cdf4; /* Light blue for same number highlight */
+            color: #2f280d; /* Light blue for same number highlight */
+            background-color: #b79d39; /* Subtle highlight for row/col */
         }
 
         .cell.highlight-row-col {
-            background-color: #353f50; /* Subtle highlight for row/col */
+            background-color: #b79d39; /* Subtle highlight for row/col */
         }
 
         .cell.hint-flash {
@@ -251,34 +253,34 @@
 
         /* 3x3 box borders */
         .cell:nth-child(3n):not(:nth-child(9n)) {
-            border-right: 3px solid #718096; /* Lighter border for dark mode */
+            border-right: 3px solid #9f7e30; /* Lighter border for dark mode */
         }
         
         .cell:nth-child(n+19):nth-child(-n+27):not(:nth-child(3n):nth-child(9n)),
         .cell:nth-child(n+46):nth-child(-n+54):not(:nth-child(3n):nth-child(9n)) {
-             border-bottom: 3px solid #718096; /* Lighter border for dark mode */
+             border-bottom: 3px solid #9f7e30; /* Lighter border for dark mode */
         }
 
         /* Ensure outer borders are handled by the grid padding or a wrapper if needed */
-        .sudoku-grid > .cell:nth-child(-n+9) { border-top: 3px solid #718096; }
-        .sudoku-grid > .cell:nth-child(9n) { border-right: 3px solid #718096; }
-        .sudoku-grid > .cell:nth-child(n+73) { border-bottom: 3px solid #718096; }
-        .sudoku-grid > .cell:nth-child(9n+1) { border-left: 3px solid #718096; }
+        .sudoku-grid > .cell:nth-child(-n+9) { border-top: 3px solid #9f7e30; }
+        .sudoku-grid > .cell:nth-child(9n) { border-right: 3px solid #9f7e30;}
+        .sudoku-grid > .cell:nth-child(n+73) { border-bottom: 3px solid #9f7e30; }
+        .sudoku-grid > .cell:nth-child(9n+1) { border-left: 3px solid #9f7e30; }
 
         .cell:nth-child(3n) {
             border-right-width: 3px;
-            border-right-color: #718096;
+            border-right-color: #9f7e30;
         }
         .cell:nth-child(9n) {
             border-right-width: 3px; /* Explicitly set for the last column in a 3x3 grid */
-            border-right-color: #718096;
+            border-right-color: #9f7e30;
         }
 
         .cell:nth-child(n+19):nth-child(-n+27), /* row 3 */
         .cell:nth-child(n+46):nth-child(-n+54)  /* row 6 */
         {
             border-bottom-width: 3px;
-            border-bottom-color: #718096;
+            border-bottom-color: #9f7e30;
         }
 
 
@@ -292,7 +294,7 @@
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
             font-size: 10px;
-            color: #a0aec0; /* Lighter gray for draft numbers */
+            color: #2f280d; /* Lighter gray for draft numbers */
             pointer-events: none;
         }
 
@@ -307,14 +309,14 @@
             text-align: center;
             margin-top: 20px;
             font-size: 16px;
-            color: #cbd5e0; /* Light gray for status text */
+            color: #626971; /* Light gray for status text */
         }
 
         .mode-indicator {
             text-align: center;
             margin-bottom: 15px;
             font-size: 14px;
-            color: #a0aec0; /* Lighter gray for mode indicator */
+            color: #626971; /* Lighter gray for mode indicator */
             font-style: italic;
         }
 

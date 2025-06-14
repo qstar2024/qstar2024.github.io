@@ -7,25 +7,26 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" />
     <style>
         :root {
-            --glass-bg-light: rgba(255, 255, 255, 0.15);
-            --glass-bg-dark: rgba(0, 0, 0, 0.25);
+            --glass-bg-light: rgba(255, 255, 255, 0.001);
+            --glass-bg-dark: rgba(0, 0, 0, 0.01);
             --glass-border: rgba(255, 255, 255, 0.2);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            --glass-shadow-hover: 0 16px 64px rgba(0, 0, 0, 0.15);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.01);
+            --glass-shadow-hover: 0 16px 64px rgba(0, 0, 0, 0.05);
             --blur-intensity: 20px;
             --border-radius: 20px;
         }
 
         @media (prefers-color-scheme: dark) {
             :root {
-                --glass-bg-light: rgba(255, 255, 255, 0.1);
-                --glass-bg-dark: rgba(0, 0, 0, 0.4);
+                --glass-bg-light: rgba(255, 255, 255, 0.015);
+                --glass-bg-dark: rgba(0, 0, 0, 0.07);
                 --glass-border: rgba(255, 255, 255, 0.15);
             }
         }
 
         body {
-            background: linear-gradient(135deg, #a7c8a3 0%, #7d6380 100%);
+            background: url('bgp_spring.png') no-repeat center center fixed;
+            background-size: cover;
             min-height: 100vh;
         }
         
@@ -107,7 +108,7 @@
             color: #fff;
             font-size: 0.8rem;
             font-weight: 500;
-            padding: 0.4rem 1.2rem;
+            padding: 0.2rem 0.6rem;
             margin-top: 0.6rem;
             margin-bottom: 0.2rem;
             cursor: pointer;
@@ -272,7 +273,7 @@
             -webkit-backdrop-filter: blur(15px);
             border-radius: var(--border-radius);
             border: 1px solid var(--glass-border);
-            margin: 20px;
+            margin: 100px;
             box-shadow: var(--glass-shadow);
         }
     </style>
@@ -281,7 +282,7 @@
 <body id="top">
     <!-- Fullscreen Video Section -->
     <div class="video-container">
-        <div class="absolute inset-0 flex items-center justify-center z-0 text-white text-lg text-center p-4" style="background-color: rgba(0,0,0,0.7);">
+        <div class="absolute inset-0 flex items-center justify-center z-0 text-white text-lg text-center p-4">
             Failed to load video, please click or scroll to continue.
         </div>
         <video class="fullscreen-video" autoplay muted loop>
@@ -298,7 +299,7 @@
     </div>
 
     <!-- Liquid Glass Cards Section -->
-    <section class="py-8 scroll-trigger content-section" id="demos">
+    <section class="py-3 scroll-trigger content-section" id="demos">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 class="text-2xl font-bold text-center vibrancy-primary mb-6 floating-element">Vibe Coding Roadshow</h2>
 
@@ -519,7 +520,7 @@
             </div>
 
             <div class="border-t border-gray-800 mt-4 pt-4 text-center">
-                <p class="text-gray-400 text-sm">&copy; 2025 Q*. All rights reserved.</p>
+                <p class="text-sm font-bold">&copy; 2025 Q*. All rights reserved.</p>
             </div>
         </div>
     </footer>

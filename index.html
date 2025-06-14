@@ -64,22 +64,47 @@
             border-color: rgba(255, 255, 255, 0.3);
         }
         
-        .dropdown-menu {
-            position: absolute;
+        .liquid-glass-menu {
+            position: fixed;
             top: 0;
-            left: 0;
-            right: 0;
-            background: var(--glass-bg-dark);
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            border-bottom: 1px solid var(--glass-border);
-            transform: translateY(-100%);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 10;
+            left: 50%;
+            transform: translate(-50%, -120%);
+            display: flex;
+            gap: 2rem;
+            z-index: 20;
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            justify-content: center;
+            width: 100vw;
+            pointer-events: none;
         }
-        
-        .video-container:hover .dropdown-menu {
-            transform: translateY(0);
+        .liquid-glass-menu.visible {
+            transform: translate(-50%, 0);
+            pointer-events: auto;
+        }
+        .liquid-glass-btn {
+            background: var(--glass-bg-light);
+            backdrop-filter: blur(var(--blur-intensity));
+            -webkit-backdrop-filter: blur(var(--blur-intensity));
+            border-radius: 2rem;
+            border: 1.5px solid var(--glass-border);
+            box-shadow: var(--glass-shadow);
+            color: #fff;
+            font-size: 1.2rem;
+            font-weight: 600;
+            padding: 0.75rem 2.5rem;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            outline: none;
+            transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
+            backdrop-filter: blur(20px);
+            border: 1.5px solid rgba(255,255,255,0.25);
+            box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+        }
+        .liquid-glass-btn:hover, .liquid-glass-btn:focus {
+            background: rgba(255,255,255,0.18);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            transform: translateY(-2px) scale(1.04);
         }
         
         .liquid-card {
@@ -245,22 +270,11 @@
             Your browser does not support the video tag.
         </video>
         
-        <!-- Transparent Dropdown Menu -->
-        <div class="dropdown-menu">
-            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center py-6">
-                    <div class="flex items-center">
-                        <h1 class="text-white text-2xl font-bold">Q*</h1>
-                    </div>
-                    <div class="flex flex-grow justify-end">
-                        <div class="ml-10 flex items-baseline space-x-4 flex-wrap justify-center">
-                            <a href="#demos" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Cool Stuffs</a>
-                            <a href="#contact" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Boring Stuffs</a>
-                            <a href="#contact" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Ask Me Anything</a>
-                        </div>
-                    </div>
-                </div>
-            </nav>
+        <!-- Liquid Glass Buttons Menu -->
+        <div class="liquid-glass-menu" id="liquidGlassMenu">
+            <button class="liquid-glass-btn" onclick="location.href='#demos'">Cool Stuffs</button>
+            <button class="liquid-glass-btn" onclick="location.href='#contact'">Boring Stuffs</button>
+            <button class="liquid-glass-btn" onclick="location.href='#contact'">Ask Me Anything</button>
         </div>
     </div>
 
@@ -451,13 +465,6 @@
                     </a>
                 </div>
 
-                <div class="col-span-1 md:col-span-1 glass-panel p-6 rounded-xl floating-element" style="animation-delay: 3.4s;">
-                    <h3 class="text-lg font-bold mb-4 vibrancy-primary">Back to Top</h3>
-                    <a href="#top" class="vibrancy-secondary text-sm mb-4">Did you notice the video is about Lantingji Xu?
-                        <p href="#top" class="text-sm font-bold">Go!</p>
-                    </a>
-                </div>
-
                 <div class="glass-panel p-6 rounded-xl floating-element" style="animation-delay: 3.6s;">
                     <h3 class="text-lg font-bold mb-4 vibrancy-primary">Ask Me Anything</h3>
                     <ul class="flex space-x-2 text-sm">
@@ -481,6 +488,13 @@
                             </svg>
                         </a></li>
                     </ul>
+                </div>
+
+                <div class="col-span-1 md:col-span-1 glass-panel p-6 rounded-xl floating-element" style="animation-delay: 3.4s;">
+                    <h3 class="text-lg font-bold mb-4 vibrancy-primary">Back to Top</h3>
+                    <a href="#top" class="vibrancy-secondary text-sm mb-4">Did you notice the video is about Lantingji Xu?
+                        <p href="#top" class="text-sm font-bold">Go!</p>
+                    </a>
                 </div>
 
             </div>
@@ -560,5 +574,34 @@
             `;
         });
     </script>
-</body>
+    <script>
+        // Liquid Glass Menu Drop Animation & Timed Visibility
+        (function() {
+            const menu = document.getElementById('liquidGlassMenu');
+            let shown = false;
+            let hideTimeout;
+            function showMenu() {
+                if (!shown) {
+                    menu.classList.add('visible');
+                    shown = true;
+                    clearTimeout(hideTimeout);
+                    hideTimeout = setTimeout(() => {
+                        menu.classList.remove('visible');
+                        shown = false;
+                    }, 5000);
+                } else {
+                    clearTimeout(hideTimeout);
+                    hideTimeout = setTimeout(() => {
+                        menu.classList.remove('visible');
+                        shown = false;
+                    }, 5000);
+                }
+            }
+            ['click','scroll'].forEach(evt => window.addEventListener(evt, showMenu, { once: false }));
+            menu.addEventListener('mouseenter', showMenu);
+            // Optionally, show on first load for demo:
+            // setTimeout(showMenu, 500);
+        })();
+    </script>
+    </body>
 </html>

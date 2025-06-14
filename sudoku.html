@@ -113,7 +113,7 @@
             padding: 2px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
             backdrop-filter: blur(10px);
-            max-width: 560px;
+            max-width: 420px;
             width: 100%; /* Ensure it takes full width up to max-width */
             color: #e2e8f0; /* Light text color for container */
         }
@@ -182,17 +182,17 @@
             border-radius: 1px;
             padding: 0;
             margin: 0 auto;
-            width: 95%; /* Take max width of zen-container */
+            width: 98%; /* Take max width of zen-container */
             height: auto; /* Allow height to adjust based on content and aspect ratio */
             aspect-ratio: 1 / 1; /* Maintain aspect ratio for square grid */
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
         }
 
         .cell {
-            background: #846d23; /* Dark yellow/brown cell background */
+            background: #927823; /* Dark yellow/brown cell background */
             color: #e2e8f0; /* Light text in cells */
             border: none;
-            font-size: clamp(12px, 5vw, 24px); /* Adaptive font size with min and max limits */
+            font-size: clamp(10px, 4vw, 20px); /* Adaptive font size with min and max limits */
             font-weight: 600;
             text-align: center;
             cursor: pointer;
@@ -227,7 +227,7 @@
         }
 
         .cell.given {
-            background: #8c774d; /* Slightly different dark for given numbers */
+            background: #a38b5b; /* Slightly different dark for given numbers */
             color: #2f280d; /* Lighter gray for given numbers */
             font-weight: 700;
         }
@@ -240,7 +240,7 @@
         .cell.highlight-same-number {
             font-weight: bold;
             color: #2f280d; /* Light blue for same number highlight */
-            background-color: #b79d39; /* Subtle highlight for row/col */
+            background-color: #c7ad46; /* Subtle highlight for row/col */
         }
 
         .cell.highlight-row-col {
@@ -263,7 +263,7 @@
 
         /* Ensure outer borders are handled by the grid padding or a wrapper if needed */
         .sudoku-grid > .cell:nth-child(-n+9) { border-top: 3px solid #9f7e30; }
-        .sudoku-grid > .cell:nth-child(9n) { border-right: 3px solid #9f7e30;}
+        .sudoku-grid > .cell:nth-child(9n) { border-right: 3px solid #9f7e30; }
         .sudoku-grid > .cell:nth-child(n+73) { border-bottom: 3px solid #9f7e30; }
         .sudoku-grid > .cell:nth-child(9n+1) { border-left: 3px solid #9f7e30; }
 

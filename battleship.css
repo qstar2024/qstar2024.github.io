@@ -1,5 +1,6 @@
 body {
-    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+    background: url('bgp_ocean.png') no-repeat center center fixed;
+    background-size: cover;
     color: #fff;
     font-family: 'Segoe UI', Arial, sans-serif;
     margin: 0;
@@ -143,7 +144,14 @@ button:hover {
         height: 28px;
     }
 }
-  @media (max-width: 600px) {
+  @media (max-width: 768px) {
+    body {
+        background: url('bgp_ocean_m.png') no-repeat center center fixed;
+        background-size: cover;
+    }
+}
+
+@media (max-width: 600px) {
     main {
         flex-direction: column;
         gap: 1rem;

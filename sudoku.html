@@ -256,8 +256,8 @@
             border-right: 3px solid #9f7e30; /* Lighter border for dark mode */
         }
         
-        .cell:nth-child(n+19):nth-child(-n+27):not(:nth-child(3n):nth-child(9n)),
-        .cell:nth-child(n+46):nth-child(-n+54):not(:nth-child(3n):nth-child(9n)) {
+        .cell:nth-child(n+19):nth-child(-n+27),
+        .cell:nth-child(n+46):nth-child(-n+54) {
              border-bottom: 3px solid #9f7e30; /* Lighter border for dark mode */
         }
 
@@ -275,14 +275,6 @@
             border-right-width: 3px; /* Explicitly set for the last column in a 3x3 grid */
             border-right-color: #9f7e30;
         }
-
-        .cell:nth-child(n+19):nth-child(-n+27), /* row 3 */
-        .cell:nth-child(n+46):nth-child(-n+54)  /* row 6 */
-        {
-            border-bottom-width: 3px;
-            border-bottom-color: #9f7e30;
-        }
-
 
         .draft-numbers {
             position: absolute;
@@ -322,16 +314,16 @@
 
         @media (max-width: 600px) {
             .sudoku-grid {
-                width: 350px;
-                height: 350px;
+                width: 320px;
+                height: 320px;
             }
             
             .cell {
-                font-size: 16px;
+                font-size: 14px;
             }
             
             .draft-numbers {
-                font-size: 10px;
+                font-size: 8px;
             }
         }
     </style>

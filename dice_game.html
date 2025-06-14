@@ -146,7 +146,7 @@
                 this.scene = new THREE.Scene();
                 const canvasEl = document.querySelector('#gameContainer canvas'); // Add this line
                 this.renderer = new THREE.WebGLRenderer({alpha: true, antialias: true, canvas: canvasEl,});
-                this.camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, .1, 300);
+                this.camera = new THREE.PerspectiveCamera(36, window.innerWidth / window.innerHeight, .1, 300);
                 this.world = new CANNON.World({gravity: new CANNON.Vec3(0, -20, 0), allowSleep: true,});
                 this.initPhysics();
                 this.diceArray = [];
@@ -163,14 +163,14 @@
                 this.renderer.shadowMap.enabled = true
                 this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-                this.camera.position.set(0, .5, 4).multiplyScalar(7);
+                this.camera.position.set(0.3, 5, 5).multiplyScalar(6); // ******
 
                 this.updateSceneSize();
 
                 const ambientLight = new THREE.AmbientLight(0xffffff, .5);
                 this.scene.add(ambientLight);
                 const topLight = new THREE.PointLight(0xffffff, .5);
-                topLight.position.set(20, 25, 0);
+                topLight.position.set(0, 55, 20);
                 topLight.castShadow = true;
                 topLight.shadow.mapSize.width = 2048;
                 topLight.shadow.mapSize.height = 2048;
@@ -202,22 +202,38 @@
                     if (isZero(euler.z)) {
                         if (isZero(euler.x)) {
                             this.diceResults.push(1);
+                            // Paint interior red for 1
+                            dice.mesh.children[0].material.color.set(0xff0000);
                         } else if (isHalfPi(euler.x)) {
                             this.diceResults.push(4);
+                            // Paint interior red for 4
+                            dice.mesh.children[0].material.color.set(0xff0000);
                         } else if (isMinusHalfPi(euler.x)) {
                             this.diceResults.push(3);
+                            // Paint interior black for 3
+                            dice.mesh.children[0].material.color.set(0x000000);
                         } else if (isPiOrMinusPi(euler.x)) {
                             this.diceResults.push(6);
+                            // Paint interior black for 6
+                            dice.mesh.children[0].material.color.set(0x000000);
                         } else {
-                            // landed on edge => wait to fall on side and fire the event again
+                            // landed on edge => add a tiny impulse to make it fall on a side
+                            const impulse = new CANNON.Vec3(0, .01, -.01); // Tiny impulse: up on y, back on z
+                            dice.body.applyImpulse(impulse, dice.body.position);
                             dice.body.allowSleep = true;
                         }
                     } else if (isHalfPi(euler.z)) {
                         this.diceResults.push(2);
+                        // Paint interior black for 2
+                        dice.mesh.children[0].material.color.set(0x000000);
                     } else if (isMinusHalfPi(euler.z)) {
                         this.diceResults.push(5);
+                        // Paint interior black for 5
+                        dice.mesh.children[0].material.color.set(0x000000);
                     } else {
-                        // landed on edge => wait to fall on side and fire the event again
+                        // landed on edge => add a tiny impulse to make it fall on a side
+                        const impulse = new CANNON.Vec3(0, .01, -.01); // Tiny impulse: up on y, back on z
+                        dice.body.applyImpulse(impulse, dice.body.position);
                         dice.body.allowSleep = true;
                     }
                 });
@@ -232,7 +248,8 @@
                     })
                 )
                 floor.receiveShadow = true;
-                floor.position.y = -4; //-7
+                // the floor is placed at y = 20
+                floor.position.y = 20;  // ******
                 floor.quaternion.setFromAxisAngle(new THREE.Vector3(-1, 0, 0), Math.PI * .5);
                 this.scene.add(floor);
 
@@ -362,7 +379,7 @@
 
             createDiceMesh() {
                 const boxMaterialOuter = new THREE.MeshStandardMaterial({
-                    color: 0xeeeeee,
+                    color: 0xffffff,
                 })
                 const boxMaterialInner = new THREE.MeshStandardMaterial({
                     color: 0x000000,
@@ -420,8 +437,8 @@
                     // to reset the velocity dice got on the previous throw
                     d.body.velocity.setZero();
                     d.body.angularVelocity.setZero();
-                    // set initial position
-                    d.body.position = new CANNON.Vec3(5, dIdx * 1.5, 0); // the floor is placed at y = -7
+                    // set initial position // the floor is placed at y = 20
+                    d.body.position = new CANNON.Vec3(dIdx * 1.25, 30, -25); // ******
                     d.mesh.position.copy(d.body.position);
                     // set initial rotation
                     d.mesh.rotation.set(2 * Math.PI * Math.random(), 0, 2 * Math.PI * Math.random())
@@ -429,7 +446,7 @@
                     // apply random impluses
                     const force = 3 + 5 * Math.random();
                     d.body.applyImpulse(
-                        new CANNON.Vec3(-force * 0.5, force, 0),
+                        new CANNON.Vec3(-force * 0.2, force, -force * 1.2), // ******
                         new CANNON.Vec3(0, 0, .2) // point of application of force is shifted from the center of mass
                     );
                     // track body velocity again for new throw
@@ -448,7 +465,11 @@
             
             displayResults() {
                 const pattern = this.getDicePattern(this.diceResults);
-                document.getElementById('results').innerHTML = `🎲 ${this.diceResults.join(', ')}`;
+                const formattedResults = this.diceResults.map(num => {
+                    const color = (num === 1 || num === 4) ? 'red' : 'white';
+                    return `<span style="color: ${color};">${num}</span>`;
+                }).join(', ');
+                document.getElementById('results').innerHTML = `🎲 ${formattedResults}`;
                 document.getElementById('total').innerHTML = `🍀 ${pattern}`;
                 document.getElementById('rollButton').disabled = false;
             }

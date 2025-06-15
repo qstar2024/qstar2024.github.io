@@ -2,22 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wordle Game</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Hangman Wordle Game</title>
     <link rel="stylesheet" href="wordle.css">
 </head>
 <body>
-    <header>
-        <h1>Wordle</h1>
-        <a href="index.html" class="back-button">Back to Home</a>
-        <button id="restart-button">Restart Game</button>
-    </header>
-    <main>
+    <div id="background-container">
+        <img id="hangman-background" src="bgp_hang_1.png" alt="Hangman Background">
+    </div>
+    
+    <div id="liquid-glass-menu" class="liquid-glass-menu">
+        <a href="index.html" class="liquid-glass-btn">Back to Home</a>
+        <button id="restart-button" class="liquid-glass-btn">Restart Game</button>
+    </div>
+    
+    <div id="game-status" class="game-status">
         <div id="message-area"></div>
-        <div id="game-board"></div>
+    </div>
+    
+    <main>
+        <div id="current-word-display"></div>
         <div id="keyboard"></div>
     </main>
-    <input type="text" id="mobile-input" style="position: absolute; left: -9999px;">
+    
+    <input type="text" id="mobile-input" style="position: absolute; left: -9999px; opacity: 0; pointer-events: none;" readonly>
     <script src="wordle.js"></script>
 </body>
 </html>

@@ -1,16 +1,54 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const gameBoard = document.getElementById('game-board');
+document.addEventListener('DOMContentLoaded', function() {
     const keyboardContainer = document.getElementById('keyboard');
     const messageArea = document.getElementById('message-area');
+    const currentWordDisplay = document.getElementById('current-word-display');
+    const hangmanBackground = document.getElementById('hangman-background');
+    const liquidGlassMenu = document.getElementById('liquid-glass-menu');
 
     let wordList = { 4: [], 5: [], 6: [], 7: [] };
     let targetWord = '';
     let wordLength = 5; // Default word length
-    let maxGuesses = 6; // Default: wordLength + 1
-    let currentRow = 0;
-    let currentCol = 0;
-    let guesses = [];
+    let maxWrongGuesses = 6; // Maximum wrong guesses before game over
+    let currentGuess = [];
+    let wrongGuesses = 0;
+    let correctGuesses = new Set();
     let gameOver = false;
+    let allGuessedLetters = new Set();
+
+    // Game state to background image mapping
+    const getBackgroundImage = (wrongGuesses, wordLength) => {
+        const imageMap = {
+            4: ['bgp_hang_1.png', 'bgp_hang_2.png', 'bgp_hang_3.png', 'bgp_hang_4.png', 'bgp_hang_5.png'],
+            5: ['bgp_hang_1.png', 'bgp_hang_2.png', 'bgp_hang_2.png', 'bgp_hang_3.png', 'bgp_hang_4.png', 'bgp_hang_5.png'],
+            6: ['bgp_hang_1.png', 'bgp_hang_2.png', 'bgp_hang_2.png', 'bgp_hang_3.png', 'bgp_hang_3.png', 'bgp_hang_4.png', 'bgp_hang_5.png'],
+            7: ['bgp_hang_1.png', 'bgp_hang_2.png', 'bgp_hang_2.png', 'bgp_hang_3.png', 'bgp_hang_3.png', 'bgp_hang_4.png', 'bgp_hang_4.png', 'bgp_hang_5.png']
+        };
+        
+        const images = imageMap[wordLength] || imageMap[5];
+        return images[Math.min(wrongGuesses, images.length - 1)];
+    };
+
+    // Update background image based on game state
+    const updateBackgroundImage = () => {
+        const newImage = getBackgroundImage(wrongGuesses, wordLength);
+        hangmanBackground.src = newImage;
+    };
+
+    // Show/hide liquid glass menu on interaction
+    let menuTimeout;
+    const showMenu = () => {
+        liquidGlassMenu.classList.add('visible');
+        clearTimeout(menuTimeout);
+        menuTimeout = setTimeout(() => {
+            liquidGlassMenu.classList.remove('visible');
+        }, 3000);
+    };
+
+    // Event listeners for menu visibility
+    document.addEventListener('mousemove', showMenu);
+    document.addEventListener('scroll', showMenu);
+    document.addEventListener('click', showMenu);
+    document.addEventListener('keydown', showMenu);
 
     async function fetchAndProcessWords() {
         try {
@@ -63,7 +101,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const keysLayout = [
         ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'],
         ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'],
-        ['ENTER', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'BACKSPACE']
+        ['Clear', 'Z', 'X', 'C', 'V', 'B', 'N', 'M', 'Enter']
     ];
 
     function initializeGame() {
@@ -78,46 +116,61 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         targetWord = wordsOfSelectedLength[Math.floor(Math.random() * wordsOfSelectedLength.length)].toUpperCase();
-        maxGuesses = wordLength + 1;
-        currentRow = 0;
-        currentCol = 0;
-        guesses = Array(maxGuesses).fill(null).map(() => Array(wordLength).fill(''));
+        
+        // Reset game state
+        currentGuess = Array(wordLength).fill('');
+        wrongGuesses = 0;
+        correctGuesses.clear();
+        allGuessedLetters.clear();
         gameOver = false;
-        messageArea.textContent = '';
-        createGameBoard();
+        round = 0;
+        maxRounds = wordLength + 1;
+        guesses = [];
+        messageArea.textContent = `Guess the ${wordLength}-letter word! (${maxRounds} rounds)`;
+        
+        createWordDisplay();
         createKeyboard();
         updateKeyboardColors({}); // Reset keyboard colors
+        updateBackgroundImage();
     }
 
-    function createGameBoard() {
-        gameBoard.innerHTML = '';
-        gameBoard.style.gridTemplateRows = `repeat(${maxGuesses}, 1fr)`;
-        for (let i = 0; i < maxGuesses; i++) {
-            const row = document.createElement('div');
-            row.classList.add('row');
-            row.style.gridTemplateColumns = `repeat(${wordLength}, 1fr)`;
-            for (let j = 0; j < wordLength; j++) {
-                const tile = document.createElement('div');
-                tile.classList.add('tile');
-                tile.id = `tile-${i}-${j}`;
-                row.appendChild(tile);
-            }
-            gameBoard.appendChild(row);
+    function createWordDisplay() {
+        currentWordDisplay.innerHTML = '';
+        for (let i = 0; i < wordLength; i++) {
+            const letterDiv = document.createElement('div');
+            letterDiv.classList.add('word-letter');
+            letterDiv.id = `letter-${i}`;
+            currentWordDisplay.appendChild(letterDiv);
+        }
+        updateWordDisplay();
+    }
+
+    function updateWordDisplay() {
+    for (let i = 0; i < wordLength; i++) {
+        const letterDiv = document.getElementById(`letter-${i}`);
+        // Show the letter only if the correct letter was guessed for this slot
+        if (currentGuess[i] && currentGuess[i].toUpperCase() === targetWord[i]) {
+            letterDiv.textContent = targetWord[i];
+            letterDiv.classList.add('correct');
+        } else {
+            letterDiv.textContent = currentGuess[i] || '';
+            letterDiv.classList.remove('correct');
         }
     }
-
+}
     function createKeyboard() {
         keyboardContainer.innerHTML = '';
-        keysLayout.forEach(rowKeys => {
+        const extendedKeysLayout = [
+            ...keysLayout.slice(0, 2),
+            [...keysLayout[2].filter(k => k !== 'BACKSPACE')]
+        ];
+        extendedKeysLayout.forEach(rowKeys => {
             const rowDiv = document.createElement('div');
-            rowDiv.classList.add('keyboard-row'); // For potential styling
+            rowDiv.classList.add('keyboard-row');
             rowKeys.forEach(key => {
                 const keyButton = document.createElement('button');
                 keyButton.classList.add('key');
                 keyButton.textContent = key;
-                if (key === 'ENTER' || key === 'BACKSPACE') {
-                    keyButton.classList.add('large');
-                }
                 keyButton.addEventListener('click', () => handleKeyPress(key));
                 rowDiv.appendChild(keyButton);
             });
@@ -125,134 +178,213 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    let round = 0;
+    let maxRounds = 0;
+    let guesses = [];
+
     function handleKeyPress(key) {
         if (gameOver) return;
-
-        if (key === 'ENTER') {
-            if (currentCol === wordLength) {
-                submitGuess();
-            }
-        } else if (key === 'BACKSPACE') {
-            if (currentCol > 0) {
-                currentCol--;
-                guesses[currentRow][currentCol] = '';
-                updateBoard();
-            }
-        } else if (currentCol < wordLength && key.length === 1 && key.match(/[A-Z]/i)) {
-            guesses[currentRow][currentCol] = key.toUpperCase();
-            currentCol++;
-            updateBoard();
-        }
-    }
-
-    function updateBoard() {
-        for (let i = 0; i < maxGuesses; i++) {
-            for (let j = 0; j < wordLength; j++) {
-                const tile = document.getElementById(`tile-${i}-${j}`);
-                if (tile) {
-                    tile.textContent = guesses[i][j];
-                    if (guesses[i][j]) {
-                        tile.classList.add('filled');
-                    } else {
-                        tile.classList.remove('filled');
-                    }
+        if (key === 'Clear') {
+            // Only clear non-correct slots
+            for (let i = 0; i < wordLength; i++) {
+                if (!correctGuesses.has(targetWord[i])) {
+                    currentGuess[i] = '';
                 }
             }
+            updateWordInputDisplay();
+            messageArea.textContent = 'Cleared! Enter a new guess.';
+            return;
+        }
+        if (key === 'Enter') {
+            if (currentGuess.join('').length !== wordLength || currentGuess.includes('')) {
+                messageArea.textContent = `Please enter a ${wordLength}-letter word.`;
+                return;
+            }
+            submitWordGuess();
+            return;
+        }
+        if (key.length !== 1 || !key.match(/[A-Z]/i)) return;
+        // Fill next empty slot that is not locked by a correct letter in the correct position
+        for (let i = 0; i < wordLength; i++) {
+            // Only lock the slot if it already contains the correct letter in the correct position
+            if (!(currentGuess[i] && currentGuess[i].toUpperCase() === targetWord[i]) && currentGuess[i] === '') {
+                currentGuess[i] = key.toUpperCase();
+                break;
+            }
+        }
+        updateWordInputDisplay();
+    }
+
+    function updateWordInputDisplay() {
+        for (let i = 0; i < wordLength; i++) {
+            const letterDiv = document.getElementById(`letter-${i}`);
+            // During input, only show the letter, do not apply color classes
+            if (currentGuess[i]) {
+                letterDiv.textContent = currentGuess[i];
+                letterDiv.classList.remove('correct', 'present', 'absent');
+                letterDiv.classList.add('filled');
+            } else {
+                letterDiv.textContent = '';
+                letterDiv.classList.remove('filled', 'correct', 'present', 'absent');
+            }
         }
     }
 
-    function submitGuess() {
-        const guess = guesses[currentRow].join('');
-        const result = checkGuess(guess);
-        animateGuess(result);
-        updateKeyboardColors(result);
-
-        if (guess === targetWord) {
-            messageArea.textContent = 'Congratulations! You guessed it!';
-            gameOver = true;
+    function submitWordGuess() {
+        let guessArr = [];
+        for (let i = 0; i < wordLength; i++) {
+            // Use currentGuess for all slots, correctGuesses will be updated based on this submission
+            guessArr[i] = currentGuess[i] || '';
+        }
+        const guess = guessArr.join('').toUpperCase();
+        if (guess.length !== wordLength) {
+            messageArea.textContent = `Please enter a ${wordLength}-letter word.`;
             return;
         }
 
-        currentRow++;
-        currentCol = 0;
+        guesses.push(guess);
+        round++;
 
-        if (currentRow === maxGuesses) {
-            messageArea.textContent = `Game Over! The word was ${targetWord}.`;
-            gameOver = true;
+        // Store the state of letters for coloring the input display and keyboard
+        // States: 0 for not checked, 1 for absent, 2 for present, 3 for correct
+        let letterStates = new Array(wordLength).fill(0);
+        let targetLetterCounts = {};
+        for (let char of targetWord) {
+            targetLetterCounts[char] = (targetLetterCounts[char] || 0) + 1;
         }
-    }
 
-    function checkGuess(guess) {
-        const result = {}; // { 'A': 'correct', 'B': 'present', 'C': 'absent' }
-        const targetArray = targetWord.split('');
-        const guessArray = guess.split('');
-        const tempTargetArray = [...targetArray]; // Use a copy for checking 'present'
-
-        // First pass: check for 'correct' letters
+        // First pass: Mark correct letters
         for (let i = 0; i < wordLength; i++) {
-            if (guessArray[i] === targetArray[i]) {
-                result[guessArray[i]] = 'correct';
-                tempTargetArray[i] = null; // Mark as used
-            } 
+            if (guess[i] === targetWord[i]) {
+                letterStates[i] = 3; // correct
+                correctGuesses.add(targetWord[i]); // Add to overall correct letters for the game
+                targetLetterCounts[guess[i]]--;
+            }
+        }
+
+        // Second pass: Mark present letters
+        for (let i = 0; i < wordLength; i++) {
+            if (letterStates[i] === 3) continue; // Already marked as correct
+            if (targetWord.includes(guess[i]) && targetLetterCounts[guess[i]] > 0) {
+                letterStates[i] = 2; // present
+                targetLetterCounts[guess[i]]--;
+            } else {
+                letterStates[i] = 1; // absent
+            }
+        }
+
+        // Update current-word-display based on letterStates
+        for (let i = 0; i < wordLength; i++) {
+            const letterDiv = document.getElementById(`letter-${i}`);
+            letterDiv.textContent = guess[i];
+            letterDiv.classList.remove('correct', 'present', 'absent', 'filled');
+            if (letterStates[i] === 3) {
+                letterDiv.classList.add('correct');
+            } else if (letterStates[i] === 2) {
+                letterDiv.classList.add('present');
+            } else if (letterStates[i] === 1) {
+                letterDiv.classList.add('absent');
+            }
         }
         
-        // Second pass: check for 'present' and 'absent' letters
+        // Create result for keyboard update (this might need adjustment based on overall game logic for keyboard)
+        let keyboardResult = {};
         for (let i = 0; i < wordLength; i++) {
-            if (guessArray[i] !== targetArray[i]) { // Only if not already 'correct'
-                if (tempTargetArray.includes(guessArray[i])) {
-                     // If letter is present elsewhere and not already marked more strongly (correct > present)
-                    if (result[guessArray[i]] !== 'correct') {
-                        result[guessArray[i]] = 'present';
-                    }
-                    tempTargetArray[tempTargetArray.indexOf(guessArray[i])] = null; // Mark as used for 'present'
-                } else {
-                    // If letter is absent and not already marked more strongly
-                    if (!result[guessArray[i]]) {
-                         result[guessArray[i]] = 'absent';
-                    }
+            const char = guess[i];
+            if (letterStates[i] === 3) {
+                keyboardResult[char] = 'correct';
+            } else if (letterStates[i] === 2) {
+                if (keyboardResult[char] !== 'correct') {
+                    keyboardResult[char] = 'present';
+                }
+            } else if (letterStates[i] === 1) {
+                if (keyboardResult[char] !== 'correct' && keyboardResult[char] !== 'present') {
+                    keyboardResult[char] = 'absent';
                 }
             }
         }
-        return result;
-    }
+        updateKeyboardColors(keyboardResult);
+        // updateWordInputDisplay(); // This is now handled by the loop above using letterStates
 
-    function animateGuess(result) {
-        const rowTiles = gameBoard.children[currentRow].children;
-        const guessArray = guesses[currentRow];
-
-        for (let i = 0; i < wordLength; i++) {
-            const tile = rowTiles[i];
-            const letter = guessArray[i];
-            setTimeout(() => {
-                tile.classList.add('reveal');
-                if (targetWord[i] === letter) {
-                    tile.classList.add('correct');
-                } else if (targetWord.includes(letter)) {
-                    tile.classList.add('present');
-                } else {
-                    tile.classList.add('absent');
-                }
-            }, i * 300); // Stagger animation
+        if (guess === targetWord) {
+            messageArea.textContent = 'Congratulations! You guessed the word!';
+            gameOver = true;
+            hangmanBackground.src = 'bgp_hang_6.png'; // Win image
+            return;
         }
+        if (round >= maxRounds) {
+            messageArea.textContent = `Game Over! The word was '${targetWord}'.`;
+            gameOver = true;
+            hangmanBackground.src = 'bgp_hang_7.png'; // Loss image
+            // Reveal the word
+            for (let i = 0; i < wordLength; i++) {
+                const letterDiv = document.getElementById(`letter-${i}`);
+                letterDiv.textContent = targetWord[i];
+                letterDiv.classList.add('correct');
+            }
+            return;
+        }
+        // Prepare for next round: keep only correct letters, clear others (including present/wrong-slot letters)
+        for (let i = 0; i < wordLength; i++) {
+            if (currentGuess[i] && currentGuess[i].toUpperCase() === targetWord[i]) {
+                // Keep correct letter in correct slot
+                continue;
+            } else {
+                currentGuess[i] = '';
+            }
+        }
+        setTimeout(() => {
+            updateWordInputDisplay();
+            messageArea.textContent = `Try again! ${maxRounds - round} rounds left.`;
+        }, 800);
+        // Update background for each round
+        wrongGuesses = round;
+        updateBackgroundImage();
+    }
+    
+    function isWordComplete() {
+        for (let letter of targetWord) {
+            if (!correctGuesses.has(letter)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     function updateKeyboardColors(result) {
-        const keys = keyboardContainer.querySelectorAll('.key');
-        keys.forEach(keyButton => {
-            const letter = keyButton.textContent;
-            if (result[letter]) {
-                // Remove previous states before adding new one
-                keyButton.classList.remove('correct', 'present', 'absent'); 
+    const keys = keyboardContainer.querySelectorAll('.key');
+    // Count occurrences of each letter in the target word
+    const targetCounts = {};
+    for (let i = 0; i < targetWord.length; i++) {
+        const l = targetWord[i];
+        targetCounts[l] = (targetCounts[l] || 0) + 1;
+    }
+    // Count correct positions for each letter in the guess
+    const guessCounts = {};
+    for (let i = 0; i < currentGuess.length; i++) {
+        const g = currentGuess[i];
+        if (g && g.toUpperCase() === targetWord[i]) {
+            guessCounts[g.toUpperCase()] = (guessCounts[g.toUpperCase()] || 0) + 1;
+        }
+    }
+    keys.forEach(keyButton => {
+        const letter = keyButton.textContent;
+        if (result[letter]) {
+            keyButton.classList.remove('correct', 'present', 'absent');
+            // If the letter is in the target word and all its slots are correctly guessed, turn green
+            if (targetCounts[letter] && guessCounts[letter] === targetCounts[letter]) {
+                keyButton.classList.add('correct');
+            } else if (targetCounts[letter]) {
+                keyButton.classList.add('present');
+            } else {
                 keyButton.classList.add(result[letter]);
             }
-            // If no result for this letter yet, ensure no color class is applied (e.g. for new game)
-            else if (Object.keys(result).length === 0) { 
-                 keyButton.classList.remove('correct', 'present', 'absent');
-            }
-        });
-    }
+        } else if (Object.keys(result).length === 0) {
+            keyButton.classList.remove('correct', 'present', 'absent');
+        }
+    });
+}
 
-    // This keydown listener is removed to prevent duplication with the one below
 
     async function startGame() {
         const wordsLoaded = await fetchAndProcessWords();
@@ -268,53 +400,42 @@ document.addEventListener('DOMContentLoaded', () => {
         restartButton.addEventListener('click', initializeGame);
     }
 
-    // Attempt to focus the hidden input for mobile keyboard
+    // Disable mobile keyboard and handle physical keyboard input
     const mobileInput = document.getElementById('mobile-input');
     if (mobileInput) {
-        mobileInput.focus();
-
-        // Handle input from the hidden field
-        mobileInput.addEventListener('input', (e) => {
-            const input = e.data;
-            if (input && input.length === 1 && input.match(/[A-Z]/i)) {
-                handleKeyPress(input.toUpperCase());
-            }
-            // Clear the input field after processing
-            mobileInput.value = '';
-        });
-
-        // Handle backspace and enter from physical/mobile keyboard
-        mobileInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace') {
-                handleKeyPress('BACKSPACE');
-                e.preventDefault(); // Prevent default backspace behavior
-            } else if (e.key === 'Enter') {
-                handleKeyPress('ENTER');
-                e.preventDefault(); // Prevent default enter behavior
-            }
-        });
-
-         // Keep focus on the input field, especially on mobile
-         document.body.addEventListener('click', () => {
-            mobileInput.focus();
-         });
-         // Also try to focus on load
-         window.addEventListener('load', () => {
-            mobileInput.focus();
+        // Prevent mobile keyboard from appearing
+        mobileInput.setAttribute('readonly', true);
+        mobileInput.style.opacity = '0';
+        mobileInput.style.pointerEvents = 'none';
+        
+        // Prevent focus on mobile input
+        mobileInput.addEventListener('focus', (e) => {
+            e.target.blur();
         });
     }
 
-    // Handle physical keyboard input (unified handler)
+    // Handle physical keyboard input
     document.addEventListener('keydown', (e) => {
-        if (document.activeElement === mobileInput) return; // Prevent duplicate input from mobile
         if (gameOver) return;
         const key = e.key.toUpperCase();
-        if (key === 'ENTER') {
-            handleKeyPress('ENTER');
-        } else if (key === 'BACKSPACE') {
-            handleKeyPress('BACKSPACE');
-        } else if (key.length === 1 && key.match(/[A-Z]/i)) {
+        if (key.length === 1 && key.match(/[A-Z]/i)) {
             handleKeyPress(key);
+            e.preventDefault(); // Prevent any default behavior
         }
     });
+    
+    // Prevent context menu on long press (mobile)
+    document.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+    });
+    
+    // Prevent zoom on double tap (mobile)
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', (e) => {
+        const now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) {
+            e.preventDefault();
+        }
+        lastTouchEnd = now;
+    }, false);
 });

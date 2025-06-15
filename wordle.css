@@ -36,16 +36,16 @@ body {
     height: 100vh;
     object-fit: contain;
     object-position: center;
-    background: linear-gradient(to bottom, #1a1a1a 0%, #2b2b2b 100%);
+    background: linear-gradient(to bottom, #c7b58b 0%, #aea882 100%);
     background-repeat: no-repeat;
     background-size: cover;
     transition: opacity 0.5s ease-in-out;
 }
 #background-container {
-    background: linear-gradient(to bottom, #1a1a1a 0%, #2b2b2b 100%);
+    background: linear-gradient(to bottom, #858224 0%, #858224 100%);
 }
 body {
-    background: #222;
+    background: #858224;
 }
 
 .liquid-glass-menu {

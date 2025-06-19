@@ -186,6 +186,7 @@ class SheepGame {
             
             // 添加点击事件
             tile.addEventListener('click', () => this.selectTile(tile));
+            tile.addEventListener('touchend', (e) => { e.preventDefault(); this.selectTile(tile); });
             
             this.gameBoard.appendChild(tile);
             this.tiles.push(tile);
@@ -240,6 +241,7 @@ class SheepGame {
             tile.style.top = `${pos.y}px`;
             tile.style.zIndex = Math.floor(index / 9) + 1;
             tile.addEventListener('click', () => this.selectTile(tile));
+            tile.addEventListener('touchend', (e) => { e.preventDefault(); this.selectTile(tile); });
             this.gameBoard.appendChild(tile);
             this.tiles.push(tile);
         });

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>The Sheep Game</title>
+    <link rel="stylesheet" href="sheep.css">
+</head>
+<body>
+    <div id="background-container">
+        <img id="sheep-background" src="bgp_sheep.png" alt="Sheep Background">
+    </div>
+    
+    <div id="liquid-glass-menu" class="liquid-glass-menu">
+        <a href="index.html" class="liquid-glass-btn">🏠Back to Home</a>
+        <button id="restart-button" class="liquid-glass-btn">🔄Restart</button>
+        <button id="hint-button" class="liquid-glass-btn">💡Hint</button>
+    </div>
+    
+    <div id="game-header" class="game-header">
+        <div class="score-display">
+            <span class="score-label">Score:</span>
+            <span id="score">0</span>
+        </div>
+        <div class="level-display">
+            <span class="level-label">Round:</span>
+            <span id="level">1</span>
+        </div>
+        <div class="moves-display">
+            <span class="moves-label">Tiles Left:</span>
+            <span id="tiles-left">0</span>
+        </div>
+    </div>
+    
+    <main id="game-container">
+        <div id="game-board" class="game-board">
+            <!-- 游戏主区域 -->
+            <div id="tile-stack" class="tile-stack"></div>
+        </div>
+        
+        <div id="bottom-slots" class="bottom-slots">
+            <div class="slot-container">
+                <div class="slot" data-slot="0"></div>
+                <div class="slot" data-slot="1"></div>
+                <div class="slot" data-slot="2"></div>
+                <div class="slot" data-slot="3"></div>
+                <div class="slot" data-slot="4"></div>
+                <div class="slot" data-slot="5"></div>
+                <div class="slot" data-slot="6"></div>
+            </div>
+        </div>
+    </main>
+    
+    <div id="game-status" class="game-status hidden">
+        <div id="message-area" class="message-area">
+            <h2 id="status-title"></h2>
+            <p id="status-message"></p>
+            <div class="status-buttons">
+                <button id="continue-btn" class="liquid-glass-btn">Continue</button>
+                <button id="restart-game-btn" class="liquid-glass-btn">Restart</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="sheep-loader">🐑</div>
+            <p>Loading...</p>
+        </div>
+    </div>
+    
+    <script src="sheep.js"></script>
+</body>
+</html>

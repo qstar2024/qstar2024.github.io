@@ -462,6 +462,12 @@ class SheepGame {
             `'Well done! You passed Level ${this.level} !\n Ready for Level ${this.level + 1} ?'`,
             () => {
                 this.level++;
+                this.tiles = [];
+                this.selectedTiles = [];
+                this.slotContents = new Array(7).fill(null);
+                this.updateUI();
+                this.clearBoard();
+                this.clearSlots();
                 this.hideGameStatus();
                 this.generateLevel();
                 this.gameRunning = true;

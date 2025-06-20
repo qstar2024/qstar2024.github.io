@@ -130,17 +130,45 @@ class SheepGame {
             return;
         }
         // 其它关卡：方块总数和emoji数量均为3的倍数
-        let tileCount = Math.min(21 + this.level * 6, 60);
-        let emojiTypes = Math.min(6 + this.level * 2, this.emojiPool.length);
+        let baseTileCount = 18 + this.level * 36;
+        let baseEmojiTypes = 6 + this.level;
+
+        // Ensure tileCount is a multiple of 3
+        let tileCount = Math.min(baseTileCount, 120);
+        if (tileCount % 3 !== 0) {
+            tileCount = Math.floor(tileCount / 3) * 3;
+        }
+
+        // Ensure emojiTypes is reasonable and allows for multiples of 3
+        let emojiTypes = Math.min(baseEmojiTypes, this.emojiPool.length);
+        if (emojiTypes === 0) emojiTypes = 3; // Prevent division by zero or too few emojis
+
         const selectedEmojis = this.shuffleArray([...this.emojiPool]).slice(0, emojiTypes);
-        // 每种emoji数量为3的倍数
+
+        // Calculate perEmoji such that total tiles are a multiple of 3
+        let perEmoji = Math.floor(tileCount / emojiTypes);
+        // Ensure perEmoji is at least 3 and a multiple of 3
+        if (perEmoji < 3) {
+            perEmoji = 3;
+        } else if (perEmoji % 3 !== 0) {
+            perEmoji = Math.floor(perEmoji / 3) * 3;
+        }
+
         let tileEmojis = [];
-        const perEmoji = Math.floor(tileCount / emojiTypes);
         for (let i = 0; i < emojiTypes; i++) {
             for (let j = 0; j < perEmoji; j++) {
                 tileEmojis.push(selectedEmojis[i]);
             }
         }
+        // Ensure the final tileEmojis array length is a multiple of 3 and not empty
+        // If after calculation, tileEmojis is empty or not a multiple of 3, regenerate with a safe minimum
+        if (tileEmojis.length === 0 || tileEmojis.length % 3 !== 0) {
+            console.warn(`Adjusting tile generation for level ${this.level}. Original count: ${tileEmojis.length}`);
+            // Fallback to a known good configuration: 3 emoji types, 3 tiles each (total 9 tiles)
+            const fallbackEmojis = this.shuffleArray([...this.emojiPool]).slice(0, 3);
+            tileEmojis = fallbackEmojis.flatMap(e => [e, e, e]);
+        }
+
         tileEmojis = this.shuffleArray(tileEmojis);
         this.createTiles(tileEmojis);
     }
@@ -148,7 +176,7 @@ class SheepGame {
     createTiles(emojiArray) {
         // Validate total tiles count
         if (emojiArray.length % 3 !== 0) {
-            alert('Total number of tiles must be divisible by 3!');
+            console.error('Total number of tiles must be divisible by 3!');
             return;
         }
     
@@ -160,7 +188,7 @@ class SheepGame {
         
         for (const [emoji, count] of Object.entries(emojiCounts)) {
             if (count % 3 !== 0) {
-                alert(`Each emoji must appear 3 times! Problem with ${emoji}`);
+                console.error(`Each emoji must appear 3 times! Problem with ${emoji}`);
                 return;
             }
         }
@@ -274,11 +302,13 @@ class SheepGame {
         // 更新可点击状态（显露被覆盖方块）
         this.updateTileStates();
         // 检查消除
-        this.checkForMatches();
+        const matchFound = this.checkForMatches();
         // 更新UI
         this.updateUI();
-        // 检查游戏结束条件
-        this.checkGameEnd();
+        // 检查游戏结束条件 (仅在没有匹配消除时立即检查，否则由removeMatches处理)
+        if (!matchFound) {
+            this.checkGameEnd();
+        }
     }
     
     deselectTile(tile) {
@@ -331,9 +361,10 @@ class SheepGame {
         for (const [emoji, count] of Object.entries(emojiCount)) {
             if (count >= 3) {
                 this.removeMatches(emoji);
-                return;
+                return true; // Indicate that a match was found
             }
         }
+        return false; // No match found
     }
     
     removeMatches(emoji) {
@@ -346,11 +377,23 @@ class SheepGame {
                 if (tilesToRemove.length === 3) break;
             }
         }
-        // 移除动画
+        // Synchronously update slotContents and remove from selectedTiles/tiles
+        tilesToRemove.forEach(({ tile, slotIndex }) => {
+            this.slotContents[slotIndex] = null; // Clear slot content immediately
+            const selectedIndex = this.selectedTiles.indexOf(tile);
+            if (selectedIndex > -1) {
+                this.selectedTiles.splice(selectedIndex, 1);
+            }
+            const tileIndex = this.tiles.indexOf(tile);
+            if (tileIndex > -1) {
+                this.tiles.splice(tileIndex, 1);
+            }
+        });
+
+        // Trigger animation and DOM removal
         tilesToRemove.forEach(({ tile, slotIndex }, index) => {
+            const slot = this.bottomSlots[slotIndex];
             setTimeout(() => {
-                this.slotContents[slotIndex] = null;
-                const slot = this.bottomSlots[slotIndex];
                 slot.textContent = '';
                 slot.classList.remove('filled');
                 tile.classList.add('removing');
@@ -358,26 +401,14 @@ class SheepGame {
                     if (tile.parentNode) {
                         tile.parentNode.removeChild(tile);
                     }
-                    const tileIndex = this.tiles.indexOf(tile);
-                    if (tileIndex > -1) {
-                        this.tiles.splice(tileIndex, 1);
-                    }
-                    const selectedIndex = this.selectedTiles.indexOf(tile);
-                    if (selectedIndex > -1) {
-                        this.selectedTiles.splice(selectedIndex, 1);
-                    }
-                    // 动画后立即检测胜利
+                    // After all animations for this match are done, reorganize and check game end
                     if (index === tilesToRemove.length - 1) {
-                        setTimeout(() => {
-                            this.reorganizeSlots();
-                            this.updateTileStates();
-                        }, 2500);
-                        setTimeout(() => {
-                            this.checkGameEnd();
-                        }, 2500);
+                        this.reorganizeSlots(); // Reorganize after all removals
+                        this.updateTileStates(); // Update tile states after reorganization
+                        this.checkGameEnd(); // Check game end after all logical changes
                     }
-                }, 500);
-            }, index * 100);
+                }, 500); // Animation duration
+            }, index * 100); // Staggered animation start
         });
         this.score += 100 * this.level;
         this.updateUI();
@@ -482,6 +513,7 @@ class SheepGame {
             '😢Game Over',
             `'Unfortunately you lost! \n Your final score ${this.score}\n Reached Level ${this.level}'`,
             () => {
+                this.level = 1; // Reset level to 1 on game over
                 this.hideGameStatus();
                 this.startNewGame();
             }

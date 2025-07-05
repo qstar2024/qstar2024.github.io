@@ -6,14 +6,29 @@ html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Ro
 
 /* Added background image with gradient fallback */
 body {
-  background: linear-gradient(to bottom, hsl(37, 53%, 11%), hsl(36, 37%, 17%)), url('bgp_library.png') no-repeat center center fixed;
-  background-size: cover;
-  background-blend-mode: multiply;
+  background: url('bgp_library.png') no-repeat center center fixed;
+  background-size: auto 100%; /* Default to full height */
+  color: #f8f9fa; /* Base light text color */
 }
 
 @media (max-width: 768px) {
   body {
     background-attachment: scroll;
+    background-size: 100% auto; /* Full width on mobile */
+    min-height: 100vh;
+  }
+}
+
+/* Ensure minimum 80% coverage on shorter dimension */
+@media (max-aspect-ratio: 4/3) {
+  body {
+    background-size: auto 100%;
+  }
+}
+
+@media (min-aspect-ratio: 4/3) {
+  body {
+    background-size: 100% auto;
   }
 }
 
@@ -36,25 +51,25 @@ body {
 .meta{font-size:.75rem;opacity:.75;margin-top:4px;}
 
 /* Section headings */
-h1,h2{font-weight:700;text-align:center;}
+h1,h2{font-weight:700;text-align:center;color:#ffffff;}
 
 /* Liquid Glass floating bottom menu */
 .liquid-glass-menu{
     position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
     display:flex;gap:24px;padding:12px 24px;z-index:50;
 }
-.liquid-glass-btn{background:rgba(255,255,255,0.15);border:none;border-radius:14px;color:#fff;padding:10px 24px;font-size:1rem;cursor:pointer;transition:background .2s,transform .2s;backdrop-filter:blur(15px) saturate(180%);} 
+.liquid-glass-btn{background:rgba(255,255,255,0.15);border:none;border-radius:14px;color:#ffffff;padding:10px 24px;font-size:1rem;cursor:pointer;transition:background .2s,transform .2s;backdrop-filter:blur(15px) saturate(180%);} 
 .liquid-glass-btn:active{transform:scale(0.96);} 
 
 /* Scroll container */
 .scroll-container{max-width:760px;margin:0 auto;padding:24px;overflow-y:auto;} 
 
 /* Editable styles */
-[contenteditable="true"]{outline:none;border-bottom:1px dashed rgba(255,255,255,0.3);} 
+[contenteditable="true"]{outline:none;border-bottom:1px dashed rgba(255,255,255,0.5);color:#ffffff;} 
 #body[contenteditable="true"]{min-height:300px;margin-top:12px;white-space:pre-wrap;}
 
 /* Markdown rendering */
-.markdown-body{font-size:1rem;line-height:1.6;} 
-.markdown-body pre{background:#161b22;padding:12px;border-radius:10px;overflow:auto;} 
+.markdown-body{font-size:1rem;line-height:1.6;color:#e9ecef;} 
+.markdown-body pre{background:rgba(22,27,34,0.8);color:#f8f9fa;padding:12px;border-radius:10px;overflow:auto;} 
 
 @media(max-width:600px){.liquid-glass-menu{flex-direction:column;gap:12px;}}

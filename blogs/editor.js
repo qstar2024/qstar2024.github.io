@@ -53,7 +53,7 @@ async function savePost(){
  * Opens GitHub OAuth popup and sets ghToken
  */
 function authenticate(){
-  const clientId = 'YOUR_GITHUB_APP_CLIENT_ID'; // TODO: replace
+  const clientId = 'Ov23li9lr04ic0z5eEwP'; // YOUR_GITHUB_APP_CLIENT_ID
   const state = Math.random().toString(36).slice(2);
   const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=repo&state=${state}`;
   const w = window.open(authUrl,'ghauth','width=500,height=600');

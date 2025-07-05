@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog Reader</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="reader.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <main class="scroll-container">
+    <h1 id="title"></h1>
+    <div class="meta" id="meta"></div>
+    <article id="content" class="markdown-body"></article>
+  </main>
+
+  <div class="liquid-glass-menu">
+    <button class="liquid-glass-btn" onclick="window.location.href='index.html'">Back to Blogs</button>
+    <button class="liquid-glass-btn" id="editBtn">Edit Mode</button>
+  </div>
+</body>
+</html>

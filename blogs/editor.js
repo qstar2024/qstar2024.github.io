@@ -67,7 +67,7 @@ function authenticate(){
   const clientId = 'Ov23li9lr04ic0z5eEwP';
   const state = Math.random().toString(36).slice(2);
   const redirectUri = encodeURIComponent(window.location.origin + '/blogs/callback.html');
-  const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=repo&state=${state}&redirect_uri=${redirectUri}`;
+  const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=repo&state=${state}&redirect_uri=${redirectUri}&response_type=token`;
   const w = window.open(authUrl,'ghauth','width=500,height=600');
   
   const authCheck = setInterval(() => {
@@ -77,39 +77,17 @@ function authenticate(){
     }
   }, 500);
   
-  window.addEventListener('message', async ev => {
-    if(ev.data.type === 'gh_code') {
-      try {
-        const token = await exchangeCodeForToken(ev.data.code);
-        window.ghToken = token;
-        localStorage.setItem('ghToken', token);
-        
-        // Notify user
-        alert('GitHub authorization successful!');
-        
-        // Focus editor window
-        window.focus();
-      } catch (e) {
-        console.error('Token exchange failed:', e);
-        alert('Authorization failed. Please try again.');
-      }
+  window.addEventListener('message', ev => {
+    if(ev.data.type === 'gh_token') {
+      window.ghToken = ev.data.token;
+      localStorage.setItem('ghToken', ev.data.token);
+      alert('GitHub authorization successful!');
+      window.focus();
     }
     else if(ev.data.type === 'gh_error') {
       alert('Authorization failed: ' + (ev.data.message || 'Unknown error'));
     }
   });
-}
-
-async function exchangeCodeForToken(code) {
-  const response = await fetch('https://your-server.com/exchange-code', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ code })
-  });
-  
-  if (!response.ok) throw new Error('Token exchange failed');
-  const data = await response.json();
-  return data.token;
 }
 
 /**

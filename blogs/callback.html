@@ -5,21 +5,21 @@
   <title>GitHub OAuth Callback</title>
   <script>
     window.addEventListener('load', () => {
-      const params = new URLSearchParams(window.location.search);
-      const code = params.get('code');
+      const hash = window.location.hash.substring(1);
+      const params = new URLSearchParams(hash);
+      const token = params.get('access_token');
       const state = params.get('state');
       
-      if (code && state) {
-        // Send code to parent window
+      if (token && state) {
         window.opener.postMessage({
-          type: 'gh_code',
-          code: code,
+          type: 'gh_token',
+          token: token,
           state: state
         }, '*');
       } else {
         window.opener.postMessage({
           type: 'gh_error',
-          message: 'Authorization failed'
+          message: 'Authorization failed: ' + window.location.hash
         }, '*');
       }
       

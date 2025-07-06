@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>GitHub OAuth Callback</title>
+  <script>
+    window.addEventListener('load', () => {
+      const params = new URLSearchParams(window.location.search);
+      const code = params.get('code');
+      const state = params.get('state');
+      
+      if (code && state) {
+        // Send code to parent window
+        window.opener.postMessage({
+          type: 'gh_code',
+          code: code,
+          state: state
+        }, '*');
+      } else {
+        window.opener.postMessage({
+          type: 'gh_error',
+          message: 'Authorization failed'
+        }, '*');
+      }
+      
+      window.close();
+    });
+  </script>
+</head>
+<body>
+  <p>Processing GitHub authorization...</p>
+</body>
+</html>

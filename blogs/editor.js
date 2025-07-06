@@ -61,13 +61,13 @@ async function savePost(){
  * Opens GitHub OAuth popup and sets ghToken
  */
 function authenticate(){
-  // Prevent multiple auth attempts
   if(window.authInProgress) return;
   window.authInProgress = true;
   
-  const clientId = 'Ov23li9lr04ic0z5eEwP'; //YOUR_GITHUB_APP_CLIENT_ID
+  const clientId = 'Ov23li9lr04ic0z5eEwP';
   const state = Math.random().toString(36).slice(2);
-  const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=repo&state=${state}`;
+  const redirectUri = encodeURIComponent(window.location.origin + '/blogs/callback.html');
+  const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=repo&state=${state}&redirect_uri=${redirectUri}`;
   const w = window.open(authUrl,'ghauth','width=500,height=600');
   
   const authCheck = setInterval(() => {
@@ -77,13 +77,39 @@ function authenticate(){
     }
   }, 500);
   
-  window.addEventListener('message', ev=>{
-    if(ev.data.type==='gh_token'){
-      window.ghToken = ev.data.token;
-      localStorage.setItem('ghToken', ev.data.token); // Persist token
-      w.close();
+  window.addEventListener('message', async ev => {
+    if(ev.data.type === 'gh_code') {
+      try {
+        const token = await exchangeCodeForToken(ev.data.code);
+        window.ghToken = token;
+        localStorage.setItem('ghToken', token);
+        
+        // Notify user
+        alert('GitHub authorization successful!');
+        
+        // Focus editor window
+        window.focus();
+      } catch (e) {
+        console.error('Token exchange failed:', e);
+        alert('Authorization failed. Please try again.');
+      }
+    }
+    else if(ev.data.type === 'gh_error') {
+      alert('Authorization failed: ' + (ev.data.message || 'Unknown error'));
     }
   });
+}
+
+async function exchangeCodeForToken(code) {
+  const response = await fetch('https://your-server.com/exchange-code', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ code })
+  });
+  
+  if (!response.ok) throw new Error('Token exchange failed');
+  const data = await response.json();
+  return data.token;
 }
 
 /**

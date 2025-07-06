@@ -6,6 +6,9 @@ const isNew = params.has('new');
 const titleInput = document.getElementById('titleInput');
 const bodyDiv = document.getElementById('body');
 
+// Check localStorage for existing token
+window.ghToken = localStorage.getItem('ghToken') || null;
+
 if(!file){ location.href='index.html'; }
 
 async function loadIfExisting(){
@@ -27,7 +30,12 @@ function calcReadTime(text){
 }
 
 async function savePost(){
-  if(!window.ghToken){alert('GitHub auth required');return;}
+  if(!window.ghToken){
+    if(confirm('GitHub authorization required. Open authorization window?')){
+      authenticate();
+    }
+    return;
+  }
   const content = {
     create_time: isNew? new Date().toISOString() : undefined,
     last_edit_time: new Date().toISOString(),
@@ -53,13 +61,26 @@ async function savePost(){
  * Opens GitHub OAuth popup and sets ghToken
  */
 function authenticate(){
-  const clientId = 'Ov23li9lr04ic0z5eEwP'; // YOUR_GITHUB_APP_CLIENT_ID
+  // Prevent multiple auth attempts
+  if(window.authInProgress) return;
+  window.authInProgress = true;
+  
+  const clientId = 'Ov23li9lr04ic0z5eEwP'; //YOUR_GITHUB_APP_CLIENT_ID
   const state = Math.random().toString(36).slice(2);
   const authUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&scope=repo&state=${state}`;
   const w = window.open(authUrl,'ghauth','width=500,height=600');
+  
+  const authCheck = setInterval(() => {
+    if(w.closed) {
+      clearInterval(authCheck);
+      window.authInProgress = false;
+    }
+  }, 500);
+  
   window.addEventListener('message', ev=>{
     if(ev.data.type==='gh_token'){
       window.ghToken = ev.data.token;
+      localStorage.setItem('ghToken', ev.data.token); // Persist token
       w.close();
     }
   });
@@ -101,7 +122,13 @@ document.getElementById('giveUpBtn').addEventListener('click', () => {
   if(confirm('Discard changes and leave?')) location.href='index.html';
 });
 
-// On load, require auth if no token
-if(!window.ghToken){
-  authenticate();
+// Only auto-authenticate if token doesn't exist
+if(!window.ghToken && !window.authInProgress){
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+      if(!window.ghToken && !window.authInProgress){
+        authenticate();
+      }
+    }, 1000); // Delay to allow token from localStorage
+  });
 }

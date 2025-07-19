@@ -38,7 +38,7 @@ body {
     border:1px solid rgba(255,255,255,0.2);
     backdrop-filter:blur(25px) saturate(160%);
     -webkit-backdrop-filter:blur(25px) saturate(160%);
-    border-radius:18px;
+    border-radius:12px;
     box-shadow:0 6px 30px rgba(0,0,0,0.25);
 }
 
@@ -55,10 +55,10 @@ h1,h2{font-weight:700;text-align:center;color:#ffffff;}
 
 /* Liquid Glass floating bottom menu */
 .liquid-glass-menu{
-    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-    display:flex;gap:24px;padding:12px 24px;z-index:50;
+    position:fixed;bottom:3px;left:50%;transform:translateX(-50%);
+    display:flex;gap:12px;padding:6px 8px;z-index:50;
 }
-.liquid-glass-btn{background:rgba(255,255,255,0.15);border:none;border-radius:14px;color:#ffffff;padding:10px 24px;font-size:1rem;cursor:pointer;transition:background .2s,transform .2s;backdrop-filter:blur(15px) saturate(180%);} 
+.liquid-glass-btn{background:rgba(255,255,255,0.15);border:none;border-radius:12px;color:#ffffff;padding:10px 24px;font-size:0.6rem;cursor:pointer;transition:background .2s,transform .2s;backdrop-filter:blur(15px) saturate(180%);} 
 .liquid-glass-btn:active{transform:scale(0.96);} 
 
 /* Scroll container */

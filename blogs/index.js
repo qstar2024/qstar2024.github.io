@@ -1,7 +1,6 @@
 /* index.js – fetch latest blogs and enable new post creation */
 const repo = "qstar2024/blog_posts";
 const latestPostsDiv = document.getElementById("latestPosts");
-const newBtn = document.getElementById("newBtn");
 
 async function fetchPosts() {
   try {
@@ -48,11 +47,5 @@ window.openPost = function(filename){
   window.location.href = `reader.html?file=${filename}`;
 }
 
-// New post
-newBtn.addEventListener('click', () => {
-  const now = new Date();
-  const fn = now.toISOString().replace(/[-:T]/g, '').slice(0,15); // yyyymmddhhmmss
-  window.location.href = `editor.html?file=${fn}.json&new=1`;
-});
 
 fetchPosts();

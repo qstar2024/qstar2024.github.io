@@ -34,7 +34,7 @@ async function fetchPosts() {
     latestPostsDiv.innerHTML = posts
       .filter(Boolean)
       .map(item => {
-        return `<div class="liquid-glass-card" onclick="openPost(${JSON.stringify(item.filename)})\">
+        return `<div class="liquid-glass-card" onclick="openPost(${JSON.stringify(item.filename)})">
           <h3>${item.subject}</h3>
           <div class="meta">Created: ${item.create_time} · Edited: ${item.last_edit_time} · ⏱️ ${item.estimate_read_time} min</div>
         </div>`;

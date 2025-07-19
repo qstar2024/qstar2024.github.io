@@ -5,18 +5,13 @@ const latestPostsDiv = document.getElementById("latestPosts");
 async function fetchPosts() {
   try {
     const res = await fetch(`https://api.github.com/repos/${repo}/contents/`);
-
     if (!res.ok) throw new Error(`Failed to fetch repo contents: ${res.statusText}`);
     
     const contents = await res.json();
-
-    const filteredContents = contents.filter(item => {
-      return item.type === 'file' && item.name.endsWith('.json');
-    });
-
-    const sortedContents = filteredContents.sort((a, b) => b.name.localeCompare(a.name));
-
-    const postFiles = sortedContents.slice(0, 5);
+    const postFiles = contents
+      .filter(item => item.type === 'file' && item.name.endsWith('.json'))
+      .sort((a, b) => b.name.localeCompare(a.name)) // Sort descending by filename
+      .slice(0, 5);
 
     if (postFiles.length === 0) {
       latestPostsDiv.innerHTML = "<p>No posts found.</p>";
@@ -25,16 +20,18 @@ async function fetchPosts() {
 
     const posts = await Promise.all(
       postFiles.map(async (file) => {
-        const response = await fetch(file.download_url);
-        const postData = await response.json();
-        return { ...postData, filename: file.name };
+        const postRes = await fetch(file.download_url);
+        if (!postRes.ok) return null;
+        const postData = await postRes.json();
+        postData.filename = file.name; // Add filename for the onclick handler
+        return postData;
       })
     );
 
     latestPostsDiv.innerHTML = posts
       .filter(Boolean)
       .map(item => {
-        return `<div class="liquid-glass-card" onclick="openPost(${JSON.stringify(item.filename)})">
+        return `<div class="liquid-glass-card" onclick="openPost('${item.filename}')">
           <h3>${item.subject}</h3>
           <div class="meta">Created: ${item.create_time} · Edited: ${item.last_edit_time} · ⏱️ ${item.estimate_read_time} min</div>
         </div>`;

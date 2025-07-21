@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Texas Hold'em Poker</title>
+    <link rel="stylesheet" href="poker-styles.css">
+</head>
+<body>
+    <div class="poker-table">
+        <div id="orientationPrompt" class="orientation-prompt">
+            <p>Please rotate your device to landscape mode for the best experience.</p>
+        </div>
+        <!-- Background felt texture -->
+        <div class="table-felt"></div>
+        
+        <!-- Game status -->
+        <div class="game-status liquid-glass-card" id="gameStatus">
+            <div class="status-text">Welcome to Texas Hold'em!</div>
+        </div>
+
+        <!-- Community cards area -->
+        <div class="community-cards">
+            <div class="card-slot" id="flop1"></div>
+            <div class="card-slot" id="flop2"></div>
+            <div class="card-slot" id="flop3"></div>
+            <div class="card-slot" id="turn"></div>
+            <div class="card-slot" id="river"></div>
+        </div>
+        
+        <!-- Pot display -->
+        <div class="pot-display liquid-glass-card">
+            <div class="pot-label">POT</div>
+            <div class="pot-amount" id="potAmount">$0</div>
+        </div>
+        
+        <!-- AI Players -->
+        <div class="player ai-player" id="player1" data-position="left">
+            <div class="player-info liquid-glass-card">
+                <div class="player-name">Arya</div>
+                <div class="player-chips">$1000</div>
+                <div class="player-status"></div>
+            </div>
+            <div class="player-cards">
+                <div class="card card-back"></div>
+                <div class="card card-back"></div>
+            </div>
+        </div>
+        
+        <div class="player ai-player" id="player2" data-position="top-left">
+            <div class="player-info liquid-glass-card">
+                <div class="player-name">Bran</div>
+                <div class="player-chips">$1000</div>
+                <div class="player-status"></div>
+            </div>
+            <div class="player-cards">
+                <div class="card card-back"></div>
+                <div class="card card-back"></div>
+            </div>
+        </div>
+        
+        <div class="player ai-player" id="player3" data-position="top-right">
+            <div class="player-info liquid-glass-card">
+                <div class="player-name">Cersei</div>
+                <div class="player-chips">$1000</div>
+                <div class="player-status"></div>
+            </div>
+            <div class="player-cards">
+                <div class="card card-back"></div>
+                <div class="card card-back"></div>
+            </div>
+        </div>
+        
+        <div class="player ai-player" id="player4" data-position="right">
+            <div class="player-info liquid-glass-card">
+                <div class="player-name">Dolores</div>
+                <div class="player-chips">$1000</div>
+                <div class="player-status"></div>
+            </div>
+            <div class="player-cards">
+                <div class="card card-back"></div>
+                <div class="card card-back"></div>
+            </div>
+        </div>
+        
+        <!-- Human Player -->
+        <div class="player human-player" id="humanPlayer" data-position="bottom">
+            <div class="player-info liquid-glass-card">
+                <div class="player-name">You</div>
+                <div class="player-chips">$1000</div>
+                <div class="player-status"></div>
+            </div>
+            <div class="player-cards">
+                <div class="card" id="humanCard1"></div>
+                <div class="card" id="humanCard2"></div>
+            </div>
+            <div class="hand-strength liquid-glass-card" id="handStrength">
+                <div class="strength-label">Hand Strength</div>
+                <div class="strength-value" id="strengthValue">High Card</div>
+            </div>
+        </div>
+        
+        <!-- Dealer button -->
+        <div class="dealer-button" id="dealerButton">D</div>
+        
+        <!-- Game controls -->
+        <div class="game-controls liquid-glass-menu">
+            <button class="liquid-glass-btn" id="foldBtn">Fold</button>
+            <button class="liquid-glass-btn" id="checkBtn">Check</button>
+            <button class="liquid-glass-btn" id="callBtn">Call $0</button>
+            <button class="liquid-glass-btn" id="raiseBtn">Raise</button>
+            <button class="liquid-glass-btn" id="allInBtn">All-In</button>
+        </div>
+        
+        <!-- Raise slider -->
+        <div class="raise-controls liquid-glass-card" id="raiseControls" style="display: none;">
+            <div class="raise-label">Raise Amount</div>
+            <input type="range" id="raiseSlider" min="0" max="1000" value="50" class="raise-slider">
+            <div class="raise-amount" id="raiseAmount">$20</div>
+            <div class="raise-buttons">
+                <button class="liquid-glass-btn" id="confirmRaise">Confirm</button>
+                <button class="liquid-glass-btn" id="cancelRaise">Cancel</button>
+            </div>
+        </div>
+        
+        <!-- New Game Button -->
+        <div class="new-game-container">
+            <button class="liquid-glass-btn" id="newGameBtn">New Game</button>
+        </div>
+        
+        
+
+        <!-- Blind level display -->
+        <div class="blind-level-display liquid-glass-card" id="blindLevelDisplay"></div>
+    </div>
+    
+    <script src="poker-game.js"></script>
+<script>
+    function checkOrientation() {
+        const prompt = document.getElementById('orientationPrompt');
+        if (window.innerHeight > window.innerWidth) {
+            prompt.style.display = 'flex';
+        } else {
+            prompt.style.display = 'none';
+        }
+    }
+    window.addEventListener('resize', checkOrientation);
+    checkOrientation();
+</script>
+</body>
+</html>

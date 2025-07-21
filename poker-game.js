@@ -172,6 +172,32 @@ class PokerGame {
         document.getElementById('confirmRaise').addEventListener('click', () => this.confirmRaise());
         document.getElementById('cancelRaise').addEventListener('click', () => this.hideRaiseControls());
         document.getElementById('raiseSlider').addEventListener('input', () => this.updateRaiseAmount());
+        
+        // Back to Home button functionality
+        this.backHomeContainer = document.querySelector('.back-home-container');
+        this.hideTimeout = null;
+        
+        const showBackHome = () => {
+            clearTimeout(this.hideTimeout);
+            this.backHomeContainer.classList.remove('hiding');
+            this.backHomeContainer.classList.add('visible');
+            this.hideTimeout = setTimeout(() => {
+                this.backHomeContainer.classList.add('hiding');
+                setTimeout(() => {
+                    this.backHomeContainer.classList.remove('visible', 'hiding');
+                }, 500);
+            }, 5000);
+        };
+        
+        document.addEventListener('click', (event) => {
+            const interactiveElements = ['BUTTON', 'INPUT', 'A', '.card', '.player-cards', '.game-controls', '.raise-controls'];
+            const isInteractive = interactiveElements.some(selector => event.target.closest(selector));
+            if (!isInteractive) {
+                showBackHome();
+            }
+        });
+        
+        document.addEventListener('scroll', showBackHome);
     }
 
     startNewGame() {

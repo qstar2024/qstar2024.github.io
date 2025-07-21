@@ -705,3 +705,33 @@ body {
     color: #ff8b94;
     font-weight: 700;
 }
+
+/* Back to Home Container */
+.back-home-container {
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    transition: top 0.5s ease-in-out;
+}
+
+.back-home-container.visible {
+    top: 20px;
+    animation: dropDown 0.5s ease-out;
+}
+
+.back-home-container.hiding {
+    animation: bounceUp 0.5s ease-in;
+}
+
+@keyframes dropDown {
+    0% { top: -60px; }
+    100% { top: 20px; }
+}
+
+@keyframes bounceUp {
+    0% { top: 20px; }
+    50% { top: -10px; }
+    100% { top: -60px; }
+}

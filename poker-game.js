@@ -54,8 +54,8 @@ class PokerGame {
             element: document.getElementById('player1'),
             personality: {
                 aggression: 0.85,
-                bluffFrequency: 0.35,
                 tightness: 0.05,
+                bluffFrequency: 0.35,
                 mathematical: 0.05
             }
         });
@@ -75,8 +75,8 @@ class PokerGame {
             element: document.getElementById('player2'),
             personality: {
                 aggression: 0.05,
-                bluffFrequency: 0.05,
                 tightness: 0.85,
+                bluffFrequency: 0.05,
                 mathematical: 0.35
             }
         });
@@ -96,8 +96,8 @@ class PokerGame {
             element: document.getElementById('player3'),
             personality: {
                 aggression: 0.35,
-                bluffFrequency: 0.85,
                 tightness: 0.05,
+                bluffFrequency: 0.85,
                 mathematical: 0.05
             }
         });
@@ -117,8 +117,8 @@ class PokerGame {
             element: document.getElementById('player4'),
             personality: {
                 aggression: 0.35,
-                bluffFrequency: 0.05,
                 tightness: 0.05,
+                bluffFrequency: 0.05,
                 mathematical: 0.85
             }
         });
@@ -360,6 +360,7 @@ class PokerGame {
         this.pot = actualSmall + actualBig;
         this.currentBet = Math.max(actualSmall, actualBig);
         this.currentPlayer = (this.dealerPosition + 3) % this.players.length;
+        this.updateUI(); // Immediate update after blinds
     }
 
     processBettingRound() {
@@ -414,7 +415,25 @@ class PokerGame {
         const potOdds = this.calculatePotOdds();
         const position = this.getPlayerPosition(player);
         
-        switch (player.strategy) {
+        const personalities = [
+            {type: 'aggressive', prob: player.personality.aggression},
+            {type: 'conservative', prob: player.personality.tightness},
+            {type: 'bluffer', prob: player.personality.bluffFrequency},
+            {type: 'analytical', prob: player.personality.mathematical}
+        ];
+        const total = personalities.reduce((sum, p) => sum + p.prob, 0);
+        if (total === 0) return { type: 'fold' };
+        const rand = Math.random() * total;
+        let cumulative = 0;
+        let selected = 'aggressive';
+        for (let p of personalities) {
+            cumulative += p.prob;
+            if (rand < cumulative) {
+                selected = p.type;
+                break;
+            }
+        }
+        switch (selected) {
             case 'aggressive':
                 return this.getAggressiveAction(player, handStrength, potOdds, position);
             case 'conservative':
@@ -432,54 +451,46 @@ class PokerGame {
         const callAmount = this.currentBet - player.bet;
         const phaseMultiplier = this.getPhaseMultiplier();
         
-        // If can't call, must fold or go all-in
         if (callAmount > player.chips) {
-            if (handStrength >= 0.4) {
-                return { type: 'call' }; // This will trigger all-in in executeAIAction
+            if (handStrength >= 0.3) {
+                return { type: 'call' };
             } else {
                 return { type: 'fold' };
             }
         }
         
-        if (handStrength >= 0.6) {
-            // Strong hand - raise for value
-            if (Math.random() < player.personality.aggression) {
-                const raiseAmount = Math.floor(this.pot * (0.3 + Math.random() * 0.4) * phaseMultiplier);
-                const maxRaise = player.chips - callAmount;
-                if (maxRaise > 0) {
-                    return { type: 'raise', amount: Math.min(raiseAmount, maxRaise) };
-                }
+        if (handStrength >= 0.5) {
+            const raiseFactor = 0.4 + handStrength * 0.6;
+            const raiseAmount = Math.floor(this.pot * raiseFactor * phaseMultiplier);
+            const maxRaise = player.chips - callAmount;
+            if (maxRaise > 0 && Math.random() < 0.8) {
+                return { type: 'raise', amount: Math.min(raiseAmount, maxRaise) };
             }
             return { type: 'call' };
-        } else if (handStrength >= 0.35) {
-            // Decent hand - mixed strategy
-            if (Math.random() < 0.4) {
-                const raiseAmount = Math.floor(this.currentBet * (1.2 + Math.random() * 0.3));
+        } else if (handStrength >= 0.25) {
+            if (Math.random() < 0.6) {
+                const raiseAmount = Math.floor(this.currentBet * (1.5 + Math.random() * 0.5));
                 const maxRaise = player.chips - callAmount;
                 if (maxRaise > 0) {
                     return { type: 'raise', amount: Math.min(raiseAmount, maxRaise) };
                 }
-            } else if (callAmount <= player.chips * 0.1) {
+            } else if (callAmount <= player.chips * 0.15) {
                 return { type: 'call' };
             } else {
                 return callAmount === 0 ? { type: 'check' } : { type: 'fold' };
             }
-        } else if (handStrength >= 0.15 && Math.random() < player.personality.bluffFrequency) {
-            // Selective bluffing
-            const bluffAmount = Math.floor(this.pot * (0.2 + Math.random() * 0.3));
+        } else if (Math.random() < player.personality.bluffFrequency * 1.2) {
+            const bluffAmount = Math.floor(this.pot * (0.25 + Math.random() * 0.35));
             const maxRaise = player.chips - callAmount;
             if (maxRaise > 0) {
                 return { type: 'raise', amount: Math.min(bluffAmount, maxRaise) };
             }
         }
         
-        if (callAmount === 0) {
-            return { type: 'check' };
-        } else if (callAmount <= this.bigBlind && handStrength >= 0.2) {
-            return { type: 'call' };
-        } else {
-            return { type: 'fold' };
+        if (callAmount === 0 || (callAmount <= this.bigBlind * 2 && handStrength >= 0.15)) {
+            return callAmount === 0 ? { type: 'check' } : { type: 'call' };
         }
+        return { type: 'fold' };
     }
 
     getPhaseMultiplier() {
@@ -497,100 +508,84 @@ class PokerGame {
         const callAmount = this.currentBet - player.bet;
         const phaseMultiplier = this.getPhaseMultiplier();
         
-        // If can't call, must fold or go all-in
         if (callAmount > player.chips) {
-            if (handStrength >= 0.6) {
-                return { type: 'call' }; // This will trigger all-in in executeAIAction
+            if (handStrength >= 0.5) {
+                return { type: 'call' };
             } else {
                 return { type: 'fold' };
             }
         }
         
-        if (handStrength >= 0.75) {
-            // Very strong hand - value bet
-            const raiseAmount = Math.floor(this.pot * 0.25 * phaseMultiplier);
+        if (handStrength >= 0.7) {
+            const raiseAmount = Math.floor(this.pot * 0.2 * phaseMultiplier);
             const maxRaise = player.chips - callAmount;
-            if (maxRaise > 0) {
+            if (maxRaise > 0 && Math.random() < 0.4) {
                 return { type: 'raise', amount: Math.min(raiseAmount, maxRaise) };
             }
             return { type: 'call' };
-        } else if (handStrength >= 0.5) {
-            // Good hand - cautious play
-            if (Math.random() < 0.3 && callAmount <= player.chips * 0.05) {
-                const raiseAmount = Math.floor(this.currentBet * 1.1);
-                const maxRaise = player.chips - callAmount;
-                if (maxRaise > 0) {
-                    return { type: 'raise', amount: Math.min(raiseAmount, maxRaise) };
-                }
-            } else if (callAmount <= player.chips * 0.08) {
+        } else if (handStrength >= 0.4) {
+            if (callAmount <= player.chips * 0.1 && Math.random() < 0.6) {
                 return { type: 'call' };
+            } else if (callAmount === 0) {
+                return { type: 'check' };
             } else {
-                return callAmount === 0 ? { type: 'check' } : { type: 'fold' };
+                return { type: 'fold' };
             }
-        } else if (handStrength >= 0.25 && potOdds > 3 && callAmount <= this.bigBlind) {
-            // Drawing hand with excellent odds and small bet
+        } else if (handStrength >= 0.2 && potOdds > 4 && callAmount <= this.bigBlind * 1.5) {
             return { type: 'call' };
         } else if (callAmount === 0) {
             return { type: 'check' };
-        } else {
-            return { type: 'fold' };
         }
+        return { type: 'fold' };
     }
 
     getBlufferAction(player, handStrength, potOdds, position) {
         const callAmount = this.currentBet - player.bet;
-        const bluffChance = Math.random();
         const phaseMultiplier = this.getPhaseMultiplier();
         const activePlayers = this.players.filter(p => !p.folded).length;
+        const unpredictability = Math.random();
         
-        // If can't call, must fold or go all-in
         if (callAmount > player.chips) {
-            if (handStrength >= 0.35 || (bluffChance < player.personality.bluffFrequency * 0.5)) {
-                return { type: 'call' }; // This will trigger all-in in executeAIAction
+            if ((handStrength >= 0.4 && unpredictability < 0.7) || unpredictability < 0.3) {
+                return { type: 'call' };
             } else {
                 return { type: 'fold' };
             }
         }
         
-        if (handStrength >= 0.65) {
-            // Strong hand - value bet
-            const raiseAmount = Math.floor(this.pot * (0.3 + Math.random() * 0.2) * phaseMultiplier);
-            const maxRaise = player.chips - callAmount;
-            if (maxRaise > 0) {
-                return { type: 'raise', amount: Math.min(raiseAmount, maxRaise) };
-            }
-            return { type: 'call' };
-        } else if (bluffChance < player.personality.bluffFrequency && activePlayers <= 3) {
-            // Strategic bluffing - less likely with more players
-            const bluffSize = this.gamePhase === 'river' ? 'large' : (Math.random() < 0.6 ? 'small' : 'medium');
-            let raiseAmount;
-            if (bluffSize === 'small') {
-                raiseAmount = Math.floor(this.pot * (0.15 + Math.random() * 0.2));
-            } else if (bluffSize === 'medium') {
-                raiseAmount = Math.floor(this.pot * (0.3 + Math.random() * 0.3));
+        if (unpredictability < 0.1 && handStrength >= 0.6) {
+            return { type: 'fold' }; // Unpredictable fold on strong hand
+        } else if (handStrength >= 0.6) {
+            if (unpredictability < 0.5) {
+                return { type: 'call' }; // Sometimes slowplay
             } else {
-                raiseAmount = Math.floor(this.pot * (0.5 + Math.random() * 0.4));
+                const raiseAmount = Math.floor(this.pot * (0.2 + unpredictability * 0.4) * phaseMultiplier);
+                const maxRaise = player.chips - callAmount;
+                if (maxRaise > 0) {
+                    return { type: 'raise', amount: Math.min(raiseAmount, maxRaise) };
+                }
             }
+        } else if (handStrength < 0.3 && unpredictability < player.personality.bluffFrequency * 1.5 && activePlayers <= 3) {
+            const bluffSize = Math.random() < 0.5 ? 'small' : (Math.random() < 0.7 ? 'medium' : 'large');
+            let raiseAmount = Math.floor(this.pot * (bluffSize === 'small' ? 0.2 : bluffSize === 'medium' ? 0.4 : 0.6));
             const maxRaise = player.chips - callAmount;
             if (maxRaise > 0) {
                 return { type: 'raise', amount: Math.min(raiseAmount, maxRaise) };
             }
-        } else if (handStrength >= 0.35) {
-            // Decent hand - call or check
-            if (callAmount <= player.chips * 0.1) {
+        } else if (handStrength >= 0.3) {
+            if (unpredictability < 0.4) {
+                return callAmount === 0 ? { type: 'check' } : { type: 'fold' }; // Unpredictable fold on decent hand
+            } else if (callAmount <= player.chips * 0.12) {
                 return { type: 'call' };
-            } else {
-                return callAmount === 0 ? { type: 'check' } : { type: 'fold' };
             }
         }
         
         if (callAmount === 0) {
-            return { type: 'check' };
-        } else if (callAmount <= this.bigBlind && handStrength >= 0.2) {
+            return Math.random() < 0.2 ? { type: 'raise', amount: Math.min(Math.floor(this.pot * 0.2), player.chips) } : { type: 'check' };
+        } else if (callAmount <= this.bigBlind * 1.5 && unpredictability < 0.6) {
             return { type: 'call' };
-        } else {
-            return { type: 'fold' };
         }
+        return { type: 'fold' };
     }
 
     getAnalyticalAction(player, handStrength, potOdds, position) {
@@ -598,58 +593,45 @@ class PokerGame {
         const expectedValue = this.calculateExpectedValue(player, handStrength, potOdds);
         const activePlayers = this.players.filter(p => !p.folded).length;
         const phaseMultiplier = this.getPhaseMultiplier();
+        const avgOpponentChips = this.players.filter(p => p !== player && !p.folded).reduce((sum, p) => sum + p.chips, 0) / (activePlayers - 1 || 1);
+        const stackToPotRatio = player.chips / this.pot;
         
-        // If can't call, must fold or go all-in based on mathematical analysis
         if (callAmount > player.chips) {
-            if (expectedValue > 0.8 || handStrength >= 0.5) {
-                return { type: 'call' }; // This will trigger all-in in executeAIAction
+            if (expectedValue > 0.7 || handStrength >= 0.45) {
+                return { type: 'call' };
             } else {
                 return { type: 'fold' };
             }
         }
         
-        // Mathematical decision making based on pot odds and expected value
-        if (handStrength >= 0.7) {
-            // Strong hand - value bet with phase consideration
-            const optimalRaise = Math.floor(this.pot * (0.25 + handStrength * 0.25) * phaseMultiplier);
+        if (handStrength >= 0.65 && expectedValue > 1.2) {
+            const optimalRaise = Math.floor(this.pot * (0.3 + handStrength * 0.3) * phaseMultiplier * Math.min(1, stackToPotRatio));
             const maxRaise = player.chips - callAmount;
-            if (maxRaise > 0) {
-                return { type: 'raise', amount: Math.min(optimalRaise, maxRaise) };
+            if (maxRaise > 0 && optimalRaise > this.bigBlind) {
+                return { type: 'raise', amount: Math.min(optimalRaise, maxRaise, avgOpponentChips * 0.5) };
             }
             return { type: 'call' };
-        } else if (expectedValue > 1.1 && handStrength >= 0.45) {
-            // Good EV with decent hand
-            const raiseAmount = Math.floor(this.pot * 0.3 * phaseMultiplier);
+        } else if (expectedValue > 1.0 && handStrength >= 0.4) {
+            const raiseAmount = Math.floor(this.pot * 0.35 * phaseMultiplier);
             const maxRaise = player.chips - callAmount;
-            if (maxRaise > 0) {
+            if (maxRaise > 0 && raiseAmount < avgOpponentChips * 0.3) {
                 return { type: 'raise', amount: Math.min(raiseAmount, maxRaise) };
             }
             return { type: 'call' };
-        } else if (expectedValue > 0.9 && potOdds > 2.5) {
-            // Marginal positive EV with good pot odds
-            if (callAmount <= player.chips * 0.12) {
-                return { type: 'call' };
-            } else {
-                return callAmount === 0 ? { type: 'check' } : { type: 'fold' };
-            }
-        } else if (handStrength >= 0.35 && potOdds > 3 && callAmount <= this.bigBlind * 2) {
-            // Drawing hand with excellent pot odds and reasonable bet
+        } else if (expectedValue > 0.85 && potOdds > 2.8 && callAmount <= player.chips * 0.15) {
             return { type: 'call' };
-        } else if (handStrength >= 0.25 && callAmount === 0) {
+        } else if (handStrength >= 0.3 && potOdds > 3.5 && callAmount <= this.bigBlind * 2.5) {
+            return { type: 'call' };
+        } else if (callAmount === 0 && handStrength >= 0.2) {
             return { type: 'check' };
-        } else if (Math.random() < player.personality.bluffFrequency && activePlayers <= 2 && this.gamePhase === 'river') {
-            // Rare strategic bluff on river with few players
-            const bluffAmount = Math.floor(this.pot * 0.4);
+        } else if (Math.random() < player.personality.bluffFrequency * 0.8 && activePlayers <= 2 && this.gamePhase === 'river' && stackToPotRatio > 1) {
+            const bluffAmount = Math.floor(this.pot * 0.45 * Math.min(1, player.chips / avgOpponentChips));
             const maxRaise = player.chips - callAmount;
             if (maxRaise > 0) {
                 return { type: 'raise', amount: Math.min(bluffAmount, maxRaise) };
             }
-            return { type: 'call' };
-        } else if (callAmount === 0) {
-            return { type: 'check' };
-        } else {
-            return { type: 'fold' };
         }
+        return callAmount === 0 ? { type: 'check' } : { type: 'fold' };
     }
 
     calculateExpectedValue(player, handStrength, potOdds) {
@@ -725,6 +707,7 @@ class PokerGame {
         }
         
         this.animateChips(player);
+        this.updateUI(); // Immediate update after AI action
     }
 
     playerAction(action) {
@@ -812,6 +795,7 @@ class PokerGame {
         
         this.animateChips(player);
         this.disablePlayerControls();
+        this.updateUI(); // Immediate update after player action
         setTimeout(() => this.processBettingRound(), 1000);
     }
 
@@ -883,6 +867,7 @@ class PokerGame {
         this.hideRaiseControls();
         this.animateChips(player);
         this.disablePlayerControls();
+        this.updateUI(); // Immediate update after raise
         setTimeout(() => this.processBettingRound(), 1000);
     }
 
@@ -998,6 +983,7 @@ class PokerGame {
             }, i * 300);
         }
         this.updateGameStatus('Flop dealt!');
+        this.updateUI(); // Update after flop
     }
 
     dealTurn() {
@@ -1006,6 +992,7 @@ class PokerGame {
         this.communityCards.push(card);
         this.animateCommunityCard(3, card);
         this.updateGameStatus('Turn dealt!');
+        this.updateUI(); // Update after turn
     }
 
     dealRiver() {
@@ -1014,6 +1001,7 @@ class PokerGame {
         this.communityCards.push(card);
         this.animateCommunityCard(4, card);
         this.updateGameStatus('River dealt!');
+        this.updateUI(); // Update after river
     }
 
     animateCommunityCard(index, card) {
@@ -1352,6 +1340,7 @@ class PokerGame {
         
         // Update dealer button position
         this.updateDealerButton();
+        this.updateBlindButtons();
         
         // Check for human game over
         if (this.players[0].chips <= 0 && !this.gameOverShown) {
@@ -1364,6 +1353,35 @@ class PokerGame {
             this.updateGameStatus('Congratulations! You win the tournament!');
             this.showNewGameButton();
             this.winShown = true;
+        }
+    }
+
+    updateBlindButtons() {
+        const smallBlindIndex = (this.dealerPosition + 1) % this.players.length;
+        const bigBlindIndex = (this.dealerPosition + 2) % this.players.length;
+        
+        const smallBlindPlayer = this.players[smallBlindIndex];
+        const bigBlindPlayer = this.players[bigBlindIndex];
+        
+        const smallBlindButton = document.getElementById('smallBlindButton');
+        const bigBlindButton = document.getElementById('bigBlindButton');
+        
+        if (smallBlindPlayer.chips > 0) {
+            const rect = smallBlindPlayer.element.getBoundingClientRect();
+            smallBlindButton.style.left = `${rect.left - 30}px`; // Left of player info
+            smallBlindButton.style.top = `${rect.top + rect.height / 2 - 12}px`;
+            smallBlindButton.style.display = 'flex';
+        } else {
+            smallBlindButton.style.display = 'none';
+        }
+        
+        if (bigBlindPlayer.chips > 0) {
+            const rect = bigBlindPlayer.element.getBoundingClientRect();
+            bigBlindButton.style.left = `${rect.left - 30}px`; // Left of player info
+            bigBlindButton.style.top = `${rect.top + rect.height / 2 - 12}px`;
+            bigBlindButton.style.display = 'flex';
+        } else {
+            bigBlindButton.style.display = 'none';
         }
     }
 

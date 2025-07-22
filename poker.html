@@ -146,7 +146,7 @@
 <script>
     function checkOrientation() {
         const prompt = document.getElementById('orientationPrompt');
-        if (window.innerHeight > window.innerWidth) {
+        if (window.innerHeight > window.innerWidth && prompt.style.display !== 'none') {
             prompt.style.display = 'flex';
         } else {
             prompt.style.display = 'none';
@@ -154,6 +154,10 @@
     }
     window.addEventListener('resize', checkOrientation);
     checkOrientation();
+
+    document.getElementById('orientationPrompt').addEventListener('click', function() {
+        this.style.display = 'none';
+    });
 </script>
 </body>
 </html>

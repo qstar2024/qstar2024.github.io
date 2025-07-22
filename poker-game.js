@@ -53,10 +53,10 @@ class PokerGame {
             strategy: 'aggressive',
             element: document.getElementById('player1'),
             personality: {
-                aggression: 0.85,
+                aggression: 0.55,
                 tightness: 0.05,
-                bluffFrequency: 0.35,
-                mathematical: 0.05
+                bluffFrequency: 0.2,
+                mathematical: 0.2
             }
         });
 
@@ -74,10 +74,10 @@ class PokerGame {
             strategy: 'conservative',
             element: document.getElementById('player2'),
             personality: {
-                aggression: 0.05,
-                tightness: 0.85,
+                aggression: 0.2,
+                tightness: 0.55,
                 bluffFrequency: 0.05,
-                mathematical: 0.35
+                mathematical: 0.2
             }
         });
 
@@ -95,10 +95,10 @@ class PokerGame {
             strategy: 'bluffer',
             element: document.getElementById('player3'),
             personality: {
-                aggression: 0.35,
+                aggression: 0.2,
                 tightness: 0.05,
-                bluffFrequency: 0.85,
-                mathematical: 0.05
+                bluffFrequency: 0.55,
+                mathematical: 0.2
             }
         });
 
@@ -116,10 +116,10 @@ class PokerGame {
             strategy: 'analytical',
             element: document.getElementById('player4'),
             personality: {
-                aggression: 0.35,
+                aggression: 0.2,
                 tightness: 0.05,
-                bluffFrequency: 0.05,
-                mathematical: 0.85
+                bluffFrequency: 0.2,
+                mathematical: 0.55
             }
         });
     }
@@ -435,21 +435,28 @@ class PokerGame {
         }
         switch (selected) {
             case 'aggressive':
-                return this.getAggressiveAction(player, handStrength, potOdds, position);
+                return this.getAggressiveAction(player, handStrength, potOdds, position, this.gamePhase);
             case 'conservative':
-                return this.getConservativeAction(player, handStrength, potOdds, position);
+                return this.getConservativeAction(player, handStrength, potOdds, position, this.gamePhase);
             case 'bluffer':
-                return this.getBlufferAction(player, handStrength, potOdds, position);
+                return this.getBlufferAction(player, handStrength, potOdds, position, this.gamePhase);
             case 'analytical':
-                return this.getAnalyticalAction(player, handStrength, potOdds, position);
+                return this.getAnalyticalAction(player, handStrength, potOdds, position, this.gamePhase);
             default:
                 return { type: 'fold' };
         }
     }
 
-    getAggressiveAction(player, handStrength, potOdds, position) {
+    getAggressiveAction(player, handStrength, potOdds, position, gamePhase) {
         const callAmount = this.currentBet - player.bet;
-        const phaseMultiplier = this.getPhaseMultiplier();
+        let phaseMultiplier;
+        switch (gamePhase) {
+            case 'preflop': phaseMultiplier = 0.8; break;
+            case 'flop': phaseMultiplier = 1.0; break;
+            case 'turn': phaseMultiplier = 1.2; break;
+            case 'river': phaseMultiplier = 1.4; break;
+            default: phaseMultiplier = 1.0;
+        }
         
         if (callAmount > player.chips) {
             if (handStrength >= 0.3) {
@@ -463,7 +470,7 @@ class PokerGame {
             const raiseFactor = 0.4 + handStrength * 0.6;
             const raiseAmount = Math.floor(this.pot * raiseFactor * phaseMultiplier);
             const maxRaise = player.chips - callAmount;
-            if (maxRaise > 0 && Math.random() < 0.8) {
+            if (maxRaise > 0 && Math.random() < 0.8 + (handStrength - 0.5) * 0.4) {
                 return { type: 'raise', amount: Math.min(raiseAmount, maxRaise) };
             }
             return { type: 'call' };
@@ -504,9 +511,8 @@ class PokerGame {
         }
     }
 
-    getConservativeAction(player, handStrength, potOdds, position) {
+    getConservativeAction(player, handStrength, potOdds, position, gamePhase) {
         const callAmount = this.currentBet - player.bet;
-        const phaseMultiplier = this.getPhaseMultiplier();
         
         if (callAmount > player.chips) {
             if (handStrength >= 0.5) {
@@ -516,10 +522,19 @@ class PokerGame {
             }
         }
         
+        let phaseMultiplier;
+        switch (gamePhase) {
+            case 'preflop': phaseMultiplier = 0.8; break;
+            case 'flop': phaseMultiplier = 1.0; break;
+            case 'turn': phaseMultiplier = 1.2; break;
+            case 'river': phaseMultiplier = 1.4; break;
+            default: phaseMultiplier = 1.0;
+        }
+        
         if (handStrength >= 0.7) {
-            const raiseAmount = Math.floor(this.pot * 0.2 * phaseMultiplier);
+            const raiseAmount = Math.floor(this.pot * (0.2 + handStrength * 0.1) * phaseMultiplier);
             const maxRaise = player.chips - callAmount;
-            if (maxRaise > 0 && Math.random() < 0.4) {
+            if (maxRaise > 0 && Math.random() < 0.4 + (handStrength - 0.7) * 0.5) {
                 return { type: 'raise', amount: Math.min(raiseAmount, maxRaise) };
             }
             return { type: 'call' };
@@ -539,9 +554,16 @@ class PokerGame {
         return { type: 'fold' };
     }
 
-    getBlufferAction(player, handStrength, potOdds, position) {
+    getBlufferAction(player, handStrength, potOdds, position, gamePhase) {
         const callAmount = this.currentBet - player.bet;
-        const phaseMultiplier = this.getPhaseMultiplier();
+        let phaseMultiplier;
+        switch (gamePhase) {
+            case 'preflop': phaseMultiplier = 0.8; break;
+            case 'flop': phaseMultiplier = 1.0; break;
+            case 'turn': phaseMultiplier = 1.2; break;
+            case 'river': phaseMultiplier = 1.4; break;
+            default: phaseMultiplier = 1.0;
+        }
         const activePlayers = this.players.filter(p => !p.folded).length;
         const unpredictability = Math.random();
         
@@ -588,11 +610,18 @@ class PokerGame {
         return { type: 'fold' };
     }
 
-    getAnalyticalAction(player, handStrength, potOdds, position) {
+    getAnalyticalAction(player, handStrength, potOdds, position, gamePhase) {
         const callAmount = this.currentBet - player.bet;
         const expectedValue = this.calculateExpectedValue(player, handStrength, potOdds);
         const activePlayers = this.players.filter(p => !p.folded).length;
-        const phaseMultiplier = this.getPhaseMultiplier();
+        let phaseMultiplier;
+        switch (gamePhase) {
+            case 'preflop': phaseMultiplier = 0.8; break;
+            case 'flop': phaseMultiplier = 1.0; break;
+            case 'turn': phaseMultiplier = 1.2; break;
+            case 'river': phaseMultiplier = 1.4; break;
+            default: phaseMultiplier = 1.0;
+        }
         const avgOpponentChips = this.players.filter(p => p !== player && !p.folded).reduce((sum, p) => sum + p.chips, 0) / (activePlayers - 1 || 1);
         const stackToPotRatio = player.chips / this.pot;
         

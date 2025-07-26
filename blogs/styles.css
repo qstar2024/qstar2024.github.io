@@ -55,8 +55,13 @@ h1,h2{font-weight:700;text-align:center;color:#ffffff;}
 
 /* Liquid Glass floating bottom menu */
 .liquid-glass-menu{
-    position:fixed;bottom:3px;left:50%;transform:translateX(-50%);
+    position:fixed;top:3px;left:50%;transform:translateX(-50%);
     display:flex;gap:12px;padding:6px 8px;z-index:50;
+    opacity:0;
+    transition:opacity 0.5s ease;
+}
+.liquid-glass-menu.visible{
+    opacity:1;
 }
 .liquid-glass-btn{background:rgba(255,255,255,0.15);border:none;border-radius:12px;color:#ffffff;padding:10px 24px;font-size:0.6rem;cursor:pointer;transition:background .2s,transform .2s;backdrop-filter:blur(15px) saturate(180%);} 
 .liquid-glass-btn:active{transform:scale(0.96);} 

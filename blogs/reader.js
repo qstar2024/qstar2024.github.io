@@ -21,3 +21,18 @@ async function loadPost(){
   }
 }
 loadPost();
+
+// Menu visibility logic
+const menu = document.querySelector('.liquid-glass-menu');
+let hideTimeout;
+
+function showMenu() {
+  menu.classList.add('visible');
+  clearTimeout(hideTimeout);
+  hideTimeout = setTimeout(() => {
+    menu.classList.remove('visible');
+  }, 3000);
+}
+
+window.addEventListener('scroll', showMenu);
+document.addEventListener('click', showMenu);

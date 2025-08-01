@@ -563,8 +563,8 @@ body {
 /* Responsive Design */
 @media (max-width: 1024px) and (orientation: landscape) {
     .table-felt {
-        width: 90vw;
-        height: 70vh;
+        width: 70vw;
+        height: 60vh;
     }
     
     .card {
@@ -588,11 +588,11 @@ body {
     }
     
     .player[data-position="left"] {
-        left: 1%;
+        left: 3%;
     }
     
     .player[data-position="right"] {
-        right: 1%;
+        right: 3%;
     }
     
     .game-controls {
@@ -608,8 +608,8 @@ body {
 
 @media (max-width: 768px) {
     .table-felt {
-        width: 95vw;
-        height: 50vh;
+        width: 80vw;
+        height: 60vh;
     }
     
     .card {

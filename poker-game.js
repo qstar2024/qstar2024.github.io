@@ -902,15 +902,15 @@ class PokerGame {
 
     nextPlayer() {
         const start = this.currentPlayer;
-    do {
-        this.currentPlayer = (this.currentPlayer + 1) % this.players.length;
-        const player = this.players[this.currentPlayer];
-        const needsToAct = !player.folded && !player.allIn && player.chips > 0 && (player.bet < this.currentBet || !player.hasActed);
-        if (needsToAct) {
-            return true;
-        }
-    } while (this.currentPlayer !== start);
-    return false;
+        do {
+            const player = this.players[this.currentPlayer];
+            const needsToAct = !player.folded && !player.allIn && player.chips > 0 && (player.bet < this.currentBet || !player.hasActed);
+            if (needsToAct) {
+                return true;
+            }
+            this.currentPlayer = (this.currentPlayer + 1) % this.players.length;
+        } while (this.currentPlayer !== start);
+        return false;
     }
 
     isRoundComplete() {

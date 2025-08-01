@@ -20,6 +20,7 @@ class PokerGame {
         this.initializeDeck();
         this.updateUI();
         this.hideNewGameButton();
+        this.hideEffects();
         this.gameOverShown = false;
         this.winShown = false;
     }
@@ -1355,6 +1356,82 @@ class PokerGame {
         setTimeout(() => player.element.classList.remove('winner'), 3000);
     }
 
+    // ===== Special Effects =====
+    showFireworks() {
+        const container = document.getElementById('fireworksContainer');
+        if (!container) return;
+        container.style.display = 'block';
+        for (let i = 0; i < 15; i++) {
+            this.launchFirework(container);
+        }
+        setTimeout(() => {
+            container.style.display = 'none';
+            container.innerHTML = '';
+        }, 3000);
+    }
+
+    launchFirework(container) {
+        const firework = document.createElement('div');
+        firework.className = 'firework';
+        firework.style.left = Math.random() * 100 + '%';
+        firework.style.top = 20 + Math.random() * 40 + '%';
+        const color = `hsl(${Math.floor(Math.random() * 360)}, 100%, 50%)`;
+        firework.style.backgroundColor = color;
+        container.appendChild(firework);
+        for (let i = 0; i < 20; i++) {
+            const p = document.createElement('div');
+            p.className = 'particle';
+            p.style.left = '0';
+            p.style.top = '0';
+            const angle = Math.random() * Math.PI * 2;
+            const distance = 30 + Math.random() * 20;
+            p.style.setProperty('--tx', Math.cos(angle) * distance + 'px');
+            p.style.setProperty('--ty', Math.sin(angle) * distance + 'px');
+            p.style.backgroundColor = color;
+            firework.appendChild(p);
+        }
+        setTimeout(() => firework.remove(), 1000);
+    }
+
+    showStorm() {
+        const container = document.getElementById('stormContainer');
+        if (!container) return;
+        container.style.display = 'block';
+        // Clouds
+        for (let i = 0; i < 5; i++) {
+            const cloud = document.createElement('div');
+            cloud.className = 'cloud';
+            cloud.style.top = Math.random() * 30 + '%';
+            cloud.style.animationDuration = 10 + Math.random() * 10 + 's';
+            container.appendChild(cloud);
+        }
+        // Lightning interval
+        this.lightningInterval = setInterval(() => this.summonLightning(container), 800);
+        setTimeout(() => this.hideEffects(), 5000);
+    }
+
+    summonLightning(container) {
+        const bolt = document.createElement('div');
+        bolt.className = 'lightning';
+        bolt.style.left = Math.random() * 100 + '%';
+        bolt.style.top = '40%';
+        bolt.style.setProperty('--angle', (-10 + Math.random() * 20) + 'deg');
+        bolt.style.setProperty('--scale', (0.8 + Math.random() * 0.4).toString());
+        container.appendChild(bolt);
+        setTimeout(() => bolt.remove(), 500);
+    }
+
+    hideEffects() {
+        const fire = document.getElementById('fireworksContainer');
+        if (fire) { fire.style.display = 'none'; fire.innerHTML = ''; }
+        const storm = document.getElementById('stormContainer');
+        if (storm) { storm.style.display = 'none'; storm.innerHTML = ''; }
+        if (this.lightningInterval) {
+            clearInterval(this.lightningInterval);
+            this.lightningInterval = null;
+        }
+    }
+
     updateUI() {
         // Update pot
         document.getElementById('potAmount').textContent = `$${this.pot}`;
@@ -1375,12 +1452,14 @@ class PokerGame {
         if (this.players[0].chips <= 0 && !this.gameOverShown) {
             this.updateGameStatus('Game Over! You have no chips left.');
             this.showNewGameButton();
+            this.showStorm();
             this.gameOverShown = true;
         }
         // Check for tournament win
         if (this.players.slice(1).every(p => p.chips <= 0) && this.players[0].chips > 0 && !this.winShown) {
             this.updateGameStatus('Congratulations! You win the tournament!');
             this.showNewGameButton();
+            this.showFireworks();
             this.winShown = true;
         }
     }

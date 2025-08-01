@@ -230,7 +230,7 @@ body {
 }
 
 .player[data-position="bottom"] {
-    bottom: 15%;
+    bottom: 10%;
     left: 50%;
     transform: translateX(-50%);
 }
@@ -393,14 +393,14 @@ body {
 /* Game Controls */
 .game-controls {
     position: fixed;
-    bottom: 20px;
+    bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    width: 80vw;
-    gap: 12px;
+    width: 85vw;
+    gap: 10px;
     padding: 8px 12px;
     z-index: 50;
 }

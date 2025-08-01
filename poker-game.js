@@ -202,7 +202,7 @@ class PokerGame {
 
     startNewGame() {
         if (this.players[0].chips <= 0 || this.players.slice(1).every(p => p.chips <= 0)) {
-            location.reload();
+            window.location.href = window.location.pathname;
             return;
         }
         this.hideNewGameButton();
@@ -1397,8 +1397,36 @@ class PokerGame {
         
         if (smallBlindPlayer.chips > 0) {
             const rect = smallBlindPlayer.element.getBoundingClientRect();
-            smallBlindButton.style.left = `${rect.left - 30}px`; // Left of player info
-            smallBlindButton.style.top = `${rect.top + rect.height / 2 - 12}px`;
+            const position = smallBlindPlayer.element.getAttribute('data-position');
+            let leftOffset, topOffset;
+            
+            // Adjust position based on player's table position
+            switch (position) {
+                case 'left':
+                    leftOffset = rect.width + 5;
+                    topOffset = rect.height / 2 - 12;
+                    break;
+                case 'top-left':
+                    leftOffset = rect.width / 2;
+                    topOffset = rect.height + 5;
+                    break;
+                case 'top-right':
+                    leftOffset = rect.width / 2;
+                    topOffset = rect.height + 5;
+                    break;
+                case 'right':
+                    leftOffset = -30;
+                    topOffset = rect.height / 2 - 12;
+                    break;
+                case 'bottom':
+                default:
+                    leftOffset = rect.width / 2;
+                    topOffset = -30;
+                    break;
+            }
+            
+            smallBlindButton.style.left = `${rect.left + leftOffset}px`;
+            smallBlindButton.style.top = `${rect.top + topOffset}px`;
             smallBlindButton.style.display = 'flex';
         } else {
             smallBlindButton.style.display = 'none';
@@ -1406,8 +1434,36 @@ class PokerGame {
         
         if (bigBlindPlayer.chips > 0) {
             const rect = bigBlindPlayer.element.getBoundingClientRect();
-            bigBlindButton.style.left = `${rect.left - 30}px`; // Left of player info
-            bigBlindButton.style.top = `${rect.top + rect.height / 2 - 12}px`;
+            const position = bigBlindPlayer.element.getAttribute('data-position');
+            let leftOffset, topOffset;
+            
+            // Adjust position based on player's table position
+            switch (position) {
+                case 'left':
+                    leftOffset = rect.width + 5;
+                    topOffset = rect.height / 2 + 12;
+                    break;
+                case 'top-left':
+                    leftOffset = rect.width / 2 + 24;
+                    topOffset = rect.height + 5;
+                    break;
+                case 'top-right':
+                    leftOffset = rect.width / 2 - 24;
+                    topOffset = rect.height + 5;
+                    break;
+                case 'right':
+                    leftOffset = -30;
+                    topOffset = rect.height / 2 + 12;
+                    break;
+                case 'bottom':
+                default:
+                    leftOffset = rect.width / 2 + 24;
+                    topOffset = -30;
+                    break;
+            }
+            
+            bigBlindButton.style.left = `${rect.left + leftOffset}px`;
+            bigBlindButton.style.top = `${rect.top + topOffset}px`;
             bigBlindButton.style.display = 'flex';
         } else {
             bigBlindButton.style.display = 'none';

@@ -77,7 +77,12 @@ h1,h2{font-weight:700;text-align:center;color:#ffffff;}
 
 /* Markdown rendering */
 .markdown-body{font-size:1rem;line-height:1.6;color:#e9ecef;} 
-.markdown-body pre{background:rgba(22,27,34,0.8);color:#f8f9fa;padding:12px;border-radius:10px;overflow:auto;} 
+.markdown-body pre{background:rgba(22,27,34,0.8);color:#f8f9fa;padding:12px;border-radius:10px;overflow:auto;}
+/* Improved readability for markdown content */
+.markdown-body p{margin-bottom:1rem;}
+.markdown-body ul,.markdown-body ol{margin:0 0 1rem 1.5rem;}
+.markdown-body h1,.markdown-body h2,.markdown-body h3,.markdown-body h4,.markdown-body h5,.markdown-body h6{margin:1.5rem 0 1rem;}
+.markdown-body blockquote{margin:1rem 0;padding-left:1rem;border-left:3px solid rgba(255,255,255,0.3);} 
 
 @media(max-width:600px){.liquid-glass-menu{flex-direction:column;gap:12px;}}
 code,pre{font-family:'Google Sans Code', monospace;}

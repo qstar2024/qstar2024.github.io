@@ -7,12 +7,18 @@ class PokerGame {
         this.communityCards = [];
         this.pot = 0;
         this.currentBet = 0;
+        // Reset minimum raise increment for new phase
+        this.minRaiseIncrement = this.bigBlind;
+        // At the start of each new phase, minimum raise increment resets to big blind
+        this.minRaiseIncrement = this.bigBlind;
         this.dealerPosition = 0;
         this.currentPlayer = 0;
         this.gamePhase = 'preflop'; // preflop, flop, turn, river, showdown
         this.bettingRound = 0;
         this.smallBlind = 10;
         this.bigBlind = 20;
+        // Track current minimum raise increment (starts at big blind each hand)
+        this.minRaiseIncrement = this.bigBlind;
         this.roundCount = 0; // Track number of rounds played
         
         this.initializePlayers();
@@ -360,6 +366,8 @@ class PokerGame {
         
         this.pot = actualSmall + actualBig;
         this.currentBet = Math.max(actualSmall, actualBig);
+        // Reset minimum raise increment at the start of every hand
+        this.minRaiseIncrement = this.bigBlind;
         this.currentPlayer = (this.dealerPosition + 3) % this.players.length;
         this.updateUI(); // Immediate update after blinds
     }
@@ -713,12 +721,21 @@ class PokerGame {
                 }
                 break;
             case 'raise':
-                const totalBet = this.currentBet + action.amount;
+                let desiredIncrement = action.amount;
+                if (desiredIncrement < this.minRaiseIncrement && player.chips > (this.currentBet - player.bet)) {
+                    desiredIncrement = this.minRaiseIncrement;
+                }
+                const totalBet = this.currentBet + desiredIncrement;
                 const raiseAmount = Math.min(totalBet - player.bet, player.chips);
+                const previousBet = this.currentBet;
                 player.bet += raiseAmount;
                 player.chips -= raiseAmount;
                 this.pot += raiseAmount;
                 this.currentBet = player.bet;
+
+                if (player.chips > 0 && (this.currentBet - previousBet) >= this.minRaiseIncrement) {
+                    this.minRaiseIncrement = this.currentBet - previousBet;
+                }
                 
                 // Reset hasActed for all other players since there's a new bet to match
                 this.players.forEach(p => {
@@ -834,12 +851,12 @@ class PokerGame {
         const slider = document.getElementById('raiseSlider');
         const player = this.players[0];
         
-        const minRaise = this.currentBet - player.bet + this.currentBet;
-        const maxRaise = player.chips;
-        
-        slider.min = minRaise;
-        slider.max = maxRaise;
-        slider.value = Math.min(minRaise + 50, maxRaise);
+        const minTotalBet = this.currentBet + this.minRaiseIncrement;
+        const maxTotalBet = player.bet + player.chips; // all-in upper bound
+
+        slider.min = Math.min(minTotalBet, maxTotalBet);
+        slider.max = maxTotalBet;
+        slider.value = slider.min;
         
         this.updateRaiseAmount();
         raiseControls.style.display = 'block';
@@ -863,13 +880,28 @@ class PokerGame {
         // Mark that this player has acted in this round
         player.hasActed = true;
         
-        const totalBet = raiseAmount;
-        const actualRaise = Math.min(totalBet - player.bet, player.chips);
-        
+        const previousBet = this.currentBet;
+        let desiredTotal = raiseAmount; // supplied by slider (absolute total)
+        let desiredIncrement = desiredTotal - previousBet;
+
+        // Enforce minimum raise increment unless this is an all-in below requirement
+        if (player.chips !== desiredTotal - player.bet && desiredIncrement < this.minRaiseIncrement) {
+            desiredIncrement = this.minRaiseIncrement;
+            desiredTotal = previousBet + desiredIncrement;
+        }
+        // Cap by available chips (all-in)
+        desiredTotal = Math.min(desiredTotal, player.bet + player.chips);
+        const actualRaise = desiredTotal - player.bet;
+
         player.bet += actualRaise;
         player.chips -= actualRaise;
         this.pot += actualRaise;
         this.currentBet = player.bet;
+
+        // Update minimum increment tracker if raise qualifies
+        if (player.chips > 0 && (this.currentBet - previousBet) >= this.minRaiseIncrement) {
+            this.minRaiseIncrement = this.currentBet - previousBet;
+        }
         
         // Reset hasActed for all other players since there's a new bet to match
         this.players.forEach(p => {
@@ -1168,7 +1200,7 @@ class PokerGame {
 
     evaluateHand(playerCards, communityCards) {
         const allCards = [...playerCards, ...communityCards];
-        if (allCards.length < 5) return { rank: -1, name: 'Invalid Hand', values: [] };
+        if (allCards.length < 5) return this.estimateStartingHand(playerCards);
 
         const cardCombinations = this.getCombinations(allCards, 5);
         let bestHand = { rank: -1, name: 'High Card', values: [] };
@@ -1571,10 +1603,37 @@ class PokerGame {
     hideNewGameButton() {
         document.querySelector('.new-game-container').style.display = 'none';
     }
+
+    // Estimate pre-flop strength when only two hole cards are available
+    estimateStartingHand(cards) {
+        const [c1, c2] = cards;
+        if (!c1 || !c2) return { rank: -1, name: 'Unknown', values: [] };
+        const v1 = this.getCardValue(c1.rank);
+        const v2 = this.getCardValue(c2.rank);
+        const suited = c1.suit === c2.suit;
+        const diff = Math.abs(v1 - v2);
+        let name = 'Off-suit Hand';
+        if (c1.rank === c2.rank) {
+            if (v1 === 14) name = 'Pocket Aces';
+            else if (v1 >= 11) name = 'Premium Pocket Pair';
+            else if (v1 >= 7) name = 'Strong Pocket Pair';
+            else name = 'Pocket Pair';
+        } else if (suited && (v1 === 14 || v2 === 14)) {
+            name = 'Suited Ace';
+        } else if (suited && diff === 1) {
+            name = 'Suited Connectors';
+        } else if (diff === 1) {
+            name = 'Connectors';
+        } else if (suited) {
+            name = 'Suited Hand';
+        }
+        const values = [Math.max(v1, v2), Math.min(v1, v2)];
+        return { rank: -1, name, values };
+    }
 }
 
 // Initialize game when page loads
-document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
     const game = new PokerGame();
     
     // Auto-start first game

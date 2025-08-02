@@ -317,7 +317,7 @@ body {
 }
 
 .pot-amount {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 700;
     color: #ffd700;
 }
@@ -393,14 +393,14 @@ body {
 /* Game Controls */
 .game-controls {
     position: fixed;
-    bottom: 10px;
+    bottom: 5px;
     left: 50%;
     transform: translateX(-50%);
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     width: 85vw;
-    gap: 10px;
+    gap: 5px;
     padding: 8px 12px;
     z-index: 50;
 }
@@ -532,12 +532,13 @@ body {
 }
 
 .strength-label {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     opacity: 0.8;
     margin-bottom: 4px;
 }
 
 .strength-value {
+    font-size: 0.8rem;
     font-weight: 700;
     color: #90ee90;
 }
@@ -596,7 +597,7 @@ body {
     }
     
     .game-controls {
-        bottom: 10px;
+        bottom: 5px;
         flex-wrap: wrap;
     }
     
@@ -655,7 +656,7 @@ body {
     .card {
         width: 40px;
         height: 56px;
-        font-size: 14px;
+        font-size: 10px;
     }
     
     .community-cards {
@@ -668,12 +669,12 @@ body {
     }
     
     .pot-amount {
-        font-size: 1rem;
+        font-size: 0.8rem;
     }
     
     .game-controls {
-        bottom: 5px;
-        gap: 8px;
+        bottom: 2px;
+        gap: 3px;
     }
     
     .liquid-glass-btn {

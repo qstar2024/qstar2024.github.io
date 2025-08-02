@@ -7,10 +7,7 @@ class PokerGame {
         this.communityCards = [];
         this.pot = 0;
         this.currentBet = 0;
-        // Reset minimum raise increment for new phase
-        this.minRaiseIncrement = this.bigBlind;
-        // At the start of each new phase, minimum raise increment resets to big blind
-        this.minRaiseIncrement = this.bigBlind;
+
         this.dealerPosition = 0;
         this.currentPlayer = 0;
         this.gamePhase = 'preflop'; // preflop, flop, turn, river, showdown
@@ -978,6 +975,8 @@ class PokerGame {
             }
         });
         this.currentBet = 0;
+        // Reset minimum raise increment for new betting phase
+        this.minRaiseIncrement = this.bigBlind;
         
         // Check if there are any players who can still bet
         const activePlayers = this.players.filter(p => !p.folded && !p.allIn && p.chips > 0).length;
@@ -1111,6 +1110,7 @@ class PokerGame {
             winner.chips += this.pot;
             this.updateGameStatus(`${winner.name} wins $${this.pot}.`);
             this.updateUI();
+            this.checkGameOutcome();
             return;
         }
 
@@ -1171,6 +1171,7 @@ class PokerGame {
 
         this.updateGameStatus(finalMessage);
         this.updateUI();
+        this.checkGameOutcome();
     }
 
     revealAllCards() {
@@ -1480,20 +1481,7 @@ class PokerGame {
         this.updateDealerButton();
         this.updateBlindButtons();
         
-        // Check for human game over
-        if (this.players[0].chips <= 0 && !this.gameOverShown) {
-            this.updateGameStatus('Game Over! You have no chips left.');
-            this.showNewGameButton();
-            this.showStorm();
-            this.gameOverShown = true;
-        }
-        // Check for tournament win
-        if (this.players.slice(1).every(p => p.chips <= 0) && this.players[0].chips > 0 && !this.winShown) {
-            this.updateGameStatus('Congratulations! You win the tournament!');
-            this.showNewGameButton();
-            this.showFireworks();
-            this.winShown = true;
-        }
+
     }
 
     updateBlindButtons() {
@@ -1622,12 +1610,36 @@ class PokerGame {
         document.getElementById('gameStatus').querySelector('.status-text').textContent = message;
     }
 
-    showNewGameButton() {
-        document.querySelector('.new-game-container').style.display = 'block';
+    // Show the "New Game" button after a short delay so community-card animations have time to finish
+    showNewGameButton(delay = 2000) {
+        const container = document.querySelector('.new-game-container');
+        if (!container) return;
+        // Ensure it is hidden first
+        container.style.display = 'none';
+        setTimeout(() => {
+            container.style.display = 'block';
+        }, delay);
     }
 
     hideNewGameButton() {
         document.querySelector('.new-game-container').style.display = 'none';
+    }
+
+    // Centralised end-of-round outcome checks (run only after chips have been redistributed)
+    checkGameOutcome() {
+        if (this.players[0].chips <= 0 && !this.gameOverShown) {
+            this.updateGameStatus('Game Over! You have no chips left.');
+            this.showNewGameButton();
+            this.showStorm();
+            this.gameOverShown = true;
+            return;
+        }
+        if (this.players.slice(1).every(p => p.chips <= 0) && this.players[0].chips > 0 && !this.winShown) {
+            this.updateGameStatus('Congratulations! You win the tournament!');
+            this.showNewGameButton();
+            this.showFireworks();
+            this.winShown = true;
+        }
     }
 
     // Estimate pre-flop strength when only two hole cards are available

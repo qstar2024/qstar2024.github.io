@@ -1,8 +1,10 @@
 /* Shared styles for the blogs sub-site – Liquid Glass look */
 
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Code&display=swap');
+
 /* --- CSS RESET (minimal) --- */
 *{margin:0;padding:0;box-sizing:border-box;}
-html,body{height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;overflow-x:hidden;}
+html,body{height:100%;font-family:'Google Sans Code',-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,monospace,sans-serif;overflow-x:hidden;}
 
 /* Added background image with gradient fallback */
 body {
@@ -78,3 +80,4 @@ h1,h2{font-weight:700;text-align:center;color:#ffffff;}
 .markdown-body pre{background:rgba(22,27,34,0.8);color:#f8f9fa;padding:12px;border-radius:10px;overflow:auto;} 
 
 @media(max-width:600px){.liquid-glass-menu{flex-direction:column;gap:12px;}}
+code,pre{font-family:'Google Sans Code', monospace;}

@@ -1585,11 +1585,37 @@ class PokerGame {
         const dealerButton = document.getElementById('dealerButton');
         const dealerPlayer = this.players[this.dealerPosition];
         const playerElement = dealerPlayer.element;
-        
-        // Position dealer button near the dealer
+
         const rect = playerElement.getBoundingClientRect();
-        dealerButton.style.left = `${rect.left + rect.width + 10}px`;
-        dealerButton.style.top = `${rect.top + rect.height / 2 - 20}px`;
+        const position = playerElement.getAttribute('data-position');
+        let leftOffset, topOffset;
+
+        switch (position) {
+            case 'left':
+                leftOffset = rect.width + 5;
+                topOffset = rect.height / 2 - 20;
+                break;
+            case 'top-left':
+                leftOffset = rect.width / 2;
+                topOffset = rect.height + 5;
+                break;
+            case 'top-right':
+                leftOffset = rect.width / 2;
+                topOffset = rect.height + 5;
+                break;
+            case 'right':
+                leftOffset = -30;
+                topOffset = rect.height / 2 - 20;
+                break;
+            case 'bottom':
+            default:
+                leftOffset = rect.width / 2;
+                topOffset = -30;
+                break;
+        }
+
+        dealerButton.style.left = `${rect.left + leftOffset}px`;
+        dealerButton.style.top = `${rect.top + topOffset}px`;
     }
 
     updateGameStatus(message) {

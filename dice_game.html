@@ -130,6 +130,82 @@
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
             transform: translateY(-2px);
         }
+
+        .help-button {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            text-decoration: none;
+            color: white;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .help-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
+
+        #instructionPanel {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
+            z-index: 2000; /* Above everything else */
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-family: Arial, sans-serif;
+            overflow-y: auto;
+        }
+
+        #instructionContent {
+            background-color: rgba(44, 62, 80, 0.95); /* Dark blue background */
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 80%;
+            max-height: 80%;
+            overflow-y: auto;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            text-align: left;
+        }
+
+        #instructionContent h2 {
+            text-align: center;
+            color: #f39c12;
+            margin-bottom: 20px;
+        }
+
+        #instructionContent p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+        }
+
+        #instructionContent ul {
+            list-style-type: disc;
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        #instructionContent li {
+            margin-bottom: 5px;
+        }
     </style>
     
     <script type="importmap">
@@ -158,12 +234,57 @@
         &#x2193;
     </a>
 
+    <button id="helpButton" class="help-button">
+        &#x2753;
+    </button>
+
+    <div id="instructionPanel">
+        <div id="instructionContent">
+            <h2>How to Play Dice Game</h2>
+            <p>Welcome to the 3D Dice Rolling Game! Here's how to play:</p>
+            
+            <h3>Game Instructions:</h3>
+            <ul>
+                <li>Click the "Roll Dice" button to roll the dice.</li>
+                <li>The dice will tumble and settle, displaying their face values.</li>
+            </ul>
+
+            <h3>Dice Patterns:</h3>
+            <ul>
+                <li><strong>秀才/一秀</strong> has one die with value of 4.</li>
+                <li><strong>举人/二举</strong> has two dices with value of 4.</li>
+                <li><strong>进士/四进</strong> four dices of the same value (e.g., four 6s).</li>
+                <li><strong>探花/三红</strong> has three dices with value of 4.</li>
+                <li><strong>榜眼/对堂</strong> all six dices showing different numbers. (a.k.a., 1,2,3,4,5,6)</li>
+                <li><strong>状元</strong> has four dices with value of 4.</li>
+                <li><strong>特殊规则</strong> you'll figure out as you play along!</li>
+            </ul>
+            <p>Click anywhere outside to dismiss the panel.</p>
+        </div>
+    </div>
+
     <script defer type="module">
         // Ensure THREE and CANNON are loaded before starting the game
         import * as THREE from "three";
         import * as CANNON from "cannon-es";
         // mergeVertices() requires the import of BufferGeometryUtils file
         import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const helpButton = document.getElementById('helpButton');
+            const instructionPanel = document.getElementById('instructionPanel');
+
+            helpButton.addEventListener('click', () => {
+                instructionPanel.style.display = 'flex';
+            });
+
+            instructionPanel.addEventListener('click', (event) => {
+                // Dismiss if clicked on the panel itself, not its content
+                if (event.target === instructionPanel) {
+                    instructionPanel.style.display = 'none';
+                }
+            });
+        });
 
         class DiceGame {
             constructor() {

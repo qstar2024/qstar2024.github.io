@@ -263,6 +263,8 @@
         </div>
     </div>
 
+    <audio id="rollSound" src="bgm_dice.mp3" preload="auto"></audio>
+
     <script defer type="module">
         // Ensure THREE and CANNON are loaded before starting the game
         import * as THREE from "three";
@@ -273,6 +275,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             const helpButton = document.getElementById('helpButton');
             const instructionPanel = document.getElementById('instructionPanel');
+            const rollButton = document.getElementById('rollButton');
+            const rollSound = document.getElementById('rollSound');
 
             helpButton.addEventListener('click', () => {
                 instructionPanel.style.display = 'flex';
@@ -282,6 +286,15 @@
                 // Dismiss if clicked on the panel itself, not its content
                 if (event.target === instructionPanel) {
                     instructionPanel.style.display = 'none';
+                }
+            });
+
+            rollButton.addEventListener('click', () => {
+                if (rollSound) {
+                    setTimeout(() => {
+                        rollSound.currentTime = 0; // Rewind to the start
+                        rollSound.play();
+                    }, 1000); // 1000 milliseconds = 1 second delay
                 }
             });
         });

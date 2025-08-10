@@ -102,6 +102,34 @@
             color: #f39c12;
             margin-top: 10px;
         }
+
+        .liquid-glass-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            text-decoration: none;
+            color: white;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .liquid-glass-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+            transform: translateY(-2px);
+        }
     </style>
     
     <script type="importmap">
@@ -125,6 +153,10 @@
         </div>
         <canvas></canvas> <!-- Add this line -->
     </div>
+
+    <a href="https://github.com/qstar2024/mobile_apps/blob/main/app_dice_0.0.1.apk" class="liquid-glass-button" target="_blank">
+        &#x2193;
+    </a>
 
     <script defer type="module">
         // Ensure THREE and CANNON are loaded before starting the game

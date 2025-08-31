@@ -285,10 +285,9 @@
         <div class="absolute inset-0 flex items-center justify-center z-0 text-white text-lg text-center p-4">
             Failed to load video, please click or scroll to continue.
         </div>
-        <video class="fullscreen-video" autoplay muted loop>
-            <source src="video.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
+        <!-- Dual videos for seamless playlist playback (A = active, B = buffer) -->
+        <video class="fullscreen-video" id="bgVideoA" autoplay muted playsinline preload="auto"></video>
+        <video class="fullscreen-video" id="bgVideoB" autoplay muted playsinline preload="auto" style="visibility:hidden;"></video>
         
         <!-- Liquid Glass Buttons Menu -->
         <div class="liquid-glass-menu" id="liquidGlassMenu">
@@ -563,40 +562,120 @@
             observer.observe(el);
         });
 
-        // Video error handling
-        const video = document.querySelector('.fullscreen-video');
-        video.addEventListener('error', function() {
-            console.log('Video failed to load. Please ensure video.mp4 exists in the root directory.');
-            // Optionally show a fallback image or message
+        // Seamless playlist playback (dual-video buffer)
+        (function() {
+            const playlist = [
+                'bgv_lanting_1.mp4',
+                'bgv_lanting_2.mp4',
+                'bgv_lanting_3.mp4',
+                'bgv_lanting_4.mp4'
+            ];
+
             const container = document.querySelector('.video-container');
-            container.innerHTML = `
-                <div class="flex items-center justify-center h-full bg-gradient-to-br from-blue-600 to-purple-700 text-white">
-                    <div class="text-center">
-                        <h1 class="text-6xl font-bold mb-4">Welcome</h1>
-                        <p class="text-xl">Your Amazing Website</p>
-                        <div class="dropdown-menu">
-                            <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                                <div class="flex justify-between items-center py-6">
-                                    <div class="flex items-center">
-                                        <h1 class="text-white text-2xl font-bold">Your Brand</h1>
-                                    </div>
-                                    <div class="hidden md:block">
-                                        <div class="ml-10 flex items-baseline space-x-4">
-                                            <a href="#home" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Home</a>
-                                            <a href="#about" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">About</a>
-                                            <a href="#services" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Services</a>
-                                            <a href="#portfolio" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Portfolio</a>
-                                            <a href="#blog" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Blog</a>
-                                            <a href="#contact" class="text-white hover:text-gray-300 px-3 py-2 rounded-md text-sm font-medium">Contact</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </nav>
+            const vA = document.getElementById('bgVideoA');
+            const vB = document.getElementById('bgVideoB');
+            const videos = [vA, vB];
+
+            let active = 0; // index in videos[] currently visible/playing
+            let buffer = 1; // index in videos[] preloading next
+            let plIndex = 0; // index in playlist[] to play next on active
+            let swapArmed = false; // prevent multiple swaps near the end
+
+            videos.forEach(v => {
+                v.muted = true;
+                v.autoplay = true;
+                v.loop = false;
+                v.setAttribute('playsinline', '');
+                v.setAttribute('preload', 'auto');
+                v.addEventListener('error', onAnyVideoError);
+            });
+
+            function onAnyVideoError() {
+                console.warn('Background video failed to load. Falling back to static hero.');
+                container.innerHTML = `
+                    <div class="flex items-center justify-center h-full bg-gradient-to-br from-blue-600 to-purple-700 text-white">
+                        <div class="text-center">
+                            <h1 class="text-6xl font-bold mb-4">Welcome</h1>
+                            <p class="text-xl">Your Amazing Website</p>
                         </div>
                     </div>
-                </div>
-            `;
-        });
+                `;
+            }
+
+            function loadSource(video, src) {
+                return new Promise(resolve => {
+                    // Reset listeners to avoid multiple resolves
+                    const onReady = () => {
+                        video.removeEventListener('canplaythrough', onReady);
+                        video.removeEventListener('loadeddata', onReady);
+                        resolve();
+                    };
+                    video.src = src;
+                    // In case reuse causes stall, force load()
+                    try { video.load(); } catch (_) {}
+                    if (video.readyState >= 3) {
+                        resolve();
+                    } else {
+                        video.addEventListener('canplaythrough', onReady, { once: true });
+                        video.addEventListener('loadeddata', onReady, { once: true });
+                    }
+                });
+            }
+
+            async function init() {
+                // Start first video
+                await loadSource(videos[active], playlist[plIndex]);
+                try { await videos[active].play(); } catch (_) {}
+
+                // Preload next into buffer
+                plIndex = (plIndex + 1) % playlist.length;
+                await loadSource(videos[buffer], playlist[plIndex]);
+                videos[buffer].pause();
+                videos[buffer].currentTime = 0;
+
+                // Monitor for near-end to swap
+                attachEndWatcher(videos[active]);
+            }
+
+            function attachEndWatcher(video) {
+                swapArmed = false;
+                const checkAndSwap = () => {
+                    // Only respond if this is still the active video
+                    if (video !== videos[active]) return;
+                    if (!isFinite(video.duration) || video.duration === 0) return;
+                    const remaining = video.duration - video.currentTime;
+                    if (!swapArmed && remaining <= 0.2) {
+                        swapArmed = true;
+                        performSwap();
+                    }
+                };
+                video.addEventListener('timeupdate', checkAndSwap);
+                video.addEventListener('ended', performSwap);
+            }
+
+            function performSwap() {
+                // Start buffer immediately and swap visibility
+                try { videos[buffer].play(); } catch (_) {}
+                videos[buffer].style.visibility = 'visible';
+                videos[active].style.visibility = 'hidden';
+
+                // Rotate roles
+                [active, buffer] = [buffer, active];
+
+                // Prepare next source in the (now hidden) buffer
+                plIndex = (plIndex + 1) % playlist.length;
+                loadSource(videos[buffer], playlist[plIndex]).then(() => {
+                    videos[buffer].pause();
+                    videos[buffer].currentTime = 0;
+                });
+
+                // Re-arm watcher on the new active
+                attachEndWatcher(videos[active]);
+            }
+
+            // Kick off
+            init();
+        })();
     </script>
     <script>
         // Liquid Glass Menu Drop Animation & Timed Visibility

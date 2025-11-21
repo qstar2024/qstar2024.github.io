@@ -129,44 +129,25 @@ class SheepGame {
             this.createFirstLevelTiles(tileEmojis);
             return;
         }
-        // 其它关卡：方块总数和emoji数量均为3的倍数
-        let baseTileCount = 18 + this.level * 36;
-        let baseEmojiTypes = 6 + this.level;
+        // 其它关卡：逐级增加方块数量并保持 3 的倍数
+        const tilesPerLevel = 18 * 5; // 每升一级至少多一层 18 块
+        const maxTiles = 18 * 100;
+        let targetTileCount = 18 + this.level * tilesPerLevel;
+        targetTileCount = Math.min(targetTileCount, maxTiles);
+        let tileCount = Math.max(18, Math.ceil(targetTileCount / 3) * 3);
 
-        // Ensure tileCount is a multiple of 3
-        let tileCount = Math.min(baseTileCount, 120);
-        if (tileCount % 3 !== 0) {
-            tileCount = Math.floor(tileCount / 3) * 3;
+        let emojiTypes = Math.min(6 + this.level, this.emojiPool.length);
+        emojiTypes = Math.max(3, emojiTypes);
+        let selectedEmojis = this.shuffleArray([...this.emojiPool]).slice(0, emojiTypes);
+        if (selectedEmojis.length === 0) {
+            selectedEmojis = ['🐑'];
         }
 
-        // Ensure emojiTypes is reasonable and allows for multiples of 3
-        let emojiTypes = Math.min(baseEmojiTypes, this.emojiPool.length);
-        if (emojiTypes === 0) emojiTypes = 3; // Prevent division by zero or too few emojis
-
-        const selectedEmojis = this.shuffleArray([...this.emojiPool]).slice(0, emojiTypes);
-
-        // Calculate perEmoji such that total tiles are a multiple of 3
-        let perEmoji = Math.floor(tileCount / emojiTypes);
-        // Ensure perEmoji is at least 3 and a multiple of 3
-        if (perEmoji < 3) {
-            perEmoji = 3;
-        } else if (perEmoji % 3 !== 0) {
-            perEmoji = Math.floor(perEmoji / 3) * 3;
-        }
-
+        const triplesNeeded = tileCount / 3;
         let tileEmojis = [];
-        for (let i = 0; i < emojiTypes; i++) {
-            for (let j = 0; j < perEmoji; j++) {
-                tileEmojis.push(selectedEmojis[i]);
-            }
-        }
-        // Ensure the final tileEmojis array length is a multiple of 3 and not empty
-        // If after calculation, tileEmojis is empty or not a multiple of 3, regenerate with a safe minimum
-        if (tileEmojis.length === 0 || tileEmojis.length % 3 !== 0) {
-            console.warn(`Adjusting tile generation for level ${this.level}. Original count: ${tileEmojis.length}`);
-            // Fallback to a known good configuration: 3 emoji types, 3 tiles each (total 9 tiles)
-            const fallbackEmojis = this.shuffleArray([...this.emojiPool]).slice(0, 3);
-            tileEmojis = fallbackEmojis.flatMap(e => [e, e, e]);
+        for (let i = 0; i < triplesNeeded; i++) {
+            const emoji = selectedEmojis[i % selectedEmojis.length];
+            tileEmojis.push(emoji, emoji, emoji);
         }
 
         tileEmojis = this.shuffleArray(tileEmojis);
@@ -192,9 +173,7 @@ class SheepGame {
                 return;
             }
         }
-        const boardRect = this.gameBoard.getBoundingClientRect();
-        const maxWidth = boardRect.width - 60;
-        const maxHeight = boardRect.height - 60;
+        const positions = this.generateStructuredPositions(emojiArray.length);
         
         emojiArray.forEach((emoji, index) => {
             const tile = document.createElement('div');
@@ -202,15 +181,10 @@ class SheepGame {
             tile.textContent = emoji;
             tile.dataset.emoji = emoji;
             tile.dataset.id = index;
-            
-            // 随机位置，但确保不会重叠太多
-            const layer = Math.floor(index / 10);
-            const x = Math.random() * (maxWidth - 100) + 50;
-            const y = Math.random() * (maxHeight - 100) + 50;
-            
-            tile.style.left = `${x}px`;
-            tile.style.top = `${y}px`;
-            tile.style.zIndex = layer + 1;
+            const pos = positions[index];
+            tile.style.left = `${pos.x}px`;
+            tile.style.top = `${pos.y}px`;
+            tile.style.zIndex = pos.zIndex;
             
             // 添加点击事件
             tile.addEventListener('click', () => this.selectTile(tile));
@@ -222,6 +196,174 @@ class SheepGame {
         
         // 更新可点击状态
         this.updateTileStates();
+    }
+
+    generateStructuredPositions(tileCount) {
+        const boardRect = this.gameBoard.getBoundingClientRect();
+        const width = boardRect.width || this.gameBoard.clientWidth || 600;
+        const height = boardRect.height || this.gameBoard.clientHeight || 600;
+        const tileSize = this.getTileSizeEstimate({ width, height });
+        const metrics = { width, height, tileSize };
+
+        const layerPlan = this.buildLayerPlan(tileCount);
+        if (layerPlan.length === 0) {
+            return [];
+        }
+
+        const layers = [];
+        const firstLayer = this.buildPatternedLayer(layerPlan[0], metrics, 0);
+        layers.push(firstLayer);
+
+        for (let i = 1; i < layerPlan.length; i++) {
+            const parentLayer = layers[i - 1];
+            const layer = this.buildNextLayerFromPlan(parentLayer, layerPlan[i], metrics, i);
+            layers.push(layer);
+        }
+
+        const flattened = [];
+        const totalLayers = layers.length;
+        for (let i = 0; i < totalLayers; i++) {
+            const zIndex = (totalLayers - i) * 10;
+            layers[i].forEach(pos => {
+                flattened.push({
+                    x: pos.x,
+                    y: pos.y,
+                    zIndex
+                });
+            });
+        }
+
+        return flattened.slice(0, tileCount);
+    }
+
+    buildLayerPlan(tileCount) {
+        const preferredSquares = [36, 25, 16, 9];
+        const residuals = [4, 1];
+        const plan = [];
+        let remaining = tileCount;
+
+        while (remaining > 0) {
+            const square = preferredSquares.find(size => size <= remaining);
+            if (square) {
+                plan.push(square);
+                remaining -= square;
+                continue;
+            }
+            const residual = residuals.find(size => size <= remaining);
+            if (residual) {
+                plan.push(residual);
+                remaining -= residual;
+            } else {
+                break;
+            }
+        }
+
+        return plan;
+    }
+
+    buildPatternedLayer(count, metrics, depthIndex) {
+        if (count === 1) {
+            return this.buildSingleTileLayer(metrics, depthIndex);
+        }
+        if (count === 4) {
+            return this.buildQuadLayer(metrics, depthIndex);
+        }
+        return this.buildSquareGridLayer(count, metrics, depthIndex);
+    }
+
+    buildSingleTileLayer(metrics, depthIndex) {
+        const { width, height, tileSize } = metrics;
+        const x = this.clamp((width - tileSize) / 2, 20, width - tileSize - 20);
+        const y = this.clamp(height * 0.2 + depthIndex * tileSize * 0.4, 20, height - tileSize - 20);
+        return [{ x, y }];
+    }
+
+    buildQuadLayer(metrics, depthIndex) {
+        const { width, height, tileSize } = metrics;
+        const gap = tileSize * 0.2;
+        const startX = this.clamp((width - (tileSize * 2 + gap)) / 2, 20, width - tileSize * 2 - gap - 20);
+        const startY = this.clamp(height * 0.2 + depthIndex * tileSize * 0.5, 20, height - tileSize * 2 - gap - 20);
+        const positions = [];
+        for (let row = 0; row < 2; row++) {
+            for (let col = 0; col < 2; col++) {
+                positions.push({
+                    x: startX + col * (tileSize + gap),
+                    y: startY + row * (tileSize + gap)
+                });
+            }
+        }
+        return positions;
+    }
+
+    buildSquareGridLayer(count, metrics, depthIndex) {
+        const { width, height, tileSize } = metrics;
+        const size = Math.sqrt(count);
+        const gap = tileSize * 0.15;
+        const totalSpan = size * tileSize + (size - 1) * gap;
+        const startX = this.clamp((width - totalSpan) / 2, 20, width - totalSpan - 20);
+        const startY = this.clamp(height * 0.15 + depthIndex * tileSize * 0.4, 20, height - totalSpan - 20);
+        const positions = [];
+        for (let row = 0; row < size; row++) {
+            for (let col = 0; col < size; col++) {
+                positions.push({
+                    x: startX + col * (tileSize + gap),
+                    y: startY + row * (tileSize + gap)
+                });
+            }
+        }
+        return positions;
+    }
+
+    buildNextLayerFromPlan(parentLayer, countNeeded, metrics, depthIndex) {
+        const baseLayer = this.buildPatternedLayer(countNeeded, metrics, depthIndex);
+        return this.offsetLayerOverParents(baseLayer, parentLayer, metrics, depthIndex);
+    }
+
+    offsetLayerOverParents(layerPositions, parents, metrics, depthIndex) {
+        const { tileSize, width, height } = metrics;
+        if (!parents || parents.length === 0) {
+            return layerPositions;
+        }
+        const margin = 20;
+        const gap = tileSize * 0.15;
+        const spacing = tileSize + gap;
+        const parentCentroid = this.computeLayerCentroid(parents);
+        const currentCentroid = this.computeLayerCentroid(layerPositions);
+        const baseShiftX = parentCentroid.x - currentCentroid.x;
+        const baseShiftY = parentCentroid.y - currentCentroid.y;
+        const staggerX = ((depthIndex % 2 === 0) ? 1 : -1) * spacing / 2;
+        const staggerY = spacing / 2;
+        const verticalLift = tileSize * (0.35 + depthIndex * 0.05);
+
+        return layerPositions.map(pos => {
+            const x = this.clamp(pos.x + baseShiftX + staggerX, margin, width - margin - tileSize);
+            const y = this.clamp(pos.y + baseShiftY + staggerY + verticalLift, margin, height - margin - tileSize);
+            return { x, y };
+        });
+    }
+
+    computeLayerCentroid(positions) {
+        if (!positions || positions.length === 0) return { x: 0, y: 0 };
+        const sum = positions.reduce((acc, pos) => {
+            acc.x += pos.x;
+            acc.y += pos.y;
+            return acc;
+        }, { x: 0, y: 0 });
+        return {
+            x: sum.x / positions.length,
+            y: sum.y / positions.length
+        };
+    }
+
+    getTileSizeEstimate(dimensions) {
+        const base = Math.min(dimensions.width, dimensions.height) * 0.12;
+        return Math.max(48, Math.min(base, 80));
+    }
+
+    clamp(value, min, max) {
+        if (Number.isNaN(value)) return min;
+        if (min > max) return min;
+        return Math.min(Math.max(value, min), max);
     }
 
     // 第一关九宫格错位两层

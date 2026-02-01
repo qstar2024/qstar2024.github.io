@@ -470,6 +470,19 @@
         </div>
     </section>
 
+    <!-- Blogs Section -->
+    <section id="blogs" class="py-12 glass-panel scroll-trigger">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-extrabold tracking-tight">Vibe Research Blogs</h2>
+                <p class="mt-4 text-lg text-gray-400">Documenting my learning notes on various financial alchemistry research topics.</p>
+            </div>
+            <div id="blogPostsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Blog posts will be dynamically inserted here -->
+            </div>
+        </div>
+    </section>
+
     <!-- Footer with Sitemap -->
     <footer class="py-4 glass-footer" id="contact">
         <div class="max-w-7xl mx-auto py-2 px-4 sm:px-6 lg:px-8">
@@ -712,6 +725,66 @@
             menu.addEventListener('mouseenter', showMenu);
             // Optionally, show on first load for demo:
             setTimeout(showMenu, 500);
+        })();
+    </script>
+    <script>
+        // Fetch and display blog posts
+        (function() {
+            const repo = "qstar2024/blog_posts";
+            const blogPostsContainer = document.getElementById("blogPostsContainer");
+
+            async function fetchPosts() {
+                try {
+                    const res = await fetch(`https://api.github.com/repos/${repo}/contents/`);
+                    if (!res.ok) throw new Error(`Failed to fetch repo contents: ${res.statusText}`);
+                    
+                    const contents = await res.json();
+                    const postFiles = contents
+                        .filter(item => item.type === 'file' && item.name.endsWith('.json'))
+                        .sort((a, b) => b.name.localeCompare(a.name)) // Sort descending by filename
+                        .slice(0, 3); // Display the latest 3 posts
+
+                    if (postFiles.length === 0) {
+                        blogPostsContainer.innerHTML = "<p>No posts found.</p>";
+                        return;
+                    }
+
+                    const posts = await Promise.all(
+                        postFiles.map(async (file) => {
+                            const postRes = await fetch(file.download_url);
+                            if (!postRes.ok) return null;
+                            const postData = await postRes.json();
+                            postData.filename = file.name; // Add filename for the onclick handler
+                            return postData;
+                        })
+                    );
+
+                    blogPostsContainer.innerHTML = posts
+                        .filter(Boolean)
+                        .map(item => {
+                            return `
+                                <div class="liquid-card h-64 cursor-pointer glow-effect floating-element" onclick="window.location.href='blogs/reader.html?file=${item.filename}'">
+                                    <div class="liquid-card-inner">
+                                        <div class="liquid-card-front vibrancy-primary" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                                            <h3 class="text-xl font-bold vibrancy-primary">${item.subject}</h3>
+                                            <p class="text-sm mt-2 vibrancy-secondary">${item.create_time}</p>
+                                        </div>
+                                        <div class="liquid-card-back vibrancy-primary" style="background: linear-gradient(135deg, #764ba2, #667eea);">
+                                            <h3 class="text-lg font-bold mb-4 vibrancy-primary">Read More</h3>
+                                            <p class="text-sm mb-2 vibrancy-secondary">${item.summary || 'Click to read the full post.'}</p>
+                                            <p class="text-sm font-bold">Click to read!</p>
+                                        </div>
+                                    </div>
+                                </div>`;
+                        })
+                        .join("");
+                } catch (e) {
+                    blogPostsContainer.innerHTML = "<p>Failed to load posts.</p>";
+                    console.error(e);
+                }
+            }
+
+            fetchPosts();
         })();
     </script>
     </body>

@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>天垂象·地成形——拓扑数据分析与古老智慧的对话</title>
+  <style>
+    /* Reset and Base */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    html {
+      scroll-behavior: smooth;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+      background: #0a0a0f;
+      color: #e8e6e1;
+      line-height: 1.8;
+      overflow-x: hidden;
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a0a0f;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(99, 102, 241, 0.3);
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(99, 102, 241, 0.5);
+    }
+    
+    /* Selection */
+    ::selection {
+      background: rgba(99, 102, 241, 0.3);
+      color: #e8e6e1;
+    }
+    
+    /* Hero Section */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      overflow: hidden;
+    }
+    
+    .hero-bg {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+    }
+    
+    .star {
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: white;
+      border-radius: 50%;
+      animation: twinkle 3s ease-in-out infinite;
+    }
+    
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 0.8; }
+    }
+    
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+    }
+    
+    .orb-1 {
+      width: 600px;
+      height: 600px;
+      background: rgba(99, 102, 241, 0.15);
+      left: 10%;
+      top: 20%;
+    }
+    
+    .orb-2 {
+      width: 400px;
+      height: 400px;
+      background: rgba(168, 85, 247, 0.12);
+      right: 15%;
+      bottom: 30%;
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      max-width: 900px;
+    }
+    
+    .hero-icons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      opacity: 0.6;
+    }
+    
+    .hero-icons svg {
+      width: 20px;
+      height: 20px;
+    }
+    
+    .hero-title {
+      font-size: clamp(2.5rem, 8vw, 5rem);
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #fcd34d, #a5b4fc, #c4b5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .hero-subtitle {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      color: rgba(165, 180, 252, 0.8);
+      font-weight: 300;
+      letter-spacing: 0.15em;
+      margin-bottom: 0.5rem;
+    }
+    
+    .hero-english {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.4);
+      letter-spacing: 0.05em;
+      margin-bottom: 3rem;
+      font-style: italic;
+    }
+    
+    .hero-quote {
+      max-width: 600px;
+      margin: 0 auto 2rem;
+      padding: 1.5rem;
+      border-left: 2px solid rgba(99, 102, 241, 0.5);
+      background: linear-gradient(90deg, rgba(99, 102, 241, 0.05), transparent);
+      text-align: left;
+    }
+    
+    .hero-quote p {
+      font-size: 1.3rem;
+      color: rgba(255, 255, 255, 0.85);
+      font-style: italic;
+      margin-bottom: 0.5rem;
+    }
+    
+    .hero-quote cite {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.5);
+      font-style: normal;
+    }
+    
+    .hero-intro {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.6);
+      max-width: 600px;
+      margin: 0 auto 3rem;
+      line-height: 2;
+    }
+    
+    .hero-intro span {
+      color: rgba(165, 180, 252, 0.9);
+    }
+    
+    .scroll-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: rgba(255, 255, 255, 0.4);
+      text-decoration: none;
+      transition: color 0.3s ease;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-size: 0.9rem;
+      letter-spacing: 0.1em;
+    }
+    
+    .scroll-btn:hover {
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .scroll-btn svg {
+      width: 24px;
+      height: 24px;
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(8px); }
+    }
+    
+    /* Section Styles */
+    section {
+      padding: 6rem 1.5rem;
+      position: relative;
+    }
+    
+    .section-content {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    
+    .section-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .section-icon.indigo {
+      background: rgba(99, 102, 241, 0.2);
+    }
+    
+    .section-icon.purple {
+      background: rgba(168, 85, 247, 0.2);
+    }
+    
+    .section-icon.amber {
+      background: rgba(251, 191, 36, 0.2);
+    }
+    
+    .section-icon.emerald {
+      background: rgba(52, 211, 153, 0.2);
+    }
+    
+    .section-icon svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .section-title {
+      font-size: clamp(1.8rem, 5vw, 2.5rem);
+      font-weight: 300;
+      background: linear-gradient(135deg, #fcd34d, #a5b4fc, #c4b5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .section-body {
+      font-size: 1.05rem;
+      line-height: 2;
+    }
+    
+    .section-body p {
+      margin-bottom: 1.5rem;
+      color: rgba(255, 255, 255, 0.75);
+    }
+    
+    .section-body h3 {
+      font-size: 1.3rem;
+      color: rgba(165, 180, 252, 0.9);
+      margin: 2.5rem 0 1rem;
+      font-weight: 400;
+    }
+    
+    .highlight-amber {
+      color: rgba(251, 191, 36, 0.9);
+    }
+    
+    .highlight-indigo {
+      color: rgba(165, 180, 252, 0.9);
+    }
+    
+    .highlight-purple {
+      color: rgba(196, 181, 253, 0.9);
+    }
+    
+    .highlight-emerald {
+      color: rgba(52, 211, 153, 0.9);
+    }
+    
+    /* Cards */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+      margin: 2.5rem 0;
+    }
+    
+    .card {
+      padding: 1.5rem;
+      border-radius: 12px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px -10px rgba(99, 102, 241, 0.2);
+    }
+    
+    .card-amber {
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), transparent);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+    }
+    
+    .card-indigo {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), transparent);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    
+    .card-header svg {
+      width: 32px;
+      height: 32px;
+    }
+    
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 300;
+    }
+    
+    .card-amber .card-title {
+      color: rgba(251, 191, 36, 0.9);
+    }
+    
+    .card-indigo .card-title {
+      color: rgba(165, 180, 252, 0.9);
+    }
+    
+    .card-body {
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.65);
+      margin-bottom: 1rem;
+    }
+    
+    .card-list {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.5);
+      list-style: none;
+    }
+    
+    .card-list li {
+      margin-bottom: 0.25rem;
+    }
+    
+    /* Table */
+    .table-container {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      overflow-x: auto;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.95rem;
+    }
+    
+    th, td {
+      padding: 0.875rem 1rem;
+      text-align: left;
+    }
+    
+    th {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+      font-weight: 400;
+    }
+    
+    th:first-child {
+      color: rgba(251, 191, 36, 0.9);
+    }
+    
+    th:last-child {
+      color: rgba(165, 180, 252, 0.9);
+    }
+    
+    td {
+      color: rgba(255, 255, 255, 0.65);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    /* Visualization */
+    .viz-container {
+      margin: 2.5rem 0;
+      padding: 2rem;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.5), rgba(30, 41, 59, 0.3));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .viz-title {
+      text-align: center;
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 2rem;
+    }
+    
+    .filtration-steps {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    
+    .filtration-step {
+      text-align: center;
+    }
+    
+    .filtration-circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      border: 2px solid;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 0.75rem;
+      position: relative;
+    }
+    
+    .filtration-circle.step-1 {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    .filtration-circle.step-2 {
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+    
+    .filtration-circle.step-3 {
+      border-color: rgba(168, 85, 247, 0.4);
+    }
+    
+    .filtration-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: white;
+    }
+    
+    .filtration-triangle {
+      position: absolute;
+      inset: 15%;
+    }
+    
+    .filtration-triangle svg {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .filtration-filled {
+      position: absolute;
+      inset: 15%;
+    }
+    
+    .filtration-filled svg {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .filtration-label {
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .filtration-sublabel {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.35);
+    }
+    
+    .arrow {
+      color: rgba(255, 255, 255, 0.3);
+      font-size: 1.5rem;
+    }
+    
+    .viz-caption {
+      text-align: center;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 1.5rem;
+    }
+    
+    /* Barcode */
+    .barcode-container {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .barcode-title {
+      text-align: center;
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin-bottom: 1.5rem;
+    }
+    
+    .barcode-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .barcode-label {
+      width: 80px;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .barcode-track {
+      flex: 1;
+      height: 24px;
+      background: rgba(30, 41, 59, 0.5);
+      border-radius: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .barcode-bar {
+      position: absolute;
+      height: 100%;
+      border-radius: 2px;
+    }
+    
+    .barcode-h0 .barcode-bar {
+      background: linear-gradient(90deg, rgba(251, 191, 36, 0.7), rgba(251, 191, 36, 0.2));
+    }
+    
+    .barcode-h1 .barcode-bar {
+      background: linear-gradient(90deg, rgba(99, 102, 241, 0.7), rgba(99, 102, 241, 0.2));
+    }
+    
+    .barcode-h2 .barcode-bar {
+      background: linear-gradient(90deg, rgba(168, 85, 247, 0.7), rgba(168, 85, 247, 0.2));
+    }
+    
+    .barcode-noise {
+      position: absolute;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 2px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    
+    .barcode-caption {
+      text-align: center;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.4);
+      margin-top: 1rem;
+    }
+    
+    /* Steps Grid */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+    
+    .step-card {
+      padding: 1.25rem;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .step-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .step-number {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(99, 102, 241, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
+      color: rgba(165, 180, 252, 0.9);
+    }
+    
+    .step-title {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.85);
+    }
+    
+    .step-body {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+    
+    /* Highlight Box */
+    .highlight-box {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(251, 191, 36, 0.08), transparent);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+    }
+    
+    .highlight-box p {
+      margin-bottom: 1rem;
+    }
+    
+    .highlight-box p:last-child {
+      margin-bottom: 0;
+    }
+    
+    .highlight-box .note {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.55);
+      font-style: italic;
+    }
+    
+    /* Formula Box */
+    .formula-box {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+    
+    .formula {
+      font-size: 1.3rem;
+      color: rgba(255, 255, 255, 0.85);
+      font-family: "Times New Roman", Georgia, serif;
+      margin-bottom: 0.75rem;
+    }
+    
+    .formula-caption {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.5);
+    }
+    
+    /* Philosophy Box */
+    .philosophy-box {
+      margin: 2rem 0;
+      padding: 1.5rem;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), transparent);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    
+    .philosophy-box h4 {
+      font-size: 1.1rem;
+      color: rgba(255, 255, 255, 0.85);
+      margin-bottom: 0.75rem;
+      font-weight: 400;
+    }
+    
+    .philosophy-box p {
+      color: rgba(255, 255, 255, 0.65);
+    }
+    
+    /* Compare Grid */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    
+    .compare-item h5 {
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .compare-item.amber h5 {
+      color: rgba(251, 191, 36, 0.8);
+    }
+    
+    .compare-item.emerald h5 {
+      color: rgba(52, 211, 153, 0.8);
+    }
+    
+    .compare-item p {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.55);
+      margin: 0;
+    }
+    
+    /* Conclusion Box */
+    .conclusion-box {
+      margin: 3rem 0;
+      padding: 2.5rem;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(168, 85, 247, 0.1), rgba(251, 191, 36, 0.08));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+    }
+    
+    .conclusion-box p {
+      font-size: clamp(1.2rem, 4vw, 1.6rem);
+      line-height: 2;
+      background: linear-gradient(135deg, #fcd34d, #a5b4fc, #c4b5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0;
+    }
+    
+    /* Quote Block */
+    .quote-block {
+      margin: 2rem 0;
+      text-align: center;
+    }
+    
+    .quote-block p {
+      font-size: 1.2rem;
+      color: rgba(255, 255, 255, 0.8);
+      font-style: italic;
+      line-height: 2;
+    }
+    
+    .quote-block cite {
+      display: block;
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin-top: 1rem;
+      font-style: normal;
+    }
+    
+    /* Footer */
+    footer {
+      padding: 4rem 1.5rem;
+      text-align: center;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .footer-icons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      opacity: 0.5;
+    }
+    
+    .footer-icons svg {
+      width: 24px;
+      height: 24px;
+    }
+    
+    .footer-title {
+      font-size: clamp(1.5rem, 5vw, 2.5rem);
+      font-weight: 300;
+      background: linear-gradient(135deg, #fcd34d, #a5b4fc, #c4b5fd);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 2rem;
+    }
+    
+    .footer-text {
+      max-width: 700px;
+      margin: 0 auto 2rem;
+      color: rgba(255, 255, 255, 0.7);
+      line-height: 2;
+    }
+    
+    .footer-note {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.4);
+    }
+    
+    .footer-tags {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.3);
+      margin-top: 1rem;
+    }
+    
+    /* Section backgrounds */
+    .bg-gradient-purple {
+      background: linear-gradient(180deg, transparent, rgba(88, 28, 135, 0.15), transparent);
+    }
+    
+    .bg-gradient-indigo {
+      background: linear-gradient(180deg, transparent, rgba(30, 27, 75, 0.2), transparent);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      section {
+        padding: 4rem 1rem;
+      }
+      
+      .cards-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .steps-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .compare-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .filtration-steps {
+        flex-direction: column;
+      }
+      
+      .arrow {
+        transform: rotate(90deg);
+      }
+      
+      .table-container {
+        overflow-x: scroll;
+      }
+    }
+    
+    /* Print styles */
+    @media print {
+      body {
+        background: white;
+        color: black;
+      }
+      
+      .hero-title, .section-title, .conclusion-box p, .footer-title {
+        -webkit-text-fill-color: black;
+        color: black;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-bg">
+      <!-- Stars -->
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          const heroBg = document.querySelector('.hero-bg');
+          for (let i = 0; i < 50; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.opacity = Math.random() * 0.5 + 0.2;
+            star.style.animationDelay = Math.random() * 3 + 's';
+            heroBg.appendChild(star);
+          }
+        });
+      </script>
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+    </div>
+    
+    <div class="hero-content">
+      <div class="hero-icons">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: #fcd34d;">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: #818cf8;">
+          <circle cx="12" cy="12" r="10"></circle>
+        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: #c4b5fd;">
+          <path d="M12 2l8.66 5v10L12 22l-8.66-5V7L12 2z"></path>
+        </svg>
+      </div>
+      
+      <h1 class="hero-title">天垂象 · 地成形</h1>
+      <p class="hero-subtitle">拓扑数据分析与古老智慧的对话</p>
+      <p class="hero-english">
+        Heaven Displays Phenomena · Earth Gives Form<br>
+        Topological Data Analysis meets Ancient Wisdom
+      </p>
+      
+      <div class="hero-quote">
+        <p>"在天成象，在地成形，变化见矣。"</p>
+        <cite>——《周易·系辞上传》</cite>
+      </div>
+      
+      <p class="hero-intro">
+        两千年前的中国先贤与今天的数学家，在探索同一个永恒命题：
+        <span>如何从混沌中辨识秩序，从表象中洞察本质。</span>
+      </p>
+      
+      <a href="#part1" class="scroll-btn">
+        <span>继续阅读</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Part 1: Two Languages -->
+  <section id="part1">
+    <div class="section-content">
+      <div class="section-header">
+        <div class="section-icon indigo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: #818cf8;">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
+        </div>
+        <h2 class="section-title">壹 · 两重视角：形与象</h2>
+      </div>
+      
+      <div class="section-body">
+        <p>
+          《周易·系辞》开篇即言："在天成象，在地成形。"这八个字，道破了中国古代宇宙观的核心洞见。
+        </p>
+        
+        <div class="cards-grid">
+          <div class="card card-amber">
+            <div class="card-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: #fcd34d;">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              </svg>
+              <h3 class="card-title">形 (xíng)</h3>
+            </div>
+            <p class="card-body">
+              地之所成，有形有质。山川草木，皆可触及、测量、描摹其边界。
+            </p>
+            <ul class="card-list">
+              <li>• 具体的、物质的</li>
+              <li>• 可测量的、有边界的</li>
+              <li>• 数据的点、列、行</li>
+            </ul>
+          </div>
+          
+          <div class="card card-indigo">
+            <div class="card-header">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: #c4b5fd;">
+                <path d="M12 3l1.912 5.813a2 2 0 0 0 1.275 1.275L21 12l-5.813 1.912a2 2 0 0 0-1.275 1.275L12 21l-1.912-5.813a2 2 0 0 0-1.275-1.275L3 12l5.813-1.912a2 2 0 0 0 1.275-1.275L12 3z"></path>
+              </svg>
+              <h3 class="card-title">象 (xiàng)</h3>
+            </div>
+            <p class="card-body">
+              天之所垂，有象无质。日月星辰之运转，四时寒暑之更迭，可识而不可执。
+            </p>
+            <ul class="card-list">
+              <li>• 抽象的、关系的</li>
+              <li>• 可辨识的、无边界的</li>
+              <li>• 数据的形、结构、模式</li>
+            </ul>
+          </div>
+        </div>
+        
+        <p>
+          唐代孔颖达在《周易正义》中疏曰："象谓悬象，日月星辰也；形谓山川草木也。"象是悬于天而可见者，形是立于地而可触者。二者之别，在于一虚一实，一抽象一具体。
+        </p>
+        
+        <p>
+          这种区分，与现代数学中的"流形假设"（Manifold Hypothesis）惊人地契合。高维数据虽然表现为无数离散的点——这就是<span class="highlight-amber">形</span>，是"地成形"的现代对应——但这些点实际上分布在一个低维流形上，遵循着某种内在的拓扑结构——这就是<span class="highlight-indigo">象</span>，是"天成象"的数学表达。
+        </p>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>古典框架</th>
+                <th>现代数据对应</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>地成形</td>
+                <td>原始数据集——点、数、表格</td>
+              </tr>
+              <tr>
+                <td>天垂象</td>
+                <td>隐藏的流形或拓扑结构</td>
+              </tr>
+              <tr>
+                <td>观象</td>
+                <td>用TDA从点中推断结构</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <p>
+          真正的智慧，在于不被"形"所困，而能观"象"以通神明之德。这正是拓扑数据分析的核心理念：<span class="highlight-indigo">我们关心的不是数据点本身，而是它们之间的关系，是生成这些点的 underlying structure。</span>
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Part 2: Persistent Homology -->
+  <section id="part2" class="bg-gradient-indigo">
+    <div class="section-content">
+      <div class="section-header">
+        <div class="section-icon purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: #c4b5fd;">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </div>
+        <h2 class="section-title">贰 · 观象之法：持续同调</h2>
+      </div>
+      
+      <div class="section-body">
+        <p>
+          如何观象？《系辞》给出了方法："圣人设卦观象，系辞焉而明吉凶。"关键在于"观"——不是静态地看，而是动态地、多尺度地审视。
+        </p>
+        
+        <h3>古法：以时为尺</h3>
+        <p>
+          古代观天者，不以一时之云气为吉凶。一颗流星划过，不过是 noise；而五星连珠、日月合璧之异象，若经年岁检验而确有其规律性，方为国家之祥瑞或警兆。这是<span class="highlight-amber">以时间为尺度</span>的滤波—— fleeting details 被滤去，enduring patterns 被保留。
+        </p>
+        
+        <h3>今术：以距为尺</h3>
+        <p>
+          拓扑数据分析的核心工具——<span class="highlight-purple">持续同调（Persistent Homology）</span>——运用的是同样的智慧，只不过以"距离"替代"时间"。
+        </p>
+        
+        <div class="viz-container">
+          <h4 class="viz-title">滤波过程（Filtration）示意</h4>
+          <div class="filtration-steps">
+            <div class="filtration-step">
+              <div class="filtration-circle step-1">
+                <div class="filtration-dot"></div>
+              </div>
+              <p class="filtration-label">ε 极小</p>
+              <p class="filtration-sublabel">孤立点</p>
+            </div>
+            <span class="arrow">→</span>
+            <div class="filtration-step">
+              <div class="filtration-circle step-2">
+                <div class="filtration-triangle">
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <line x1="20" y1="80" x2="80" y2="80" stroke="rgba(99,102,241,0.6)" stroke-width="3"/>
+                    <line x1="20" y1="80" x2="50" y2="20" stroke="rgba(99,102,241,0.6)" stroke-width="3"/>
+                    <line x1="80" y1="80" x2="50" y2="20" stroke="rgba(99,102,241,0.6)" stroke-width="3"/>
+                  </svg>
+                </div>
+              </div>
+              <p class="filtration-label">ε 增大</p>
+              <p class="filtration-sublabel">连接成线</p>
+            </div>
+            <span class="arrow">→</span>
+            <div class="filtration-step">
+              <div class="filtration-circle step-3">
+                <div class="filtration-filled">
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <polygon points="20,80 80,80 50,20" fill="rgba(168,85,247,0.3)" stroke="rgba(168,85,247,0.6)" stroke-width="3"/>
+                  </svg>
+                </div>
+              </div>
+              <p class="filtration-label">ε 更大</p>
+              <p class="filtration-sublabel">填充成面</p>
+            </div>
+          </div>
+          <p class="viz-caption">随着尺度参数 ε 增大，点逐渐连接、成线、成面——拓扑特征随之生灭</p>
+        </div>
+        
+        <p>
+          想象你的数据点散布在暗室中。持续同调如同一盏可调节亮度的灯：光球极小时，只见孤立点；光球渐大，点与点连接成线；再大，线围成环、环填充成面。
+        </p>
+        
+        <p>
+          关键洞察在于：<span class="highlight-purple">有些环出现片刻即被填充，这是 noise；有些环跨越广阔尺度依然存在，这是 signal。</span> 后者的"持续期"（persistence）长，故被称为"持续特征"——它们对应着数据中真正的拓扑结构，如同甜甜圈中心的孔洞，无论你怎么拉伸、旋转，它始终存在。
+        </p>
+        
+        <div class="barcode-container">
+          <h4 class="barcode-title">持续条形码（Persistence Barcode）</h4>
+          <div class="barcode-row barcode-h0">
+            <span class="barcode-label">H₀ (连通)</span>
+            <div class="barcode-track">
+              <div class="barcode-bar" style="left: 0%; width: 95%;"></div>
+              <div class="barcode-bar" style="left: 5%; width: 60%;"></div>
+              <div class="barcode-bar" style="left: 15%; width: 40%;"></div>
+            </div>
+          </div>
+          <div class="barcode-row barcode-h1">
+            <span class="barcode-label">H₁ (环)</span>
+            <div class="barcode-track">
+              <div class="barcode-bar" style="left: 20%; width: 70%;"></div>
+              <div class="barcode-noise" style="left: 10%; width: 8%;"></div>
+              <div class="barcode-noise" style="left: 92%; width: 5%;"></div>
+            </div>
+          </div>
+          <div class="barcode-row barcode-h2">
+            <span class="barcode-label">H₂ (腔)</span>
+            <div class="barcode-track">
+              <div class="barcode-bar" style="left: 40%; width: 45%;"></div>
+            </div>
+          </div>
+          <p class="barcode-caption">长条代表持久特征（signal），短条代表瞬态噪声（noise）</p>
+        </div>
+        
+        <p>
+          持续图（persistence diagram）或条形码（barcode），就是现代版的"象"——它剥离了数据的具体坐标，保留了其拓扑骨架。这不是简化，而是<span class="highlight-indigo">提炼</span>：从纷繁复杂的"形"中，提取出稳定不变的"象"。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Part 3: Mapper Algorithm -->
+  <section id="part3">
+    <div class="section-content">
+      <div class="section-header">
+        <div class="section-icon amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: #fcd34d;">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"></path>
+          </svg>
+        </div>
+        <h2 class="section-title">叁 · 绘象之术：Mapper算法</h2>
+      </div>
+      
+      <div class="section-body">
+        <p>
+          持续同调告诉我们"有什么"特征——多少个连通分量、多少个洞、多少个腔。但要真正"导航"，我们需要一张地图。这就是<span class="highlight-amber">Mapper算法</span>的用武之地。
+        </p>
+        
+        <h3>从点云到图谱</h3>
+        <p>
+          Mapper算法由 Gunnar Carlsson 及其合作者开发，是 TDA 中最具实用价值的工具之一。它的核心思想可以概括为四步：
+        </p>
+        
+        <div class="steps-grid">
+          <div class="step-card">
+            <div class="step-header">
+              <span class="step-number">1</span>
+              <h4 class="step-title">投影（Lens）</h4>
+            </div>
+            <p class="step-body">
+              选择一个"滤波函数"（filter function），将高维数据投影到低维空间。这可以是PCA的第一主成分、密度估计、或任何有意义的度量。
+            </p>
+          </div>
+          <div class="step-card">
+            <div class="step-header">
+              <span class="step-number">2</span>
+              <h4 class="step-title">切片与聚类（Cover & Cluster）</h4>
+            </div>
+            <p class="step-body">
+              将投影空间切分为重叠的区间（cover），在每个区间内对原数据点进行聚类。重叠确保连续性不被破坏。
+            </p>
+          </div>
+          <div class="step-card">
+            <div class="step-header">
+              <span class="step-number">3</span>
+              <h4 class="step-title">建图（Graph）</h4>
+            </div>
+            <p class="step-body">
+              每个聚类成为一个节点；若两个聚类共享数据点（因区间重叠），则在对应节点间连边。
+            </p>
+          </div>
+          <div class="step-card">
+            <div class="step-header">
+              <span class="step-number">4</span>
+              <h4 class="step-title">显形（Reveal）</h4>
+            </div>
+            <p class="step-body">
+              得到的图就是数据的"拓扑地图"——长链可能表示 progression，中心辐射状可能表示核心群体，分离的簇表示 distinct subgroups。
+            </p>
+          </div>
+        </div>
+        
+        <h3>乳腺癌研究的突破</h3>
+        <div class="highlight-box">
+          <p>
+            2011年，Carlsson 团队将 Mapper 算法应用于一个被研究超过十年的乳腺癌基因数据集。该数据集包含272名患者的25,000个基因标记——传统的统计方法已反复分析，认为所有可发现的模式都已被发掘。
+          </p>
+          <p>
+            然而，Mapper 生成的拓扑图揭示了一个<span class="highlight-amber">此前未知的肿瘤亚型</span>，其患者具有<span class="highlight-amber">100%的生存率</span>。
+          </p>
+          <p class="note">
+            为什么传统方法错过了它？因为它们被"形"所困——直接对高维点云进行聚类或分类。Mapper 问的是另一个问题："这些点的关系构成了什么形状？"答案，只有在抽象图中才能看见。
+          </p>
+        </div>
+        
+        <p>
+          Mapper 图就是现代版的"卦象"——它不是数据本身，而是数据的<span class="highlight-indigo">关系结构</span>。正如六十四卦不是万物本身，而是万物变化模式的符号化表达。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Part 4: Deep Structure -->
+  <section id="part4" class="bg-gradient-purple">
+    <div class="section-content">
+      <div class="section-header">
+        <div class="section-icon purple">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: #c4b5fd;">
+            <polygon points="12 2 22 22 2 22 12 2"></polygon>
+          </svg>
+        </div>
+        <h2 class="section-title">肆 · 深层同构：稳定性与范函性</h2>
+      </div>
+      
+      <div class="section-body">
+        <p>
+          若说前述的相似还只是"类比"，那么接下来要揭示的，是<span class="highlight-purple">结构层面的同构</span>——两个框架在数学和哲学上的深层契合。
+        </p>
+        
+        <h3>稳定性定理：变的恒常</h3>
+        <div class="formula-box">
+          <p class="formula">d<sub>B</sub>(D(f), D(g)) ≤ ||f - g||<sub>∞</sub></p>
+          <p class="formula-caption">稳定性定理：若数据变化微小，其持续图也变化微小</p>
+        </div>
+        <p>
+          Cohen-Steiner、Edelsbrunner 和 Harer 于2007年证明的<span class="highlight-purple">稳定性定理</span>，是 TDA 理论基石之一。它表明：持续图（或条形码）作为数据的拓扑摘要，对噪声具有鲁棒性。数据的小扰动只会导致拓扑摘要的小变化。
+        </p>
+        <p>
+          这正是"象"的特性——<span class="highlight-amber">持久之象</span>。古代观象者不以一时之异变为吉凶，必待其反复验证、确有规律性方下定论。稳定性定理给了这种直觉以严格的数学保证：我们提取的"象"不是偶然的，而是结构的真实反映。
+        </p>
+        
+        <h3>范函性：结构保持的映射</h3>
+        <p>
+          更深层的结构是<span class="highlight-purple">范函性（Functoriality）</span>。在范畴论中，范函是一种结构保持的映射：它将一个范畴中的对象映射到另一个范畴的对象，同时将态射映射为态射，且保持复合关系和恒等性。
+        </p>
+        <p>
+          TDA 的核心构造——从数据空间到持续图、从持续图到同调群——都是<span class="highlight-indigo">范函</span>。这意味着：数据空间之间的连续映射，诱导出持续图之间的对应映射；同构的数据空间产生同构的持续图。
+        </p>
+        
+        <div class="philosophy-box">
+          <h4>哲学意涵：关系本体论</h4>
+          <p>
+            范函性体现了一种深刻的哲学立场：<span class="highlight-indigo">关系先于实体</span>。一个对象的意义不在于其内在本质，而在于它与其他对象的关系网络。这与《周易》的思维方式高度一致——卦爻的意义不在于孤立符号，而在于其位置、变化、与其他卦爻的承乘比应关系。
+          </p>
+        </div>
+        
+        <h3>扩展持续同调：天地交感</h3>
+        <p>
+          扩展持续同调（Extended Persistence）将普通的下水平集（sublevel）持续同调与上水平集（superlevel）持续同调结合，形成一个完整的图景。这产生了三种配对：
+        </p>
+        <ul style="list-style: none; margin: 1.5rem 0;">
+          <li style="margin-bottom: 0.75rem; color: rgba(255,255,255,0.75);">
+            <span class="highlight-amber">Ordinary（普通）</span>：在下水平集中诞生并消亡的特征——对应"地成形"的下行过程
+          </li>
+          <li style="margin-bottom: 0.75rem; color: rgba(255,255,255,0.75);">
+            <span class="highlight-indigo">Extended（扩展）</span>：在下水平集诞生、在上水平集消亡的特征——对应"天地交感"的桥梁
+          </li>
+          <li style="color: rgba(255,255,255,0.75);">
+            <span class="highlight-purple">Relative（相对）</span>：在上水平集中诞生并消亡的特征——对应"天垂象"的上行过程
+          </li>
+        </ul>
+        <p>
+          当定义域是无边流形时，扩展持续图呈现出<span class="highlight-purple">关于对角线的对称性</span>——"天"与"地"不是对立而是互补，是同一结构的两种视角。这正是阴阳互根的数学表达。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Part 5: Applications -->
+  <section id="part5">
+    <div class="section-content">
+      <div class="section-header">
+        <div class="section-icon emerald">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: #34d399;">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+        </div>
+        <h2 class="section-title">伍 · 观象致用：从市场到投资组合</h2>
+      </div>
+      
+      <div class="section-body">
+        <p>
+          理论与实践的分野，在于能否致用。《周易》之"易"，本义即为"变易"——观察变化、把握时机、指导行动。TDA 在金融领域的应用，正是这一精神的现代延续。
+        </p>
+        
+        <h3>🔍 宏观：识别市场体制（Regime）</h3>
+        <p>
+          投资的首要问题是：我们处于什么样的市场环境？稳定增长、剧烈震荡、还是泡沫前夕？传统经济学依赖领先指标和复杂模型。TDA 提供了不同视角：检测市场结构的拓扑变化。
+        </p>
+        <p>
+          研究表明，在2008年金融危机前，股票网络的持续景观（persistence landscapes）出现了"显著的拓扑变化"——Lp范数的急剧上升成为<span class="highlight-emerald">临界转变的早期预警信号</span>。这正是"观天象以察时变"的数学实现。
+        </p>
+        
+        <h3>🧭 中观：非传统资产配置</h3>
+        <p>
+          现代投资组合理论依赖相关性和方差。TDA 绕过这些传统度量，直接问：资产的"拓扑相似性"如何？
+        </p>
+        <p>
+          研究者用 Mapper 算法将标普500的200只股票投影为拓扑图，按拓扑聚类而非行业分类进行等权配置。结果组合展现出<span class="highlight-emerald">更高的风险调整后收益（Alpha）</span>和<span class="highlight-emerald">更低的基准相关性</span>。
+        </p>
+        
+        <h3>⚖️ 微观：拓扑风险度量</h3>
+        <p>
+          2025年的研究提出了"拓扑风险"概念——用持续景观的变化范数量化资产收益动态的结构不稳定性。优化目标从"最小化方差"转变为"<span class="highlight-emerald">最小化拓扑风险</span>"。
+        </p>
+        <p>
+          近十年标普500数据的回测显示，这种组合持续跑赢七种经典模型和市场指数。它问的不是"波动多大"，而是"<span class="highlight-purple">根本结构变了多少</span>"。
+        </p>
+        
+        <div class="highlight-box" style="background: linear-gradient(135deg, rgba(52,211,153,0.08), transparent); border-color: rgba(52,211,153,0.2);">
+          <h4 style="color: rgba(255,255,255,0.85); margin-bottom: 1rem; font-weight: 400;">从形到象：风险观的升华</h4>
+          <div class="compare-grid">
+            <div class="compare-item amber">
+              <h5>传统风险观（形）</h5>
+              <p>方差、标准差——度量价格的离散程度</p>
+            </div>
+            <div class="compare-item emerald">
+              <h5>拓扑风险观（象）</h5>
+              <p>持续景观变化——度量结构的稳定性</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Conclusion -->
+  <section id="conclusion" class="bg-gradient-indigo">
+    <div class="section-content" style="text-align: center;">
+      <div class="footer-icons">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: #fcd34d;">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: #818cf8;">
+          <circle cx="12" cy="12" r="10"></circle>
+        </svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="color: #c4b5fd;">
+          <path d="M12 2l8.66 5v10L12 22l-8.66-5V7L12 2z"></path>
+        </svg>
+      </div>
+      
+      <h2 class="section-title" style="margin-bottom: 2rem;">结语：形而上者谓之道</h2>
+      
+      <div class="section-body" style="text-align: left;">
+        <p>
+          《系辞》曰："形而上者谓之道，形而下者谓之器。"两千年后，拓扑学用另一种语言诉说着同样的真理：
+        </p>
+        <p>
+          <span class="highlight-amber">形而下</span>——数据点、价格、指标——是"器"，是我们可以测量、计算、操作的具体之物。
+        </p>
+        <p>
+          <span class="highlight-indigo">形而上</span>——流形、同调类、持续图——是"道"，是生成万物的结构、关系、模式。
+        </p>
+        <p>
+          拓扑数据分析不是对古老智慧的简单附会。它是同一认知结构在不同时代、不同文化、不同符号系统中的独立涌现。从"天垂象，地成形"到 persistent homology，从"观象玩辞"到 mapper graphs，人类一直在学习同一件事：
+        </p>
+      </div>
+      
+      <div class="conclusion-box">
+        <p>
+          "不被表象迷惑，<br>
+          而洞察生成表象的永恒结构。"
+        </p>
+      </div>
+      
+      <div class="quote-block">
+        <p>
+          观乎天文，以察时变；<br>
+          观乎人文，以化成天下。
+        </p>
+        <cite>——《周易·贲卦·彖传》</cite>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p class="footer-note">本文仅供学术交流与思想探讨</p>
+    <p class="footer-tags">Topological Data Analysis · 周易 · 象数思维</p>
+  </footer>
+
+</body>
+</html>

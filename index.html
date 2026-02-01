@@ -765,11 +765,12 @@
                                     <div class="liquid-card-inner">
                                         <div class="liquid-card-front vibrancy-primary" style="background: linear-gradient(135deg, #a3acb9, #7b848f);">
                                             <h3 class="text-xl font-bold vibrancy-primary">${item.subject}</h3>
-                                            <p class="text-sm mt-2 vibrancy-secondary">${item.create_time}</p>
+                                            <p class="text-sm mt-2 vibrancy-secondary">${item.estimate_read_time || 'minutes read'}</p>
                                         </div>
                                         <div class="liquid-card-back vibrancy-primary" style="background: linear-gradient(135deg, #7b848f, #a3acb9);">
-                                            <h3 class="text-lg font-bold mb-4 vibrancy-primary">Read More</h3>
-                                            <p class="text-sm mb-2 vibrancy-secondary">${item.summary || 'Click to read the full post.'}</p>
+                                            <h3 class="text-lg font-bold mb-4 vibrancy-primary">${item.subject}</h3>
+                                            <p class="text-sm mb-2 vibrancy-secondary">${'Created:' || item.create_time}</p>
+                                            <p class="text-sm mb-2 vibrancy-secondary">${'Edited:' || item.last_edit_time}</p>
                                             <p class="text-sm font-bold">Click to read!</p>
                                         </div>
                                     </div>

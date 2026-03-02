@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Paw Pals - Virtual Pet Game</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-pink: #D37295;
+            --light-pink: #FABFD2;
+            --soft-pink: #F8D7E3;
+            --pale-pink: #FDEEF4;
+            --dark-pink: #B85C7A;
+            --rose: #E891A8;
+            --white: #FFFBFC;
+            --cream: #FFF8F5;
+            --shadow: rgba(211, 114, 149, 0.2);
+            --text-dark: #5A3D4A;
+            --text-light: #8B6B7A;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background: linear-gradient(135deg, var(--pale-pink) 0%, var(--soft-pink) 50%, var(--light-pink) 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            color: var(--text-dark);
+        }
+
+        /* Background Pattern */
+        .bg-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, var(--light-pink) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, var(--soft-pink) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.4) 0%, transparent 30%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .bg-pattern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23D37295' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.5;
+        }
+
+        /* Header */
+        .game-header {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--light-pink);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 800;
+            font-size: 1.4rem;
+            color: var(--primary-pink);
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* Main Container */
+        .game-container {
+            position: relative;
+            z-index: 5;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Location Tabs */
+        .location-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .location-tab {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            background: var(--white);
+            color: var(--text-light);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .location-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--shadow);
+        }
+
+        .location-tab.active {
+            background: linear-gradient(135deg, var(--primary-pink) 0%, var(--rose) 100%);
+            color: white;
+        }
+
+        /* Scene Container */
+        .scene {
+            background: linear-gradient(180deg, var(--cream) 0%, var(--white) 100%);
+            border-radius: 30px;
+            padding: 30px;
+            min-height: 350px;
+            position: relative;
+            box-shadow: 
+                0 10px 40px var(--shadow),
+                inset 0 2px 0 rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .scene::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60%;
+            background: linear-gradient(180deg, var(--pale-pink) 0%, transparent 100%);
+            opacity: 0.5;
+            border-radius: 30px 30px 0 0;
+        }
+
+        .scene-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            min-height: 280px;
+            align-items: flex-end;
+        }
+
+        /* Pet Card */
+        .pet-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 25px;
+            padding: 20px;
+            width: 160px;
+            text-align: center;
+            box-shadow: 0 8px 25px var(--shadow);
+            transition: all 0.3s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .pet-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 35px var(--shadow);
+        }
+
+        .pet-card.selected {
+            box-shadow: 0 0 0 4px var(--primary-pink), 0 12px 35px var(--shadow);
+        }
+
+        .pet-avatar {
+            font-size: 5rem;
+            margin-bottom: 10px;
+            display: block;
+            animation: petIdle 3s ease-in-out infinite;
+        }
+
+        @keyframes petIdle {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-8px) scale(1.05); }
+        }
+
+        .pet-card.happy .pet-avatar {
+            animation: petHappy 0.5s ease-in-out;
+        }
+
+        @keyframes petHappy {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.2) rotate(-10deg); }
+            75% { transform: scale(1.2) rotate(10deg); }
+        }
+
+        .pet-card.eating .pet-avatar {
+            animation: petEat 0.6s ease-in-out 3;
+        }
+
+        @keyframes petEat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(0.9) translateY(5px); }
+        }
+
+        .pet-card.bathing .pet-avatar {
+            animation: petBath 1s ease-in-out infinite;
+        }
+
+        @keyframes petBath {
+            0%, 100% { transform: translateX(0) rotate(0deg); }
+            25% { transform: translateX(-5px) rotate(-5deg); }
+            75% { transform: translateX(5px) rotate(5deg); }
+        }
+
+        .pet-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .pet-status {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .status-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+        }
+
+        .status-icon {
+            font-size: 1rem;
+        }
+
+        .status-track {
+            flex: 1;
+            height: 8px;
+            background: var(--soft-pink);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .status-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease, background-color 0.3s ease;
+        }
+
+        .status-fill.health {
+            background: linear-gradient(90deg, #FF9AA2, #FFB7B2);
+        }
+
+        .status-fill.mood {
+            background: linear-gradient(90deg, #FFDAC1, #FFECC7);
+        }
+
+        .status-value {
+            font-weight: 600;
+            min-width: 25px;
+            text-align: right;
+        }
+
+        /* Action Buttons */
+        .actions-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 25px;
+            padding: 20px;
+            box-shadow: 0 8px 25px var(--shadow);
+        }
+
+        .actions-title {
+            text-align: center;
+            font-weight: 700;
+            color: var(--primary-pink);
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 15px 10px;
+            border: none;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--white) 0%, var(--pale-pink) 100%);
+            color: var(--text-dark);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px var(--shadow);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px var(--shadow);
+            background: linear-gradient(135deg, var(--soft-pink) 0%, var(--light-pink) 100%);
+        }
+
+        .action-btn:active:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .action-btn.fight-btn {
+            background: linear-gradient(135deg, #FF9AA2 0%, #FFB7B2 100%);
+            color: white;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 4px 15px var(--shadow); }
+            50% { box-shadow: 0 4px 25px rgba(211, 114, 149, 0.5); }
+        }
+
+        .action-icon {
+            font-size: 1.8rem;
+        }
+
+        /* Fight Mini-Game - ENHANCED */
+        .fight-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(90, 61, 74, 0.95);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 10px;
+        }
+
+        .fight-overlay.active {
+            display: flex;
+        }
+
+        .fight-arena {
+            background: linear-gradient(135deg, var(--cream) 0%, var(--white) 100%);
+            border-radius: 30px;
+            padding: 20px;
+            max-width: 500px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .fight-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-pink);
+            margin-bottom: 10px;
+        }
+
+        .player-side {
+            background: linear-gradient(135deg, var(--primary-pink) 0%, var(--rose) 100%);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .round-counter {
+            background: var(--soft-pink);
+            color: var(--text-dark);
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .move-guide {
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 0.85rem;
+        }
+
+        .move-guide-title {
+            font-weight: 700;
+            color: var(--primary-pink);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .move-arrows {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .move-arrow {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 0.8rem;
+        }
+
+        .move-arrow span:first-child {
+            font-size: 1.2rem;
+        }
+
+        .arrow {
+            color: var(--primary-pink);
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .fight-scene {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 15px 0;
+            font-size: 3rem;
+            position: relative;
+        }
+
+        @media (max-width: 400px) {
+            .fight-scene {
+                font-size: 2.5rem;
+            }
+        }
+
+        .fight-pet {
+            animation: fightBounce 0.5s ease-in-out infinite alternate;
+        }
+
+        .fight-pet.cat {
+            animation-delay: 0.1s;
+        }
+
+        @keyframes fightBounce {
+            0% { transform: translateY(0) scale(1); }
+            100% { transform: translateY(-15px) scale(1.1); }
+        }
+
+        .vs-text {
+            font-weight: 800;
+            color: var(--rose);
+            font-size: 2rem;
+        }
+
+        .fight-message {
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+
+        .fight-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .fight-btn-action {
+            padding: 15px 25px;
+            border: none;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--primary-pink) 0%, var(--rose) 100%);
+            color: white;
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .fight-btn-action:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(211, 114, 149, 0.4);
+        }
+
+        .fight-btn-action:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .fight-result {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--primary-pink);
+            margin: 15px 0;
+            min-height: 30px;
+        }
+
+        .status-impact {
+            background: rgba(255, 154, 162, 0.2);
+            border-radius: 10px;
+            padding: 8px 12px;
+            margin: 10px 0;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+        }
+
+        .status-impact.negative {
+            background: rgba(139, 107, 122, 0.2);
+        }
+
+        /* Photo Modal */
+        .photo-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(90, 61, 74, 0.95);
+            z-index: 100;
+            display: none;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .photo-modal.active {
+            display: flex;
+        }
+
+        .photo-frame {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: rotate(-2deg);
+        }
+
+        .photo-frame::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .photo-content {
+            background: linear-gradient(135deg, var(--pale-pink) 0%, var(--soft-pink) 100%);
+            border-radius: 15px;
+            padding: 30px;
+            font-size: 6rem;
+            margin-bottom: 15px;
+        }
+
+        .photo-caption {
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            color: var(--text-dark);
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+
+        .photo-timestamp {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        /* Floating Hearts Animation */
+        .heart {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: floatUp 1.5s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-80px) scale(1.5);
+            }
+        }
+
+        /* Message Toast - MOVED TO TOP */
+        .toast {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--primary-pink);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            font-weight: 700;
+            box-shadow: 0 8px 25px rgba(211, 114, 149, 0.4);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Back Button */
+        .back-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background: linear-gradient(135deg, var(--soft-pink) 0%, var(--light-pink) 100%);
+            color: var(--text-dark);
+            font-family: 'Nunito', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--shadow);
+        }
+
+        /* Home/Scene Decorations */
+        .scene-decoration {
+            position: absolute;
+            font-size: 2rem;
+            opacity: 0.6;
+        }
+
+        .decoration-1 { top: 10%; left: 5%; }
+        .decoration-2 { top: 15%; right: 10%; }
+        .decoration-3 { top: 40%; left: 8%; }
+        .decoration-4 { bottom: 20%; right: 5%; }
+
+        /* Responsive - ENHANCED FOR MOBILE */
+        @media (max-width: 600px) {
+            .game-header {
+                padding: 10px 15px;
+            }
+            
+            .logo {
+                font-size: 1rem;
+            }
+            
+            .logo-icon {
+                font-size: 1.4rem;
+            }
+            
+            .location-tab {
+                padding: 10px 18px;
+                font-size: 0.85rem;
+            }
+            
+            .scene {
+                padding: 15px;
+                min-height: 250px;
+                border-radius: 20px;
+            }
+
+            .scene-decoration {
+                font-size: 1.5rem;
+            }
+            
+            .pet-card {
+                width: 130px;
+                padding: 12px;
+                border-radius: 20px;
+            }
+            
+            .pet-avatar {
+                font-size: 3.5rem;
+            }
+
+            .pet-name {
+                font-size: 0.95rem;
+            }
+
+            .status-bar {
+                font-size: 0.7rem;
+            }
+            
+            .actions-panel {
+                padding: 15px;
+            }
+
+            .actions-title {
+                font-size: 1rem;
+            }
+            
+            .actions-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 8px;
+            }
+            
+            .action-btn {
+                padding: 10px 5px;
+                font-size: 0.75rem;
+                border-radius: 15px;
+            }
+            
+            .action-icon {
+                font-size: 1.4rem;
+            }
+
+            .fight-btn {
+                animation: none;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .game-header {
+                padding: 8px 10px;
+            }
+
+            .logo {
+                font-size: 0.9rem;
+            }
+
+            .back-btn {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+
+            .location-tabs {
+                gap: 5px;
+            }
+
+            .location-tab {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+            }
+
+            .scene {
+                padding: 10px;
+                min-height: 220px;
+            }
+
+            .scene-content {
+                gap: 15px;
+            }
+
+            .pet-card {
+                width: 115px;
+                padding: 10px;
+            }
+
+            .pet-avatar {
+                font-size: 3rem;
+            }
+
+            .actions-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+
+            .action-btn {
+                padding: 8px 4px;
+                font-size: 0.7rem;
+            }
+
+            .action-icon {
+                font-size: 1.2rem;
+            }
+
+            /* Fight modal mobile adjustments */
+            .fight-arena {
+                padding: 15px 10px;
+                margin: 10px;
+                width: calc(100% - 20px);
+            }
+
+            .fight-title {
+                font-size: 1.2rem;
+            }
+
+            .player-side {
+                font-size: 0.8rem;
+                padding: 6px 12px;
+            }
+
+            .move-guide {
+                padding: 8px;
+            }
+
+            .move-guide-title {
+                font-size: 0.8rem;
+            }
+
+            .move-arrow {
+                font-size: 0.7rem;
+            }
+
+            .move-arrow span:first-child {
+                font-size: 1rem;
+            }
+
+            .fight-scene {
+                font-size: 2.5rem;
+                margin: 10px 0;
+            }
+
+            .fight-message {
+                font-size: 0.9rem;
+            }
+
+            .fight-actions {
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .fight-btn-action {
+                padding: 10px 15px;
+                font-size: 0.9rem;
+            }
+
+            .status-impact {
+                font-size: 0.75rem;
+                padding: 6px 8px;
+            }
+
+            /* Photo modal mobile */
+            .photo-frame {
+                padding: 15px;
+                margin: 10px;
+            }
+
+            .photo-content {
+                font-size: 4rem;
+                padding: 20px;
+            }
+
+            .photo-caption {
+                font-size: 1rem;
+            }
+
+            /* Toast mobile */
+            .toast {
+                top: 70px;
+                padding: 10px 15px;
+                font-size: 0.85rem;
+                max-width: 95%;
+            }
+        }
+
+        /* Landscape mode adjustments */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .game-header {
+                padding: 8px 15px;
+            }
+
+            .scene {
+                min-height: 180px;
+                padding: 10px;
+            }
+
+            .pet-card {
+                width: 100px;
+                padding: 8px;
+            }
+
+            .pet-avatar {
+                font-size: 2.5rem;
+            }
+
+            .actions-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .fight-arena {
+                max-height: 95vh;
+                overflow-y: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-pattern"></div>
+    
+    <header class="game-header">
+        <div class="logo">
+            <span class="logo-icon">🐾</span>
+            <span>Paw Pals</span>
+        </div>
+        <div class="header-buttons">
+            <a href="index.html#demos" class="back-btn">🏠 Home</a>
+        </div>
+    </header>
+
+    <main class="game-container">
+        <!-- Location Tabs -->
+        <div class="location-tabs">
+            <button class="location-tab active" data-location="house">
+                <span>🏠</span> House
+            </button>
+            <button class="location-tab" data-location="yard">
+                <span>🌳</span> Yard
+            </button>
+        </div>
+
+        <!-- Scene -->
+        <div class="scene" id="scene">
+            <div class="scene-decoration decoration-1">🏠</div>
+            <div class="scene-decoration decoration-2">💕</div>
+            <div class="scene-decoration decoration-3">🌸</div>
+            <div class="scene-decoration decoration-4">✨</div>
+            
+            <div class="scene-content" id="sceneContent">
+                <!-- Pets will be rendered here -->
+            </div>
+        </div>
+
+        <!-- Actions Panel -->
+        <div class="actions-panel">
+            <div class="actions-title">Choose an Action</div>
+            <div class="actions-grid" id="actionsGrid">
+                <button class="action-btn" data-action="pet">
+                    <span class="action-icon">👋</span>
+                    <span>Pet</span>
+                </button>
+                <button class="action-btn" data-action="feed">
+                    <span class="action-icon">🍖</span>
+                    <span>Feed</span>
+                </button>
+                <button class="action-btn" data-action="bathe">
+                    <span class="action-icon">🛁</span>
+                    <span>Bathe</span>
+                </button>
+                <button class="action-btn" data-action="play">
+                    <span class="action-icon">🎾</span>
+                    <span>Play</span>
+                </button>
+                <button class="action-btn" data-action="photo">
+                    <span class="action-icon">📸</span>
+                    <span>Photo</span>
+                </button>
+                <button class="action-btn fight-btn" id="fightBtn" data-action="fight" style="display: none;">
+                    <span class="action-icon">⚔️</span>
+                    <span>Fight!</span>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Fight Mini-Game Overlay -->
+    <div class="fight-overlay" id="fightOverlay">
+        <div class="fight-arena">
+            <div class="fight-title">🥊 Cat vs Dog! 🥊</div>
+            <div class="player-side" id="playerSide">You are supporting: ???</div>
+            <div class="round-counter" id="roundCounter">Round 1</div>
+            
+            <div class="move-guide">
+                <div class="move-guide-title">🎮 How to Play</div>
+                <div class="move-arrows">
+                    <div class="move-arrow"><span>🐾</span><span class="arrow">→</span><span>beats</span><span class="arrow">→</span><span>😤</span></div>
+                    <div class="move-arrow"><span>😤</span><span class="arrow">→</span><span>beats</span><span class="arrow">→</span><span>💨</span></div>
+                    <div class="move-arrow"><span>💨</span><span class="arrow">→</span><span>beats</span><span class="arrow">→</span><span>🐾</span></div>
+                </div>
+            </div>
+
+            <div class="fight-scene">
+                <div class="fight-pet cat">🐱</div>
+                <div class="vs-text">VS</div>
+                <div class="fight-pet dog">🐶</div>
+            </div>
+            <div class="fight-message" id="fightMessage">
+                The battle begins! Choose your action!
+            </div>
+            <div class="status-impact" id="statusImpact"></div>
+            <div class="fight-actions" id="fightActions">
+                <button class="fight-btn-action" data-move="pounce">🐾 Pounce</button>
+                <button class="fight-btn-action" data-move="dodge">💨 Dodge</button>
+                <button class="fight-btn-action" data-move="taunt">😤 Taunt</button>
+            </div>
+            <div class="fight-result" id="fightResult"></div>
+            <div id="roundButtons" style="margin-top: 15px; display: none;">
+                <button class="fight-btn-action" id="nextRoundBtn" style="margin-right: 10px;">⚔️ Next Round</button>
+                <button class="fight-btn-action" id="exitFightBtn" style="background: linear-gradient(135deg, #8B6B7A 0%, #5A3D4A 100%);">🏳️ Exit Fight</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Photo Modal -->
+    <div class="photo-modal" id="photoModal">
+        <div class="photo-frame">
+            <div class="photo-content" id="photoContent">🐱</div>
+            <div class="photo-caption" id="photoCaption">My adorable pet!</div>
+            <div class="photo-timestamp" id="photoTimestamp"></div>
+            <button class="fight-btn-action" id="closePhoto">Close</button>
+        </div>
+    </div>
+
+    <!-- Toast Message -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Game State
+        const gameState = {
+            currentLocation: 'house',
+            selectedPet: null,
+            pets: {
+                cat: {
+                    name: 'Mochi',
+                    emoji: '🐱',
+                    type: 'cat',
+                    location: 'house',
+                    health: 0, // Will be randomized
+                    mood: 0,   // Will be randomized
+                    maxHealth: 100,
+                    maxMood: 100
+                },
+                dog: {
+                    name: 'Biscuit',
+                    emoji: '🐶',
+                    type: 'dog',
+                    location: 'house',
+                    health: 0, // Will be randomized
+                    mood: 0,   // Will be randomized
+                    maxHealth: 100,
+                    maxMood: 100
+                }
+            }
+        };
+
+        // Randomize initial stats (30-80 range for varied experience)
+        function randomizeInitialStats() {
+            ['cat', 'dog'].forEach(petType => {
+                gameState.pets[petType].health = Math.floor(Math.random() * 51) + 30; // 30-80
+                gameState.pets[petType].mood = Math.floor(Math.random() * 51) + 30;   // 30-80
+            });
+        }
+
+        // Initialize
+        randomizeInitialStats();
+
+        // DOM Elements
+        const sceneContent = document.getElementById('sceneContent');
+        const locationTabs = document.querySelectorAll('.location-tab');
+        const actionBtns = document.querySelectorAll('.action-btn');
+        const fightBtn = document.getElementById('fightBtn');
+        const fightOverlay = document.getElementById('fightOverlay');
+        const photoModal = document.getElementById('photoModal');
+        const toast = document.getElementById('toast');
+        const fightMessage = document.getElementById('fightMessage');
+        const fightResult = document.getElementById('fightResult');
+        const fightActions = document.getElementById('fightActions');
+        const closeFight = document.getElementById('closeFight');
+
+        // Scene decorations by location
+        const decorations = {
+            house: ['🏠', '💕', '🌸', '✨'],
+            yard: ['🌳', '🌻', '🦋', '🌈']
+        };
+
+        // Render Scene
+        function renderScene() {
+            // Update decorations
+            const decorElements = document.querySelectorAll('.scene-decoration');
+            const currentDecor = decorations[gameState.currentLocation];
+            decorElements.forEach((el, i) => {
+                el.textContent = currentDecor[i] || '✨';
+            });
+
+            // Render pets in current location
+            sceneContent.innerHTML = '';
+            
+            ['cat', 'dog'].forEach(petType => {
+                const pet = gameState.pets[petType];
+                if (pet.location === gameState.currentLocation) {
+                    const petCard = createPetCard(pet);
+                    sceneContent.appendChild(petCard);
+                }
+            });
+
+            // Update fight button visibility
+            checkFightAvailability();
+            
+            // Update selected state
+            updateSelectedState();
+        }
+
+        function createPetCard(pet) {
+            const card = document.createElement('div');
+            card.className = `pet-card ${pet.type === gameState.selectedPet ? 'selected' : ''}`;
+            card.dataset.pet = pet.type;
+            
+            card.innerHTML = `
+                <span class="pet-avatar">${pet.emoji}</span>
+                <div class="pet-name">${pet.name}</div>
+                <div class="pet-status">
+                    <div class="status-bar">
+                        <span class="status-icon">❤️</span>
+                        <div class="status-track">
+                            <div class="status-fill health" style="width: ${pet.health}%"></div>
+                        </div>
+                        <span class="status-value">${pet.health}</span>
+                    </div>
+                    <div class="status-bar">
+                        <span class="status-icon">😊</span>
+                        <div class="status-track">
+                            <div class="status-fill mood" style="width: ${pet.mood}%"></div>
+                        </div>
+                        <span class="status-value">${pet.mood}</span>
+                    </div>
+                </div>
+            `;
+            
+            card.addEventListener('click', () => selectPet(pet.type));
+            return card;
+        }
+
+        function selectPet(petType) {
+            gameState.selectedPet = petType;
+            updateSelectedState();
+            showToast(`Selected ${gameState.pets[petType].name}!`);
+        }
+
+        function updateSelectedState() {
+            document.querySelectorAll('.pet-card').forEach(card => {
+                card.classList.toggle('selected', card.dataset.pet === gameState.selectedPet);
+            });
+        }
+
+        function checkFightAvailability() {
+            const catInLocation = gameState.pets.cat.location === gameState.currentLocation;
+            const dogInLocation = gameState.pets.dog.location === gameState.currentLocation;
+            fightBtn.style.display = (catInLocation && dogInLocation) ? 'flex' : 'none';
+        }
+
+        // Location Switching
+        locationTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                locationTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                gameState.currentLocation = tab.dataset.location;
+                
+                // Deselect pet when switching locations if pet not in new location
+                if (gameState.selectedPet) {
+                    const selectedPetData = gameState.pets[gameState.selectedPet];
+                    if (selectedPetData.location !== gameState.currentLocation) {
+                        gameState.selectedPet = null;
+                    }
+                }
+                
+                renderScene();
+                showToast(`Moved to ${gameState.currentLocation === 'house' ? '🏠 House' : '🌳 Yard'}!`);
+            });
+        });
+
+        // Pet Actions
+        actionBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const action = btn.dataset.action;
+                
+                if (action === 'fight') {
+                    startFight();
+                    return;
+                }
+                
+                if (!gameState.selectedPet) {
+                    showToast('Select a pet first! 👆');
+                    return;
+                }
+                
+                const pet = gameState.pets[gameState.selectedPet];
+                performAction(action, pet);
+            });
+        });
+
+        function performAction(action, pet) {
+            const card = document.querySelector(`.pet-card[data-pet="${pet.type}"]`);
+            
+            switch(action) {
+                case 'pet':
+                    pet.mood = Math.min(pet.mood + 10, pet.maxMood);
+                    card.classList.add('happy');
+                    createHearts(card);
+                    showToast(`${pet.name} loves being petted! 💕`);
+                    setTimeout(() => card.classList.remove('happy'), 500);
+                    break;
+                    
+                case 'feed':
+                    pet.health = Math.min(pet.health + 15, pet.maxHealth);
+                    pet.mood = Math.min(pet.mood + 5, pet.maxMood);
+                    card.classList.add('eating');
+                    showToast(`Yum! ${pet.name} enjoyed the meal! 🍖`);
+                    setTimeout(() => card.classList.remove('eating'), 1800);
+                    break;
+                    
+                case 'bathe':
+                    pet.health = Math.min(pet.health + 10, pet.maxHealth);
+                    card.classList.add('bathing');
+                    showToast(`Splish splash! ${pet.name} is clean! 🛁`);
+                    setTimeout(() => card.classList.remove('bathing'), 1000);
+                    break;
+                    
+                case 'play':
+                    pet.mood = Math.min(pet.mood + 20, pet.maxMood);
+                    pet.health = Math.max(pet.health - 5, 0);
+                    card.classList.add('happy');
+                    createHearts(card);
+                    showToast(`${pet.name} had so much fun playing! 🎾`);
+                    setTimeout(() => card.classList.remove('happy'), 500);
+                    break;
+                    
+                case 'photo':
+                    takePhoto(pet);
+                    return;
+            }
+            
+            renderScene();
+        }
+
+        function createHearts(element) {
+            const rect = element.getBoundingClientRect();
+            for (let i = 0; i < 3; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.className = 'heart';
+                    heart.textContent = ['💕', '💖', '💗'][i];
+                    heart.style.left = `${rect.left + rect.width / 2 + (Math.random() * 40 - 20)}px`;
+                    heart.style.top = `${rect.top}px`;
+                    document.body.appendChild(heart);
+                    setTimeout(() => heart.remove(), 1500);
+                }, i * 200);
+            }
+        }
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // Photo Feature
+        function takePhoto(pet) {
+            document.getElementById('photoContent').textContent = pet.emoji;
+            document.getElementById('photoCaption').textContent = `${pet.name} looking adorable!`;
+            document.getElementById('photoTimestamp').textContent = new Date().toLocaleString();
+            photoModal.classList.add('active');
+        }
+
+        document.getElementById('closePhoto').addEventListener('click', () => {
+            photoModal.classList.remove('active');
+            showToast('Photo saved to album! 📸');
+        });
+
+        // Fight Mini-Game - ENHANCED
+        let fightState = {
+            round: 1,
+            playerSide: null, // 'cat' or 'dog'
+            opponentSide: null,
+            isActive: false
+        };
+
+        const MIN_HEALTH_TO_FIGHT = 20; // Minimum health required to continue fighting
+        const MIN_MOOD_TO_FIGHT = 15;   // Minimum mood required to continue fighting
+
+        function startFight() {
+            // Determine player side based on selected pet, or random if none selected
+            if (gameState.selectedPet && ['cat', 'dog'].includes(gameState.selectedPet)) {
+                fightState.playerSide = gameState.selectedPet;
+            } else {
+                // Randomly assign if no pet selected
+                fightState.playerSide = Math.random() > 0.5 ? 'cat' : 'dog';
+            }
+            fightState.opponentSide = fightState.playerSide === 'cat' ? 'dog' : 'cat';
+            fightState.round = 1;
+            fightState.isActive = true;
+
+            // Check if pets can fight (health/mood check)
+            const playerPet = gameState.pets[fightState.playerSide];
+            const opponentPet = gameState.pets[fightState.opponentSide];
+            
+            if (playerPet.health < MIN_HEALTH_TO_FIGHT || playerPet.mood < MIN_MOOD_TO_FIGHT) {
+                showToast(`${playerPet.name} is too weak to fight! Rest first! 💤`);
+                return;
+            }
+
+            fightOverlay.classList.add('active');
+            updateFightUI();
+            
+            document.getElementById('playerSide').textContent = 
+                `You are supporting: ${playerPet.name} ${playerPet.emoji}`;
+            document.getElementById('roundCounter').textContent = `Round ${fightState.round}`;
+            fightMessage.textContent = 'The battle begins! Choose your action!';
+            fightResult.textContent = '';
+            document.getElementById('statusImpact').textContent = '';
+            fightActions.style.display = 'flex';
+            document.getElementById('roundButtons').style.display = 'none';
+        }
+
+        function updateFightUI() {
+            // Update pet avatars with highlight for player's side
+            const catAvatar = document.querySelector('.fight-pet.cat');
+            const dogAvatar = document.querySelector('.fight-pet.dog');
+            
+            catAvatar.style.filter = fightState.playerSide === 'cat' ? 'drop-shadow(0 0 10px #FFD700)' : 'none';
+            dogAvatar.style.filter = fightState.playerSide === 'dog' ? 'drop-shadow(0 0 10px #FFD700)' : 'none';
+            
+            // Add indicator for player's pet
+            catAvatar.innerHTML = fightState.playerSide === 'cat' ? '🐱<div style="font-size:0.4em; color:#FFD700; margin-top:-5px;">⭐ YOU</div>' : '🐱';
+            dogAvatar.innerHTML = fightState.playerSide === 'dog' ? '🐶<div style="font-size:0.4em; color:#FFD700; margin-top:-5px;">⭐ YOU</div>' : '🐶';
+        }
+
+        document.querySelectorAll('.fight-btn-action[data-move]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const playerMove = btn.dataset.move;
+                const moves = ['pounce', 'dodge', 'taunt'];
+                const aiMove = moves[Math.floor(Math.random() * moves.length)];
+                
+                resolveFightRound(playerMove, aiMove);
+            });
+        });
+
+        function resolveFightRound(playerMove, aiMove) {
+            // Rock-paper-scissors style mechanics
+            const outcomes = {
+                pounce: { beats: 'taunt', losesTo: 'dodge' },
+                dodge: { beats: 'pounce', losesTo: 'taunt' },
+                taunt: { beats: 'dodge', losesTo: 'pounce' }
+            };
+            
+            const moveNames = { pounce: 'Pounce', dodge: 'Dodge', taunt: 'Taunt' };
+            const moveEmojis = { pounce: '🐾', dodge: '💨', taunt: '😤' };
+            
+            let result;
+            if (playerMove === aiMove) {
+                result = 'draw';
+            } else if (outcomes[playerMove].beats === aiMove) {
+                result = 'win';
+            } else {
+                result = 'lose';
+            }
+            
+            const playerPet = gameState.pets[fightState.playerSide];
+            const opponentPet = gameState.pets[fightState.opponentSide];
+            
+            // Calculate impacts
+            let healthImpactPlayer = 0;
+            let moodImpactPlayer = 0;
+            let healthImpactOpponent = 0;
+            let moodImpactOpponent = 0;
+            let impactMessage = '';
+            
+            if (result === 'win') {
+                moodImpactPlayer = 20;
+                moodImpactOpponent = -10;
+                healthImpactOpponent = -5;
+                impactMessage = `${playerPet.name} gains confidence! ${opponentPet.name} is shaken!`;
+            } else if (result === 'lose') {
+                moodImpactPlayer = -10;
+                healthImpactPlayer = -5;
+                moodImpactOpponent = 15;
+                impactMessage = `${playerPet.name} is hurt! ${opponentPet.name} grows stronger!`;
+            } else {
+                moodImpactPlayer = 5;
+                moodImpactOpponent = 5;
+                healthImpactPlayer = -2;
+                healthImpactOpponent = -2;
+                impactMessage = 'Both pets are exhausted from the intense battle!';
+            }
+            
+            // Apply impacts with limits
+            playerPet.mood = Math.min(Math.max(playerPet.mood + moodImpactPlayer, 0), 100);
+            playerPet.health = Math.min(Math.max(playerPet.health + healthImpactPlayer, 0), 100);
+            opponentPet.mood = Math.min(Math.max(opponentPet.mood + moodImpactOpponent, 0), 100);
+            opponentPet.health = Math.min(Math.max(opponentPet.health + healthImpactOpponent, 0), 100);
+            
+            // Messages
+            const messages = {
+                pounce: `🐾 ${playerPet.name} pounces forward!`,
+                dodge: `💨 ${playerPet.name} nimbly dodges!`,
+                taunt: `😤 ${playerPet.name} taunts ${opponentPet.name}!`
+            };
+            
+            const aiMessages = {
+                pounce: `🐾 ${opponentPet.name} pounces at ${playerPet.name}!`,
+                dodge: `💨 ${opponentPet.name} dodges the attack!`,
+                taunt: `😤 ${opponentPet.name} taunts back!`
+            };
+            
+            const resultMessages = {
+                win: `🎉 ${playerPet.name} won this round!`,
+                lose: `😅 ${playerPet.name} lost this round!`,
+                draw: `🤝 It's a draw this round!`
+            };
+            
+            fightMessage.innerHTML = `${messages[playerMove]}<br>${aiMessages[aiMove]}`;
+            fightResult.textContent = resultMessages[result];
+            
+            const statusImpactEl = document.getElementById('statusImpact');
+            statusImpactEl.textContent = impactMessage;
+            statusImpactEl.className = result === 'win' ? 'status-impact' : (result === 'lose' ? 'status-impact negative' : 'status-impact');
+            
+            fightActions.style.display = 'none';
+            document.getElementById('roundButtons').style.display = 'block';
+            
+            // Check for fight end conditions
+            const playerCanContinue = playerPet.health >= MIN_HEALTH_TO_FIGHT && playerPet.mood >= MIN_MOOD_TO_FIGHT;
+            const opponentCanContinue = opponentPet.health >= MIN_HEALTH_TO_FIGHT && opponentPet.mood >= MIN_MOOD_TO_FIGHT;
+            
+            const nextRoundBtn = document.getElementById('nextRoundBtn');
+            const exitBtn = document.getElementById('exitFightBtn');
+            
+            if (!playerCanContinue || !opponentCanContinue) {
+                // Fight must end
+                nextRoundBtn.style.display = 'none';
+                exitBtn.textContent = '🏳️ End Fight';
+                
+                if (!playerCanContinue) {
+                    fightResult.textContent = `💔 ${playerPet.name} is too exhausted to continue! Fight over!`;
+                } else if (!opponentCanContinue) {
+                    fightResult.textContent = `🏆 ${opponentPet.name} admits defeat! You win the battle!`;
+                }
+            } else {
+                nextRoundBtn.style.display = 'inline-block';
+                exitBtn.textContent = '🏳️ Exit Fight';
+            }
+            
+            renderScene();
+        }
+
+        document.getElementById('nextRoundBtn').addEventListener('click', () => {
+            fightState.round++;
+            document.getElementById('roundCounter').textContent = `Round ${fightState.round}`;
+            fightMessage.textContent = `Round ${fightState.round}! Choose your action!`;
+            fightResult.textContent = '';
+            document.getElementById('statusImpact').textContent = '';
+            fightActions.style.display = 'flex';
+            document.getElementById('roundButtons').style.display = 'none';
+        });
+
+        document.getElementById('exitFightBtn').addEventListener('click', () => {
+            const playerPet = gameState.pets[fightState.playerSide];
+            const opponentPet = gameState.pets[fightState.opponentSide];
+            
+            fightOverlay.classList.remove('active');
+            fightState.isActive = false;
+            
+            // Reset UI for next time
+            fightActions.style.display = 'flex';
+            document.getElementById('roundButtons').style.display = 'none';
+            document.getElementById('nextRoundBtn').style.display = 'inline-block';
+            
+            showToast(`The fight is over! ${playerPet.name} and ${opponentPet.name} need rest! 🐾`);
+        });
+
+        // Close overlays on background click
+        fightOverlay.addEventListener('click', (e) => {
+            if (e.target === fightOverlay) {
+                fightOverlay.classList.remove('active');
+            }
+        });
+
+        photoModal.addEventListener('click', (e) => {
+            if (e.target === photoModal) {
+                photoModal.classList.remove('active');
+            }
+        });
+
+        // Random pet movement every 30-60 seconds
+        function randomPetMovement() {
+            const delay = Math.random() * 30000 + 30000; // 30-60 seconds
+            
+            setTimeout(() => {
+                const petType = Math.random() > 0.5 ? 'cat' : 'dog';
+                const pet = gameState.pets[petType];
+                const newLocation = pet.location === 'house' ? 'yard' : 'house';
+                
+                pet.location = newLocation;
+                
+                // Only show message and re-render if the moving pet is in current view
+                if (pet.location === gameState.currentLocation) {
+                    if (gameState.selectedPet && gameState.pets[gameState.selectedPet].location !== gameState.currentLocation) {
+                        gameState.selectedPet = null;
+                    }
+                    renderScene();
+                    showToast(`${pet.name} came to the ${newLocation}! 🐾`);
+                } else if (pet.type === gameState.selectedPet) {
+                    gameState.selectedPet = null;
+                    renderScene();
+                    showToast(`${pet.name} left for the ${newLocation}! 🐾`);
+                }
+                
+                randomPetMovement();
+            }, delay);
+        }
+
+        // Initialize
+        renderScene();
+        randomPetMovement();
+        showToast('Welcome to Paw Pals! Your pets are waiting! 🐾');
+    </script>
+</body>
+</html>

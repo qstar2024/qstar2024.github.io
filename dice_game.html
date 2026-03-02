@@ -203,8 +203,140 @@
             margin-bottom: 10px;
         }
 
-        #instructionContent li {
-            margin-bottom: 5px;
+        /* Dice Result Bowl Container */
+        .dice-result-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .dice-result-overlay.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .dice-bowl {
+            width: 340px;
+            min-height: 180px;
+            background: linear-gradient(145deg, #a93226 0%, #e74c3c 50%, #c0392b 100%);
+            border-radius: 50%;
+            box-shadow: 
+                inset 0 10px 30px rgba(0,0,0,0.4),
+                0 15px 50px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            position: relative;
+            transform: scale(0.9);
+            animation: bowlPop 0.4s ease forwards;
+        }
+
+        @keyframes bowlPop {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .bowl-title {
+            color: #fff;
+            font-size: 1.4rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            margin-bottom: 15px;
+            letter-spacing: 2px;
+        }
+
+        .dice-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+            max-width: 280px;
+        }
+
+        /* Dice Face Styles */
+        .dice-face {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(145deg, #fff 0%, #f0f0f0 100%);
+            border-radius: 8px;
+            box-shadow: 
+                0 4px 8px rgba(0,0,0,0.3),
+                inset 0 -2px 4px rgba(0,0,0,0.1);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            padding: 6px;
+            position: relative;
+        }
+
+        .dice-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            align-self: center;
+            justify-self: center;
+            box-shadow: inset 0 -2px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Red dots for 1 and 4 */
+        .dice-dot.red {
+            background: radial-gradient(circle at 30% 30%, #ff6b6b, #c0392b);
+        }
+
+        /* Black dots for 2, 3, 5, 6 */
+        .dice-dot.black {
+            background: radial-gradient(circle at 30% 30%, #555, #000);
+        }
+
+        /* Dice face positions */
+        .dice-face[data-value="1"] .dice-dot:nth-child(1) { grid-area: 2 / 2 / 3 / 3; }
+
+        .dice-face[data-value="2"] .dice-dot:nth-child(1) { grid-area: 1 / 1 / 2 / 2; }
+        .dice-face[data-value="2"] .dice-dot:nth-child(2) { grid-area: 3 / 3 / 4 / 4; }
+
+        .dice-face[data-value="3"] .dice-dot:nth-child(1) { grid-area: 1 / 1 / 2 / 2; }
+        .dice-face[data-value="3"] .dice-dot:nth-child(2) { grid-area: 2 / 2 / 3 / 3; }
+        .dice-face[data-value="3"] .dice-dot:nth-child(3) { grid-area: 3 / 3 / 4 / 4; }
+
+        .dice-face[data-value="4"] .dice-dot:nth-child(1) { grid-area: 1 / 1 / 2 / 2; }
+        .dice-face[data-value="4"] .dice-dot:nth-child(2) { grid-area: 1 / 3 / 2 / 4; }
+        .dice-face[data-value="4"] .dice-dot:nth-child(3) { grid-area: 3 / 1 / 4 / 2; }
+        .dice-face[data-value="4"] .dice-dot:nth-child(4) { grid-area: 3 / 3 / 4 / 4; }
+
+        .dice-face[data-value="5"] .dice-dot:nth-child(1) { grid-area: 1 / 1 / 2 / 2; }
+        .dice-face[data-value="5"] .dice-dot:nth-child(2) { grid-area: 1 / 3 / 2 / 4; }
+        .dice-face[data-value="5"] .dice-dot:nth-child(3) { grid-area: 2 / 2 / 3 / 3; }
+        .dice-face[data-value="5"] .dice-dot:nth-child(4) { grid-area: 3 / 1 / 4 / 2; }
+        .dice-face[data-value="5"] .dice-dot:nth-child(5) { grid-area: 3 / 3 / 4 / 4; }
+
+        .dice-face[data-value="6"] .dice-dot:nth-child(1) { grid-area: 1 / 1 / 2 / 2; }
+        .dice-face[data-value="6"] .dice-dot:nth-child(2) { grid-area: 1 / 3 / 2 / 4; }
+        .dice-face[data-value="6"] .dice-dot:nth-child(3) { grid-area: 2 / 1 / 3 / 2; }
+        .dice-face[data-value="6"] .dice-dot:nth-child(4) { grid-area: 2 / 3 / 3 / 4; }
+        .dice-face[data-value="6"] .dice-dot:nth-child(5) { grid-area: 3 / 1 / 4 / 2; }
+        .dice-face[data-value="6"] .dice-dot:nth-child(6) { grid-area: 3 / 3 / 4 / 4; }
+
+        .bowl-hint {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.85rem;
+            margin-top: 15px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         }
     </style>
     
@@ -260,6 +392,14 @@
                 <li><strong>特殊规则</strong> you'll figure out as you play along!</li>
             </ul>
             <p>Click anywhere outside to dismiss the panel.</p>
+        </div>
+    </div>
+
+    <div id="diceResultOverlay" class="dice-result-overlay">
+        <div class="dice-bowl">
+            <div class="bowl-title">🎲 RESULT 🎲</div>
+            <div id="diceContainer" class="dice-container"></div>
+            <div class="bowl-hint">Click anywhere to dismiss</div>
         </div>
     </div>
 
@@ -639,6 +779,42 @@
                 document.getElementById('results').innerHTML = `🎲 ${formattedResults}`;
                 document.getElementById('total').innerHTML = `🍀 ${pattern}`;
                 document.getElementById('rollButton').disabled = false;
+                
+                // Show dice bowl animation
+                this.showDiceBowl();
+            }
+
+            showDiceBowl() {
+                const overlay = document.getElementById('diceResultOverlay');
+                const container = document.getElementById('diceContainer');
+                
+                // Clear previous dice
+                container.innerHTML = '';
+                
+                // Keep original order of results (don't sort)
+                const results = this.diceResults;
+                
+                // Create dice faces
+                results.forEach(value => {
+                    const diceFace = document.createElement('div');
+                    diceFace.className = 'dice-face';
+                    diceFace.setAttribute('data-value', value);
+                    
+                    // Determine dot color: 1 and 4 are red, others are black
+                    const dotColorClass = (value === 1 || value === 4) ? 'red' : 'black';
+                    
+                    // Create dots based on value
+                    for (let i = 0; i < value; i++) {
+                        const dot = document.createElement('div');
+                        dot.className = `dice-dot ${dotColorClass}`;
+                        diceFace.appendChild(dot);
+                    }
+                    
+                    container.appendChild(diceFace);
+                });
+                
+                // Show overlay
+                overlay.classList.add('active');
             }
 
             setupEventListeners() {
@@ -649,6 +825,12 @@
 
                 window.addEventListener('resize', () => {
                     this.updateSceneSize();
+                });
+
+                // Click anywhere to dismiss dice result overlay
+                const diceOverlay = document.getElementById('diceResultOverlay');
+                diceOverlay.addEventListener('click', (e) => {
+                    diceOverlay.classList.remove('active');
                 });
             }
 

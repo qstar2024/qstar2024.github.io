@@ -185,8 +185,6 @@
             box-sizing: border-box;
         }
 
-
-
         .brick.computer-selected {
             border-color: #e74c3c;
             animation: computerPulse 1s infinite;
@@ -243,20 +241,23 @@
             flex-direction: column;
             align-items: center;
             gap: 20px;
-            /* Now that the column is 1fr, adjust padding/margin for spacing */
-            padding: 0; /* Add horizontal padding */
-            width: 100%; /* Fill the grid column */
+            padding: 0;
+            width: 100%;
         }
 
         .middle-bricks {
             display: flex;
             flex-direction: column;
             gap: 5px;
+            width: 100%;
+            padding: 0 10px;
+            box-sizing: border-box;
         }
 
         .middle-brick {
             height: 35px;
-            background: linear-gradient(45deg, #f39c12, #e67e22);
+            width: 100%;
+            background: linear-gradient(145deg, #f39c12, #e67e22);
             border-radius: 5px;
             display: flex;
             align-items: center;
@@ -267,25 +268,69 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
             transition: all 0.3s ease;
             cursor: pointer;
-            border: 2px solid transparent;
-            width: 100%;
+            border: 3px solid transparent;
             box-sizing: border-box;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
         }
 
         .middle-brick:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+            border-color: #f1c40f;
         }
 
         .middle-brick.selected {
-            border-color: #D7B5A6;
-            background: linear-gradient(45deg, #C2A192, #D7B5A6);
+            border-color: #3498db;
+            background: linear-gradient(145deg, #5dade2, #3498db);
+            transform: translateY(-8px);
+            box-shadow: 0 12px 24px rgba(52, 152, 219, 0.4);
         }
 
         .middle-brick.computer-selected {
-            border-color: #D7B5A6;
-            background: linear-gradient(45deg, #C2A192, #D7B5A6);
+            border-color: #e74c3c;
+            background: linear-gradient(145deg, #ec7063, #e74c3c);
             animation: computerPulse 1s infinite;
+        }
+
+        .middle-brick.from-pile::after {
+            content: 'NEW';
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            background: #27ae60;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 6px;
+            animation: fadeInOut 2s ease;
+            z-index: 2;
+            font-weight: bold;
+        }
+
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            20%, 80% { opacity: 1; }
+        }
+
+        .brick-ghost {
+            position: fixed;
+            height: 35px;
+            background: linear-gradient(145deg, #f39c12, #e67e22);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            z-index: 999;
+            pointer-events: none;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .controls {
@@ -420,19 +465,19 @@
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .game-board {
-                grid-template-columns: repeat(3, 1fr); /* Adjust grid for smaller screens */
+                grid-template-columns: repeat(3, 1fr);
                 grid-template-rows: auto 1fr;
                 gap: 10px;
             }
 
             .player-tower {
-                width: 100%; /* Ensure they fill their grid column */
+                width: 100%;
                 grid-column: 1;
                 grid-row: 1;
             }
 
             .computer-tower {
-                width: 100%; /* Ensure they fill their grid column */
+                width: 100%;
                 grid-column: 3;
                 grid-row: 1;
             }
@@ -440,36 +485,60 @@
             .middle-area {
                 grid-column: 2;
                 grid-row: 1;
-                order: unset; /* Remove order to follow grid column */
+                order: unset;
                 min-width: auto;
-                padding: 0 5px; /* Adjust padding for smaller screens */
+                padding: 0 5px;
+            }
+
+            .pile-container {
+                width: 120px;
+                height: 100px;
             }
 
             .middle-bricks {
-                flex-direction: column; /* Revert middle bricks to column layout */
-                justify-content: center;
-            }
-
-            .tower {
-                min-height: 300px;
-            }
-
-            .brick {
-                height: 35px;
-                font-size: 0.9rem;
+                flex-direction: row;
+                gap: 10px;
             }
 
             .middle-brick {
                 height: 35px;
-                width: 100%; /* Make middle bricks fill the middle area width */
-                margin: 0 auto;
                 font-size: 1rem;
             }
 
-            .game-info {
-                grid-column: 1 / span 2; /* Adjust span for smaller screens */
-                grid-row: 2; /* Place below the towers and middle area */
-                grid-template-columns: repeat(2, 1fr);
+            .btn {
+                background: var(--glass-bg-light);
+                backdrop-filter: blur(var(--blur-intensity));
+                -webkit-backdrop-filter: blur(var(--blur-intensity));
+                border-radius: 1.6rem;
+                border: 1.5px solid var(--glass-border);
+                box-shadow: var(--glass-shadow);
+                color: #fff;
+                font-size: 0.8rem;
+                font-weight: 600;
+                padding: 0.4rem 0.8rem;
+                cursor: pointer;
+                outline: none;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                text-decoration: none;
+                display: inline-block;
+                text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                text-transform: uppercase;
+                letter-spacing: 1px;
+            }
+
+            .btn-primary {
+                background: var(--glass-bg-light);
+                color: white;
+            }
+
+            .btn-success {
+                background: var(--glass-bg-light);
+                color: white;
+            }
+
+            .btn-warning {
+                background: var(--glass-bg-light);
+                color: white;
             }
         }
 
@@ -484,7 +553,6 @@
 
             .tower {
                 padding: 10px;
-                /* Remove explicit width, let grid handle sizing */
                 width: 100%;
             }
 
@@ -497,20 +565,24 @@
             .middle-area {
                 order: -1;
                 min-width: auto;
-                /* Remove explicit width, let grid handle sizing */
                 width: 100%;
+            }
+
+            .pile-container {
+                width: 100px;
+                height: 90px;
             }
 
             .middle-bricks {
                 flex-direction: column;
                 justify-content: center;
+                gap: 8px;
+                width: 100%;
+                padding: 0 5px;
             }
 
             .middle-brick {
                 height: 35px;
-                width: 100%;
-                max-width: 120px;
-                margin: 0 auto;
                 font-size: 0.9rem;
             }
 
@@ -526,9 +598,7 @@
             font-size: 1.2rem;
         }
 
-        .hidden {
-            display: none;
-        }
+
     </style>
 </head>
 <body>
@@ -573,7 +643,6 @@
             <div class="middle-area">
                 <div class="middle-bricks" id="middle-bricks"></div>
                 <div class="controls">
-
                     <button class="btn btn-success" id="new-round-btn">Next Round</button>
                     <button class="btn btn-skip" id="skip-btn" style="display: none;">Skip Turn</button>
                 </div>
@@ -593,6 +662,8 @@
                 this.selectedBrick = null;
                 this.gameState = null;
                 this.gameLogic = new TowerBlasterGame();
+                this.isPlayerAnimating = false;
+                this.isComputerAnimating = false;
                 this.init();
             }
 
@@ -646,47 +717,173 @@
 
             makeMove(brickIndex, towerLevel) {
                 try {
-                    // Show swap animation
-                    this.showSwapAnimation(brickIndex, towerLevel);
-                    
-                    const result = this.gameLogic.player_move(brickIndex, towerLevel);
-                    if (result.success) {
-                        this.gameState = this.gameLogic.get_game_state();
-                        this.selectedBrick = null;
-                        
-                        // Wait for animation to complete
-                        setTimeout(() => {
-                            this.updateUI();
-                            
-                            if (this.gameState.round_over) {
-                                if (this.gameState.winner === 'player') {
-                                    this.showStatus('🎉 You won this round!', 'success');
-                                    this.demolishTower('computer');
-                                } else {
-                                    this.showStatus('💀 Computer won! Game Over!', 'danger');
-                                    this.demolishTower('player');
-                                }
-                            }
-                        }, 800);
-                    } else {
-                        this.showStatus('Invalid move', 'danger');
+                    const result = this.gameLogic.player_swap(brickIndex, towerLevel);
+                    if (!result.success) {
+                        this.showStatus(result.message || 'Invalid move', 'danger');
+                        return;
                     }
+
+                    this.isPlayerAnimating = true;
+                    this.updateButtons(); // Disable buttons during animation
+
+                    // Animate the player's move, then trigger the computer's turn in the callback
+                    this.animatePlayerMove(brickIndex, towerLevel, result.chosen_brick, result.old_brick, () => {
+                        this.isPlayerAnimating = false;
+                        this.gameState = this.gameLogic.get_game_state(); // Get latest state
+                        if (this.gameState.round_over) {
+                            this.updateUI();
+                        } else {
+                            this.triggerComputerTurn();
+                        }
+                    });
                 } catch (error) {
+                    console.error("Error in makeMove:", error);
                     this.showStatus('Error making move', 'danger');
                 }
             }
 
+            animatePlayerMove(brickIndex, towerLevel, chosenBrick, oldBrick, callback) {
+                // Get all necessary DOM elements
+                const middleBricks = document.querySelectorAll('.middle-brick');
+                const playerBricks = document.querySelectorAll('#player-tower .brick');
+                
+                const sourceBrick = middleBricks[brickIndex];
+                const targetBrick = playerBricks[towerLevel];
+                const otherIndex = 1 - brickIndex;
+                const otherBrick = middleBricks[otherIndex];
+                
+                if (!sourceBrick || !targetBrick) {
+                    callback();
+                    return;
+                }
+                
+                // Capture positions at START (before any visual changes)
+                const sourceRect = sourceBrick.getBoundingClientRect();
+                const targetRect = targetBrick.getBoundingClientRect();
+                
+                // STEP 1: Create ghost for chosen brick flying to tower
+                const ghostToTower = document.createElement('div');
+                ghostToTower.className = 'brick-ghost';
+                ghostToTower.textContent = chosenBrick; // Use passed value
+                ghostToTower.style.left = sourceRect.left + 'px';
+                ghostToTower.style.top = sourceRect.top + 'px';
+                ghostToTower.style.width = sourceRect.width + 'px';
+                ghostToTower.style.height = sourceRect.height + 'px';
+                document.body.appendChild(ghostToTower);
+                
+                // Animate ghost to tower
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        ghostToTower.style.left = targetRect.left + 'px';
+                        ghostToTower.style.top = targetRect.top + 'px';
+                    }, 50);
+                });
+                
+                // STEP 2: After reaching tower, create return ghost and update values
+                setTimeout(() => {
+                    // Update tower brick in place
+                    targetBrick.textContent = chosenBrick; // Use passed value
+                    targetBrick.classList.remove('empty', 'selectable');
+                    targetBrick.style.cursor = 'default';
+                    
+                    // Create ghost for returned brick flying back
+                    const ghostReturn = document.createElement('div');
+                    ghostReturn.className = 'brick-ghost';
+                    ghostReturn.textContent = oldBrick; // Use passed value
+                    ghostReturn.style.left = targetRect.left + 'px';
+                    ghostReturn.style.top = targetRect.top + 'px';
+                    ghostReturn.style.width = targetRect.width + 'px';
+                    ghostReturn.style.height = targetRect.height + 'px';
+                    document.body.appendChild(ghostReturn);
+                    
+                    // Animate return ghost back to source
+                    requestAnimationFrame(() => {
+                        setTimeout(() => {
+                            ghostReturn.style.left = sourceRect.left + 'px';
+                            ghostReturn.style.top = sourceRect.top + 'px';
+                        }, 50);
+                    });
+                    
+                    // STEP 3: After return animation, update middle bricks
+                    setTimeout(() => {
+                        // Remove selected highlight from source
+                        sourceBrick.classList.remove('selected');
+                        
+                        
+                        // Source brick gets returned value
+                        sourceBrick.textContent = oldBrick; // Use passed value
+                        
+                        // Cleanup ghosts and finish
+                        setTimeout(() => {
+                            ghostToTower.remove();
+                            ghostReturn.remove();
+                            callback();
+                        }, 100);
+                    }, 600); // Wait for return animation
+                }, 650); // Wait for ghost to reach tower
+            }
+
             skipTurn() {
                 try {
-                    const result = this.gameLogic.skip_turn();
+                    const result = this.gameLogic.player_skip();
                     if (result.success) {
-                        this.gameState = this.gameLogic.get_game_state();
+                        this.showStatus('You skipped your turn. Computer is next.', 'info');
                         this.selectedBrick = null;
-                        this.updateUI();
+                        this.updateButtons(); // Disable buttons
+                        this.triggerComputerTurn();
+                    } else {
+                        this.showStatus(result.message || 'Error skipping turn', 'danger');
                     }
                 } catch (error) {
+                    console.error("Error in skipTurn:", error);
                     this.showStatus('Error skipping turn', 'danger');
                 }
+            }
+
+            triggerComputerTurn() {
+                this.isComputerAnimating = true;
+                this.updateButtons();
+                this.showStatus('Computer is thinking...', 'info');
+
+                setTimeout(() => {
+                    const result = this.gameLogic.computer_move();
+                    this.gameState = this.gameLogic.get_game_state(); // Get state after computer's move
+
+                    if (!result.success) {
+                        this.isComputerAnimating = false;
+                        this.showStatus('Error in computer turn', 'danger');
+                        this.updateButtons();
+                        return;
+                    }
+
+                    const { decision } = result;
+
+                    if (decision.move === 'skip') {
+                        this.showStatus('Computer skipped its turn.', 'info');
+                        // If computer skips, go straight to ending the turn
+                        setTimeout(() => this.endTurn(), 1000); // Wait 1s to show message
+                    } else {
+                        // Animate the computer's swap
+                        const { brick_index, tower_level } = decision;
+                        this.showComputerMove(brick_index, tower_level, () => {
+                            // After animation, end the turn
+                            this.endTurn();
+                        });
+                    }
+                }, 1000); // Delay for "thinking"
+            }
+
+            endTurn() {
+                // Finalize the turn logic (e.g., refresh middle bricks)
+                this.gameLogic.finalize_turn();
+
+                // Get the final, definitive state of the game for this round
+                this.gameState = this.gameLogic.get_game_state();
+
+                // Reset animation flag and render the final state
+                this.isComputerAnimating = false;
+                this.selectedBrick = null;
+                this.updateUI();
             }
 
             showSwapAnimation(brickIndex, towerLevel) {
@@ -708,51 +905,88 @@
                 }
             }
 
-            showComputerMove(brickIndex, towerLevel) {
-                // Clear any existing computer selections
-                document.querySelectorAll('.computer-selected').forEach(el => {
-                    el.classList.remove('computer-selected');
-                });
-                document.querySelectorAll('.swap-animation').forEach(el => {
-                    el.classList.remove('swap-animation');
-                });
-                
-                // Highlight computer's selected brick
-                const middleBricks = document.querySelectorAll('.middle-brick');
-                if (middleBricks[brickIndex]) {
-                    middleBricks[brickIndex].classList.add('computer-selected');
-                }
-                
-                // Highlight computer's tower level
-                const computerBricks = document.querySelectorAll('#computer-tower .brick');
-                if (computerBricks[towerLevel]) {
-                    computerBricks[towerLevel].classList.add('computer-selected');
-                }
-
-                // Display detailed computer move message
+            showComputerMove(brickIndex, towerLevel, callback) {
                 const chosenBrickValue = this.gameState.last_computer_move.chosen_brick_value;
                 const oldBrickValue = this.gameState.last_computer_move.old_brick_value;
-                this.showStatus(`Computer took brick ${chosenBrickValue}, placed it at level ${towerLevel + 1}, and returned brick ${oldBrickValue}.`, 'info');
+                const otherIndex = 1 - brickIndex;
+                
+                const middleBricks = document.getElementById('middle-bricks').querySelectorAll('.middle-brick');
+                const computerBricks = document.querySelectorAll('#computer-tower .brick');
+                
+                const sourceBrick = middleBricks[brickIndex];
+                const targetBrick = computerBricks[towerLevel];
+                const otherBrick = middleBricks[otherIndex];
+                
+                if (!sourceBrick || !targetBrick) {
+                    this.showStatus(`Computer took brick ${chosenBrickValue}, placed it at level ${towerLevel + 1}, and returned brick ${oldBrickValue}.`, 'info');
+                    this.updateComputerTower();
+                    this.updateMiddleBricks();
+                    return;
+                }
+                
+                // STEP 1: Highlight the computer's choice
+                sourceBrick.classList.add('computer-selected');
+                targetBrick.classList.add('computer-selected');
 
-                // Show animation after delay
+                // Add a delay to let the player see the selection
                 setTimeout(() => {
-                    if (middleBricks[brickIndex]) {
-                        middleBricks[brickIndex].classList.add('swap-animation');
-                    }
-                    if (computerBricks[towerLevel]) {
-                        computerBricks[towerLevel].classList.add('swap-animation');
-                    }
+                    const sourceRect = sourceBrick.getBoundingClientRect();
+                    const targetRect = targetBrick.getBoundingClientRect();
                     
-                    // Clear highlights after animation
+                    // STEP 2: Create ghost for chosen brick flying to computer
+                    const ghostToComputer = document.createElement('div');
+                    ghostToComputer.className = 'brick-ghost';
+                    ghostToComputer.textContent = chosenBrickValue;
+                    ghostToComputer.style.left = sourceRect.left + 'px';
+                    ghostToComputer.style.top = sourceRect.top + 'px';
+                    ghostToComputer.style.width = sourceRect.width + 'px';
+                    ghostToComputer.style.height = sourceRect.height + 'px';
+                    document.body.appendChild(ghostToComputer);
+                    
+                    // Animate to computer
+                    requestAnimationFrame(() => {
+                        setTimeout(() => {
+                            ghostToComputer.style.left = targetRect.left + 'px';
+                            ghostToComputer.style.top = targetRect.top + 'px';
+                        }, 50);
+                    });
+                    
+                    // STEP 3: After reaching computer, create return ghost
                     setTimeout(() => {
-                        document.querySelectorAll('.computer-selected').forEach(el => {
-                            el.classList.remove('computer-selected');
+                        const ghostReturn = document.createElement('div');
+                        ghostReturn.className = 'brick-ghost';
+                        ghostReturn.textContent = oldBrickValue;
+                        ghostReturn.style.left = targetRect.left + 'px';
+                        ghostReturn.style.top = targetRect.top + 'px';
+                        ghostReturn.style.width = targetRect.width + 'px';
+                        ghostReturn.style.height = targetRect.height + 'px';
+                        document.body.appendChild(ghostReturn);
+                        
+                        // Animate back to source
+                        requestAnimationFrame(() => {
+                            setTimeout(() => {
+                                ghostReturn.style.left = sourceRect.left + 'px';
+                                ghostReturn.style.top = sourceRect.top + 'px';
+                            }, 50);
                         });
-                        document.querySelectorAll('.swap-animation').forEach(el => {
-                            el.classList.remove('swap-animation');
-                        });
-                    }, 800);
-                }, 1000);
+                        
+                        // STEP 4: Update middle bricks after return
+                        setTimeout(() => {
+                            sourceBrick.classList.remove('computer-selected');
+                            targetBrick.classList.remove('computer-selected');
+                            
+                            sourceBrick.textContent = oldBrickValue;
+                            
+                            // Cleanup and show status
+                            setTimeout(() => {
+                                ghostToComputer.remove();
+                                ghostReturn.remove();
+                                this.showStatus(`Computer took brick ${chosenBrickValue}, placed it at level ${towerLevel + 1}, and returned brick ${oldBrickValue}.`, 'info');
+                                if (callback) callback();
+                            }, 100);
+                        }, 600);
+                    }, 650);
+                }, 1000); // 1-second delay to show selection
             }
 
             demolishTower(player) {
@@ -766,7 +1000,7 @@
             }
 
             updateUI() {
-                if (!this.gameState) return;
+                if (!this.gameState || this.isComputerAnimating) return;
 
                 // Update info cards
                 document.getElementById('player-score').textContent = this.gameState.player_score;
@@ -774,15 +1008,11 @@
                 document.getElementById('current-n').textContent = this.gameState.N;
                 document.getElementById('ai-strategy').textContent = this.gameState.computer_strategy;
 
-                // Show computer move animation if available
-                if (this.gameState.last_computer_move && this.gameState.current_player === 'player') {
-                    this.showComputerMove(this.gameState.last_computer_move.brick_index, this.gameState.last_computer_move.tower_level);
-                }
-
-                // Update towers
+                // Normal UI updates
                 this.updatePlayerTower();
                 this.updateComputerTower();
                 this.updateMiddleBricks();
+                
                 this.updateStatus();
                 this.updateButtons();
             }
@@ -836,7 +1066,7 @@
                         } else {
                             // Hide values during gameplay
                             brickEl.classList.add('hidden');
-                            brickEl.textContent = 'HIDDEN'; // Temporary: Check if text appears
+                            brickEl.textContent = ''; // Keep the brick visible but text hidden
                         }
                     } else {
                         // Show empty brick (during initialization or empty slots)
@@ -856,17 +1086,29 @@
                     const brickEl = document.createElement('div');
                     brickEl.className = 'middle-brick';
                     brickEl.textContent = brick;
+
+                    // Add the 'NEW' mark if the index is in the refreshed list
+                    if (this.gameState.refreshed_middle_indices && this.gameState.refreshed_middle_indices.includes(index)) {
+                        brickEl.classList.add('from-pile');
+                        // Remove the class after the animation finishes to prevent it from re-running
+                        setTimeout(() => {
+                            if (brickEl) {
+                                brickEl.classList.remove('from-pile');
+                            }
+                        }, 2000);
+                    }
                     
-                    if (this.gameState.current_player === 'player' && !this.gameState.round_over) {
+                    if (this.gameState.current_player === 'player' && !this.gameState.round_over && !this.isPlayerAnimating && !this.isComputerAnimating) {
                         brickEl.addEventListener('click', () => {
+                            if (this.isPlayerAnimating || this.isComputerAnimating) return;
                             this.selectedBrick = index;
-                            this.updateMiddleBricks();
+                            this.updateMiddleBricks(); // Re-render to show selection
                             this.updatePlayerTower();
                         });
-                        
-                        if (this.selectedBrick === index) {
-                            brickEl.classList.add('selected');
-                        }
+                    }
+                    
+                    if (this.selectedBrick === index) {
+                        brickEl.classList.add('selected');
                     }
                     
                     container.appendChild(brickEl);
@@ -915,6 +1157,7 @@
                     // Add current turn info
                     if (this.gameState.current_player === 'player') {
                         if (this.selectedBrick !== null) {
+                            const chosenBrick = this.gameState.middle_bricks[this.selectedBrick];
                             statusText += '\nNow click on a level in your tower to place the brick, or skip your turn';
                         } else {
                             statusText += '\nYour turn! Select a brick or skip your turn';
@@ -930,11 +1173,20 @@
             updateButtons() {
                 const newRoundBtn = document.getElementById('new-round-btn');
                 const skipBtn = document.getElementById('skip-btn');
-                
+                const newGameBtn = document.getElementById('new-game-btn');
+
+                const isAnimating = this.isPlayerAnimating || this.isComputerAnimating;
+
+                // New Game button should be disabled during animations
+                newGameBtn.disabled = isAnimating;
+
+                // New Round button is only visible when a round is won
                 newRoundBtn.style.display = (this.gameState.round_over && this.gameState.winner === 'player' && !this.gameState.game_completed) ? 'block' : 'none';
+                newRoundBtn.disabled = isAnimating;
                 
-                // Show skip button during player's turn
+                // Skip button is visible during player's turn, but disabled during animations
                 skipBtn.style.display = (this.gameState.current_player === 'player' && !this.gameState.round_over) ? 'block' : 'none';
+                skipBtn.disabled = isAnimating;
             }
 
             showStatus(message, type) {
@@ -958,7 +1210,8 @@
 
             start_new_round() {
                 if (this.N <= 25) {
-                    return false; // Game completed
+                    this.game_completed = true;
+                    return false;
                 }
 
                 this.pile = Array.from({ length: this.N }, (_, i) => i + 1);
@@ -971,9 +1224,12 @@
                 this.current_player = 'player';
                 this.round_over = false;
                 this.winner = null;
+                this.game_completed = false;
                 this.computer_strategy = this.choose_computer_strategy();
                 this.move_history = [];
+                this.last_player_move = null;
                 this.last_computer_move = null;
+                this.refreshed_middle_indices = [0, 1]; // Initially both are new
 
                 return true;
             }
@@ -992,27 +1248,26 @@
                 return true;
             }
 
-            player_move(chosen_brick_index, tower_level) {
-                if (this.current_player !== 'player' || this.round_over) return { success: false };
-                if (![0, 1].includes(chosen_brick_index) || tower_level < 0 || tower_level >= 10) return { success: false };
+            // New method for player swapping a brick
+            player_swap(chosen_brick_index, tower_level) {
+                if (this.current_player !== 'player' || this.round_over) return { success: false, message: 'Not your turn or round is over.' };
+                if (![0, 1].includes(chosen_brick_index) || tower_level < 0 || tower_level >= 10) return { success: false, message: 'Invalid selection.' };
 
                 const chosen_brick = this.middle_bricks[chosen_brick_index];
                 const old_brick = this.player_tower[tower_level];
                 this.player_tower[tower_level] = chosen_brick;
 
-                const unchosen_index = 1 - chosen_brick_index;
-                const unchosen_brick = this.middle_bricks[unchosen_index];
-                this.pile.push(unchosen_brick);
-                this.shuffle(this.pile);
-                this.middle_bricks[unchosen_index] = this.pile.pop();
+                // The chosen middle brick is now replaced by the player's old tower brick.
                 this.middle_bricks[chosen_brick_index] = old_brick;
 
-                this.move_history.push({
-                    player: 'human',
-                    chosen_brick: chosen_brick,
+                this.last_player_move = {
+                    skipped: false,
+                    chosen_brick_index: chosen_brick_index,
+                    chosen_brick_value: chosen_brick,
                     tower_level: tower_level,
-                    old_brick: old_brick
-                });
+                    old_brick_value: old_brick
+                };
+                this.move_history.push({ player: 'human', move: `swapped ${chosen_brick} for ${old_brick} at level ${tower_level + 1}` });
 
                 if (this.is_tower_sorted(this.player_tower)) {
                     this.round_over = true;
@@ -1020,114 +1275,159 @@
                     this.handle_round_end();
                 } else {
                     this.current_player = 'computer';
-                    this.computer_move();
                 }
+                return { success: true, chosen_brick, old_brick };
+            }
+
+            // New method for player skipping a turn
+            player_skip() {
+                if (this.current_player !== 'player' || this.round_over) return { success: false, message: 'Not your turn or round is over.' };
+
+                this.last_player_move = { skipped: true };
+                this.move_history.push({ player: 'human', move: 'skipped turn' });
+                this.current_player = 'computer';
                 return { success: true };
             }
 
-            skip_turn() {
-                if (this.round_over) return { success: false };
-                if (this.current_player === 'player') {
-                    this.current_player = 'computer';
-                    this.computer_move();
-                } else {
-                    this.current_player = 'player';
-                }
-                return { success: true };
-            }
-
+            // Main method for the computer's turn
             computer_move() {
                 if (this.current_player !== 'computer' || this.round_over) return { success: false };
-                
-                let chosen_index, tower_level;
+
                 let strategy = this.computer_strategy;
                 if (strategy === 'random') {
-                    const strategies = ['smart', 'greedy', 'smart', 'greedy', 'smart', 'greedy', 'rookie', 'rookie'];
-                    this.shuffle(strategies);
-                    strategy = strategies[0];
+                    const strategies = ['smart', 'greedy', 'rookie'];
+                    strategy = strategies[Math.floor(Math.random() * strategies.length)];
                 }
 
+                let decision;
                 if (strategy === 'smart') {
-                    [chosen_index, tower_level] = this.smart_computer_move();
+                    decision = this.smart_computer_move();
                 } else if (strategy === 'greedy') {
-                    [chosen_index, tower_level] = this.greedy_computer_move();
+                    decision = this.greedy_computer_move();
                 } else { // rookie
-                    [chosen_index, tower_level] = this.rookie_computer_move();
+                    decision = this.rookie_computer_move();
                 }
 
-                const chosen_brick = this.middle_bricks[chosen_index];
-                const old_brick = this.computer_tower[tower_level];
+                if (decision.move === 'skip') {
+                    this.last_computer_move = { skipped: true };
+                    this.move_history.push({ player: 'computer', move: 'skipped turn' });
+                } else {
+                    const { brick_index, tower_level } = decision;
+                    const chosen_brick = this.middle_bricks[brick_index];
+                    const old_brick = this.computer_tower[tower_level];
+                    this.computer_tower[tower_level] = chosen_brick;
+                    this.middle_bricks[brick_index] = old_brick;
 
-                this.last_computer_move = { 
-                    brick_index: chosen_index, 
-                    tower_level: tower_level,
-                    chosen_brick_value: chosen_brick,
-                    old_brick_value: old_brick
+                    this.last_computer_move = {
+                        skipped: false,
+                        chosen_brick_index: brick_index,
+                        tower_level: tower_level,
+                        chosen_brick_value: chosen_brick,
+                        old_brick_value: old_brick
+                    };
+                    this.move_history.push({ player: 'computer', move: `swapped ${chosen_brick} for ${old_brick} at level ${tower_level + 1}` });
+
+                    if (this.is_tower_sorted(this.computer_tower)) {
+                        this.round_over = true;
+                        this.winner = 'computer';
+                        this.handle_round_end();
+                    }
+                }
+
+                this.current_player = 'player'; // Turn goes back to player
+                return { success: true, decision };
+            }
+            
+            // New method to clean up at the end of a full turn
+            finalize_turn() {
+                if (this.round_over) {
+                    this.refreshed_middle_indices = [];
+                    return;
                 };
 
-                this.computer_tower[tower_level] = chosen_brick;
+                const computer_move = this.last_computer_move;
 
-                const unchosen_index = 1 - chosen_index;
-                const unchosen_brick = this.middle_bricks[unchosen_index];
-                this.pile.push(unchosen_brick);
-                this.shuffle(this.pile);
-                this.middle_bricks[unchosen_index] = this.pile.pop();
-                this.middle_bricks[chosen_index] = old_brick;
-
-                this.move_history.push({
-                    player: 'computer',
-                    chosen_brick: chosen_brick,
-                    tower_level: tower_level,
-                    old_brick: old_brick
-                });
-
-                if (this.is_tower_sorted(this.computer_tower)) {
-                    this.round_over = true;
-                    this.winner = 'computer';
-                    this.handle_round_end();
+                if (computer_move.skipped) {
+                    // Rule 8: If computer skips, both middle bricks are replaced
+                    if(this.pile.length > 0) this.pile.push(this.middle_bricks[0]);
+                    if(this.pile.length > 0) this.pile.push(this.middle_bricks[1]);
+                    this.shuffle(this.pile);
+                    this.middle_bricks[0] = this.pile.pop();
+                    this.middle_bricks[1] = this.pile.pop();
+                    this.refreshed_middle_indices = [0, 1];
                 } else {
-                    this.current_player = 'player';
+                    // Rule 6 & 7: Replace the brick NOT chosen by the computer
+                    const computer_unchosen_index = 1 - computer_move.chosen_brick_index;
+                    if(this.pile.length > 0) this.pile.push(this.middle_bricks[computer_unchosen_index]);
+                    this.shuffle(this.pile);
+                    this.middle_bricks[computer_unchosen_index] = this.pile.pop();
+                    this.refreshed_middle_indices = [computer_unchosen_index];
                 }
-                return { success: true };
+                
+                this.last_player_move = null;
+                this.last_computer_move = null;
             }
 
             smart_computer_move() {
-                let best_score = Infinity;
-                let best_move = [0, 0];
+                let best_score = -Infinity;
+                let best_move = null;
+                const current_disorder = this.calculate_disorder(this.computer_tower);
+
                 for (let brick_idx of [0, 1]) {
                     const brick = this.middle_bricks[brick_idx];
                     for (let level = 0; level < 10; level++) {
+                        const old_brick = this.computer_tower[level];
                         const temp_tower = [...this.computer_tower];
                         temp_tower[level] = brick;
-                        const sorted_temp_tower = [...temp_tower].sort((a, b) => a - b);
-                        let disorder = 0;
-                        for (let i = 0; i < 10; i++) {
-                            disorder += Math.abs(temp_tower[i] - sorted_temp_tower[i]);
-                        }
-                        if (disorder < best_score) {
-                            best_score = disorder;
-                            best_move = [brick_idx, level];
+                        
+                        const disorder = this.calculate_disorder(temp_tower);
+                        const improvement = current_disorder - disorder;
+                        const score = improvement - (old_brick / this.N);
+
+                        if (score > best_score) {
+                            best_score = score;
+                            best_move = { move: 'swap', brick_index: brick_idx, tower_level: level };
                         }
                     }
                 }
-                return best_move;
+                
+                // If the best move doesn't offer a positive score, it's better to skip.
+                if (best_score <= 0) {
+                    return { move: 'skip' };
+                }
+                
+                return best_move || { move: 'skip' }; // Fallback to skipping
             }
 
             greedy_computer_move() {
+                // This is a simple strategy, less likely to skip. We'll keep its logic but frame it as a decision.
                 for (let brick_idx of [0, 1]) {
                     const brick = this.middle_bricks[brick_idx];
-                    const temp_tower = [...this.computer_tower, brick];
-                    const sorted_tower = [...temp_tower].sort((a, b) => a - b);
-                    const target_pos = sorted_tower.indexOf(brick);
-                    if (target_pos < 10) {
-                        return [brick_idx, target_pos];
+                    // Try to place the brick in its sorted position
+                    const temp_tower = [...this.computer_tower, brick].sort((a, b) => a - b);
+                    const target_pos = temp_tower.indexOf(brick);
+                    if (target_pos < 10 && this.computer_tower[target_pos] > brick) {
+                         return { move: 'swap', brick_index: brick_idx, tower_level: target_pos };
                     }
                 }
-                return this.rookie_computer_move(); // Fallback
+                return { move: 'skip' }; // If no greedy move found, skip
             }
 
             rookie_computer_move() {
-                return [Math.floor(Math.random() * 2), Math.floor(Math.random() * 10)];
+                // 25% chance of skipping
+                if (Math.random() < 0.25) {
+                    return { move: 'skip' };
+                }
+                return { move: 'swap', brick_index: Math.floor(Math.random() * 2), tower_level: Math.floor(Math.random() * 10) };
+            }
+
+            calculate_disorder(tower) {
+                const sorted_tower = [...tower].sort((a, b) => a - b);
+                let disorder = 0;
+                for (let i = 0; i < 10; i++) {
+                    disorder += Math.abs(tower[i] - sorted_tower[i]);
+                }
+                return disorder;
             }
 
             handle_round_end() {
@@ -1138,6 +1438,8 @@
                     this.rounds_won += 1;
                     this.N -= 6;
                 } else {
+                    // Reset score on loss, but don't reset rounds_won
+                    this.player_score = 0;
                     this.N = 50;
                 }
             }
@@ -1149,8 +1451,6 @@
                     rounds_won: this.rounds_won,
                     player_tower: [...this.player_tower],
                     computer_tower: [...this.computer_tower],
-                    computer_tower_hidden: Array(this.computer_tower.length).fill('?'),
-                    computer_tower_revealed: this.round_over ? [...this.computer_tower] : null,
                     middle_bricks: [...this.middle_bricks],
                     current_player: this.current_player,
                     round_over: this.round_over,
@@ -1158,6 +1458,7 @@
                     computer_strategy: this.computer_strategy,
                     move_history: this.move_history.slice(-5),
                     last_computer_move: this.last_computer_move ? {...this.last_computer_move} : null,
+                    refreshed_middle_indices: this.refreshed_middle_indices || [],
                     game_completed: this.N <= 25
                 };
             }

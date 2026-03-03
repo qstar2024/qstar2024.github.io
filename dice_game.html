@@ -894,18 +894,13 @@
                 }
 
                 // 五子带X
-                if (num4s === 1) {
-                    if (counts[6] === 5) return "五子带六帶一秀";
-                    if (counts[5] === 5) return "五子带五帶一秀";
-                    if (counts[3] === 5) return "五子带三帶一秀";
-                    if (counts[2] === 5) return "五子带二帶一秀";
-                    if (counts[1] === 5) return "五子带一帶一秀";
-                } else {
-                    if (counts[6] === 5) return "五子带六";
-                    if (counts[5] === 5) return "五子带五";
-                    if (counts[3] === 5) return "五子带三";
-                    if (counts[2] === 5) return "五子带二";
-                    if (counts[1] === 5) return "五子带一";
+                if (counts[6] === 5 || counts[5] === 5 || counts[3] === 5 || counts[2] === 5 || counts[1] === 5) {
+                    if (num4s === 1) return "五子带四";
+                    if (counts[6] === 1) return "五子带六";
+                    if (counts[5] === 1) return "五子带五";
+                    if (counts[3] === 1) return "五子带三";
+                    if (counts[2] === 1) return "五子带二";
+                    if (counts[1] === 1) return "五子带一";
                 }
 
                 // 状元带X

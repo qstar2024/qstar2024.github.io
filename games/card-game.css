@@ -1,0 +1,140 @@
+/* 80 Points - Liquid Glass Dark UI */
+:root{
+  --bg:#0b0f14;
+  --panel:rgba(255,255,255,0.08);
+  --glass:rgba(255,255,255,0.12);
+  --border:rgba(255,255,255,0.15);
+  --accent:#5ac8fa;
+  --accent2:#64d2ff;
+  --danger:#ff4d4f;
+  --success:#2ecc71;
+  --text:#f8f9fa; /* memory: light on dark */
+  --text-weak:#dfe3e8;
+  --heading:#ffffff; /* memory: headings */
+  --blue-back:linear-gradient(135deg,#0f2a4d 0%, #1b3b6f 50%, #0f2a4d 100%);
+  --red-back:linear-gradient(135deg,#5a0b16 0%, #8a1222 50%, #5a0b16 100%);
+  --shadow:0 6px 24px rgba(0,0,0,0.4);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  color:var(--text);
+  background:#0b0f14;
+  overflow:auto; /* allow scroll on small screens */
+}
+
+.app{position:relative; height:100vh; width:100vw;}
+.bg-image{
+  position:absolute; inset:0; pointer-events:none; z-index:0;
+  background-image: url('bgp_zen.png'), radial-gradient(100% 100% at 50% 10%, #0c1622 0%, #0b0f14 60%, #070a0e 100%);
+  background-size:cover; /* memory: cover */
+  background-position:center;
+  filter:contrast(1.1) saturate(1.05) brightness(0.9);
+}
+
+/* Ensure background covers 80% of shorter dimension */
+@media (orientation:landscape){
+  .bg-image{background-size:auto 80vh;}
+}
+@media (orientation:portrait){
+  .bg-image{background-size:80vw auto;}
+}
+
+.glass{
+  background:var(--panel);
+  backdrop-filter: blur(16px) saturate(1.2);
+  -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  border:1px solid var(--border);
+  border-radius:14px;
+  box-shadow: var(--shadow);
+}
+
+.topbar,.bottombar{
+  position:relative; z-index:2; margin:8px; padding:10px 12px; display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.topbar .title{font-weight:800; letter-spacing:0.5px; color:var(--heading)}
+.status{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.controls{display:flex; gap:8px; flex-wrap:wrap}
+
+.badge{padding:6px 10px; border-radius:999px; background:var(--glass); border:1px solid var(--border); font-size:12px}
+
+.switch{display:inline-flex; align-items:center; gap:6px}
+.switch .slider{width:36px; height:20px; background:var(--glass); border-radius:999px; border:1px solid var(--border); position:relative; display:inline-block}
+.switch input{display:none}
+.switch .slider::after{content:""; position:absolute; width:16px; height:16px; border-radius:50%; background:var(--text); top:1px; left:1px; transition:transform .2s ease}
+.switch input:checked + .slider::after{transform:translateX(16px); background:var(--accent)}
+.switch .switch-label{font-size:12px; color:var(--text-weak)}
+
+.btn{padding:8px 12px; border-radius:10px; border:1px solid var(--border); background:var(--glass); color:var(--text); cursor:pointer}
+.btn.primary{border-color:transparent; background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#001018; font-weight:600}
+.btn.success{border-color:#1d7d4f; background:linear-gradient(135deg,#28c76f,#20bf6b); color:#00160e}
+.btn.danger{border-color:#7d1d1d; background:linear-gradient(135deg,#ff5f6d,#ff4d4f)}
+.btn.tiny{padding:6px 8px; font-size:12px}
+.btn:disabled{opacity:.5; cursor:not-allowed}
+
+.table{
+  position:absolute; inset:56px 0 88px 0; display:grid; grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; gap:10px; padding:10px; z-index:1;
+}
+.player{padding:10px; display:flex; flex-direction:column; gap:8px;}
+.player-header{display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:12px}
+/* hide AI side panels in simplified layout */
+.player.left,.player.right,.player.top{display:none !important}
+.player.bottom{grid-row:3; grid-column:1}
+
+.center{grid-row:2; grid-column:1; display:flex; flex-direction:column; gap:10px; align-items:center; justify-content:center}
+.center-cards{width:min(680px, 96%); padding:10px}
+.center-header{display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px}
+.trick-grid{display:grid; grid-template-areas: 'top top' 'left right' 'bottom bottom'; gap:8px}
+.slot{height:clamp(80px, 16vw, 110px); min-width:clamp(120px, 40vw, 220px); border:1px dashed var(--border); border-radius:12px; background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center; position:relative; overflow:visible}
+.slot[data-pos="top"]{grid-area:top}
+.slot[data-pos="left"]{grid-area:left}
+.slot[data-pos="right"]{grid-area:right}
+.slot[data-pos="bottom"]{grid-area:bottom}
+
+.center-pile{width:min(680px, 96%); height:clamp(90px, 18vw, 120px); display:flex; align-items:center; justify-content:center; gap:10px; padding:10px}
+.center-pile .card{transform:translateY(0)}
+
+.hand{display:flex; align-items:flex-end; gap:8px; flex-wrap:wrap; padding:8px; justify-content:center}
+.ai-hand{height:48px}
+.played{height:120px; display:flex; align-items:center; justify-content:center}
+
+.card{width:clamp(52px, 10vw, 72px); height:clamp(72px, 14vw, 100px); position:relative; border-radius:10px; border:1px solid rgba(255,255,255,0.2); background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.08)); box-shadow: var(--shadow); color:var(--text); user-select:none; cursor:pointer; transition:transform .15s ease, box-shadow .15s ease, outline-color .15s ease}
+.card[aria-pressed="true"], .card.selected{transform:translateY(-8px) rotate(-1deg); box-shadow:0 10px 30px rgba(0,0,0,.5); outline:2px solid var(--accent); outline-offset:2px}
+.card .front, .card .back{position:absolute; inset:0; border-radius:10px; display:flex; align-items:center; justify-content:center}
+.card .front{padding:8px; font-weight:700}
+.card .value{position:absolute; top:6px; left:6px; font-size:clamp(10px, 2.2vw, 14px)}
+.card .suit{position:absolute; bottom:6px; right:6px; font-size:clamp(10px, 2.2vw, 14px)}
+.card .back.blue{background:var(--blue-back)}
+.card .back.red{background:var(--red-back)}
+.card .joker{font-size:18px}
+.card.trump{outline:2px solid var(--accent)}
+.card.disabled{opacity:.5; cursor:not-allowed}
+
+/* Animations */
+@keyframes dealIn{from{transform:translateY(-40px) scale(.9); opacity:0} to{transform:translateY(0) scale(1); opacity:1}}
+.card.deal{animation:dealIn .25s ease both}
+@keyframes flip{from{transform:rotateY(180deg)} to{transform:rotateY(0)}}
+.played .card{animation: flip .25s ease}
+
+/* Celebration */
+.celebration{position:fixed; inset:0; display:none; align-items:center; justify-content:center; flex-direction:column; background:rgba(0,0,0,0.5); z-index:5}
+.celebration.active{display:flex}
+.celebration .celebration-text{margin-top:16px; font-size:28px; color:var(--heading); text-shadow:0 2px 12px rgba(0,0,0,.6)}
+.fireworks{position:relative; width:160px; height:160px}
+.fireworks .spark{position:absolute; inset:0; border-radius:50%; background: radial-gradient(circle, rgba(255,255,255,.9), rgba(255,255,255,0) 60%); animation:burst 1.6s ease infinite}
+.fireworks .spark:nth-child(2){animation-delay:.2s}
+.fireworks .spark:nth-child(3){animation-delay:.4s}
+@keyframes burst{0%{transform:scale(.2); opacity:.2} 50%{transform:scale(1); opacity:1} 100%{transform:scale(1.2); opacity:0}}
+
+/* Toast */
+.toast{position:fixed; bottom:16px; left:50%; transform:translateX(-50%); padding:10px 14px; background:var(--glass); border:1px solid var(--border); border-radius:12px; z-index:6; display:none}
+.toast.show{display:block}
+
+/* Minimal extra responsive tweaks */
+@media (max-width: 480px){
+  .topbar{margin:6px; padding:8px 10px}
+  .bottombar{margin:6px; padding:8px 10px}
+}

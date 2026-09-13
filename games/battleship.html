@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battleship Game</title>
+    <link rel="stylesheet" href="battleship.css">
+</head>
+<body>
+    <header>
+        <h1>Battleship</h1>
+        <button id="home-btn" onclick="window.location.href='index.html'">Back to Home</button>
+    </header>
+    <main>
+        <div id="status"></div>
+        <section id="ship-info-section">
+            <ul id="ship-list"></ul>
+        </section>
+        <section id="game-section">
+            <div id="game-grid"></div>
+        </section>
+        <div id="controls">
+            <label for="grid-size-select">Grid Size:</label>
+            <select id="grid-size-select">
+                <option value="8">Small (8x8)</option>
+                <option value="10" selected>Standard (10x10)</option>
+                <option value="13">Large (13x13)</option>
+            </select>
+            <button id="start-btn" style="display: none;">Start Game</button>
+            <button id="new-game-btn">New Game</button>
+        </div>
+    </main>
+    <script src="battleship.js"></script>
+</body>
+</html>

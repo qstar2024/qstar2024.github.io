@@ -11,7 +11,7 @@ async function fetchPosts() {
     const postFiles = contents
       .filter(item => item.type === 'file' && item.name.endsWith('.json'))
       .sort((a, b) => b.name.localeCompare(a.name)) // Sort descending by filename
-      .slice(0, 5);
+      .slice(0, 12);
 
     if (postFiles.length === 0) {
       latestPostsDiv.innerHTML = "<p>No posts found.</p>";

@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>甩牌失败：合理试探，还是蓄意熵坍塌？——升级（两副牌）博弈论报告</title>
+<style>
+  :root{
+    --paper:#f6f1e7;
+    --paper-2:#efe7d8;
+    --ink:#1e1b17;
+    --muted:#6f665b;
+    --accent:#a8442a;
+    --accent-2:#315c63;
+    --line:#d7cbbb;
+    --card:#fffaf0;
+    --shadow:0 18px 50px rgba(50,38,24,.10);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  html, body{overflow-x:hidden;}
+  body{
+    margin:0;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 15% 8%, rgba(168,68,42,.08), transparent 28%),
+      radial-gradient(circle at 85% 30%, rgba(49,92,99,.07), transparent 30%),
+      linear-gradient(180deg,var(--paper),#fbf8f1 45%,var(--paper));
+    font-family: Georgia, "Times New Roman", "Songti SC", "Noto Serif SC", serif;
+    line-height:1.78;
+    font-size:17px;
+    -webkit-text-size-adjust:100%;
+  }
+  img, svg{max-width:100%;height:auto;}
+
+  /* ===== 返回主页按钮 ===== */
+  .back-button{
+    position:fixed;
+    top:16px; left:16px;
+    z-index:200;
+    display:inline-flex;align-items:center;gap:6px;
+    padding:8px 14px;
+    border-radius:999px;
+    background:rgba(255,250,240,.9);
+    border:1px solid var(--line);
+    color:var(--ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size:13px;font-weight:600;letter-spacing:.02em;
+    text-decoration:none;
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    box-shadow:0 4px 14px rgba(50,38,24,.10);
+    transition:transform .2s ease, box-shadow .2s ease, background .2s ease;
+  }
+  .back-button:hover{
+    transform:translateY(-1px);
+    box-shadow:0 8px 22px rgba(50,38,24,.16);
+    background:#fffaf0;
+  }
+  .back-button:active{transform:translateY(0);}
+
+  /* ===== 阅读进度条 ===== */
+  .progress{
+    position:fixed;top:0;left:0;height:4px;width:0%;
+    background:linear-gradient(90deg,var(--accent),#d08a4f);
+    z-index:99;box-shadow:0 0 12px rgba(168,68,42,.45);
+  }
+
+  /* ===== Hero ===== */
+  .hero{
+    position:relative;
+    border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#f1e8d8,#f8f3e9);
+    overflow:hidden;
+  }
+  .hero-art{
+    display:block;width:100%;height:auto;
+    min-height:260px;
+  }
+  .hero-copy{
+    max-width:980px;margin:-120px auto 0;padding:0 28px 46px;
+    position:relative;z-index:2;
+  }
+  .kicker{
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent);font-size:12px;font-weight:700;
+    margin:0 0 14px;
+  }
+  h1{
+    font-size:clamp(30px,5.2vw,68px);
+    line-height:1.06;letter-spacing:-.02em;
+    margin:0 0 18px;max-width:900px;font-weight:700;
+  }
+  .deck{
+    max-width:760px;color:var(--muted);
+    font-size:clamp(16px,1.6vw,19px);margin:0 0 24px;
+  }
+  .meta{
+    display:flex;flex-wrap:wrap;gap:12px 28px;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+    font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    padding:12px 0;
+  }
+
+  /* ===== 主内容 ===== */
+  .wrap{max-width:980px;margin:0 auto;padding:44px 28px 80px;}
+  .abstract{
+    background:linear-gradient(135deg,rgba(255,250,240,.96),rgba(239,231,216,.75));
+    border:1px solid var(--line);box-shadow:var(--shadow);
+    padding:28px 30px;margin:0 0 46px;position:relative;
+  }
+  .abstract:before{
+    content:"";position:absolute;left:-1px;top:18px;bottom:18px;width:4px;
+    background:var(--accent);
+  }
+  .abstract h2{
+    margin-top:0;border:0;padding:0;
+    font-size:18px;letter-spacing:.08em;text-transform:uppercase;
+  }
+  .abstract p:last-child{margin-bottom:0;}
+
+  h2{
+    font-size:clamp(24px,3vw,36px);line-height:1.2;
+    margin:54px 0 16px;padding-top:18px;
+    border-top:1px solid var(--line);letter-spacing:-.01em;
+  }
+  h2 .num{
+    color:var(--accent);
+    font-family:ui-sans-serif,system-ui,sans-serif;
+    font-size:13px;letter-spacing:.16em;display:block;margin-bottom:8px;
+    text-transform:uppercase;
+  }
+  h3{font-size:20px;margin:30px 0 10px;}
+  p{margin:0 0 17px;}
+
+  .lede{font-size:clamp(18px,2vw,21px);line-height:1.65;color:#2b2620;}
+  .lede:first-letter{
+    float:left;font-size:64px;line-height:.84;padding:8px 10px 0 0;
+    color:var(--accent);font-weight:700;
+  }
+
+  .rule{height:1px;background:var(--line);margin:32px 0;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:24px 0;}
+  .data-card{
+    background:rgba(255,250,240,.72);border:1px solid var(--line);
+    padding:20px 22px;box-shadow:0 8px 24px rgba(60,45,30,.05);
+  }
+  .data-card .label{
+    font-family:ui-sans-serif,system-ui,sans-serif;
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);
+  }
+  .data-card .big{
+    font-size:clamp(26px,3.4vw,34px);line-height:1.1;
+    color:var(--accent);font-weight:700;margin-top:6px;
+  }
+  .data-card .small{font-size:14px;color:var(--muted);margin-top:6px;}
+
+  .note{
+    border-left:3px solid var(--accent-2);
+    padding:14px 18px;margin:24px 0;
+    background:rgba(49,92,99,.055);color:#2d3f42;font-size:15.5px;
+  }
+  .note strong{color:var(--accent-2);}
+
+  .eq{
+    background:#1e1b17;color:#f7f0e4;
+    padding:18px 22px;margin:22px 0;overflow-x:auto;
+    font-family:"Cambria Math", Georgia, serif;font-size:18px;
+    border-radius:2px;box-shadow:0 12px 28px rgba(30,27,23,.16);
+    -webkit-overflow-scrolling:touch;
+  }
+  .eq .hl{color:#e7a36b;}
+  .formula{
+    background:var(--card);border:1px solid var(--line);
+    padding:18px 22px;margin:22px 0;overflow-x:auto;
+    font-family:"Cambria Math", Georgia, serif;font-size:17px;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .callout{
+    border:1px solid var(--line);background:#fffaf0;
+    padding:22px 24px;margin:28px 0;box-shadow:var(--shadow);
+  }
+  .callout .tag{
+    display:inline-block;
+    font-family:ui-sans-serif,system-ui,sans-serif;
+    font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+    color:#fff;background:var(--accent);padding:4px 8px;margin-bottom:10px;
+  }
+
+  .verdict{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:26px 0;}
+  .verdict > div{
+    border:1px solid var(--line);padding:18px 20px;
+    background:rgba(255,250,240,.7);
+  }
+  .verdict h4{margin:0 0 8px;font-size:16px;letter-spacing:.04em;}
+  .verdict .good{border-top:4px solid var(--accent-2);}
+  .verdict .bad{border-top:4px solid var(--accent);}
+
+  .caption{
+    font-family:ui-sans-serif,system-ui,sans-serif;font-size:12px;
+    letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+    margin:-8px 0 26px;
+  }
+  .figure{
+    margin:30px 0 8px;border:1px solid var(--line);
+    background:rgba(255,250,240,.55);padding:14px;
+  }
+  .figure svg{display:block;width:100%;height:auto;}
+
+  /* ===== 表格：外层容器负责横向滚动 ===== */
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+    margin:24px 0;
+    border:1px solid var(--line);
+    background:rgba(255,250,240,.55);
+  }
+  .table-wrap table{
+    margin:0;border:0;min-width:560px;
+    width:100%;border-collapse:collapse;font-size:15.5px;
+  }
+  table{border-collapse:collapse;margin:24px 0;font-size:15.5px;}
+  th,td{border-bottom:1px solid var(--line);padding:11px 12px;text-align:left;vertical-align:top;}
+  th{
+    font-family:ui-sans-serif,system-ui,sans-serif;font-size:11px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--muted);
+    background:rgba(239,231,216,.55);
+  }
+
+  code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    background:rgba(30,27,23,.07);padding:2px 5px;border-radius:2px;
+    font-size:.92em;word-break:break-word;
+  }
+
+  .footnotes{
+    margin-top:60px;padding-top:22px;border-top:1px solid var(--line);
+    font-size:14px;color:var(--muted);
+  }
+
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease,transform .7s ease;}
+  .reveal.visible{opacity:1;transform:none;}
+
+  /* ===== 大屏 ===== */
+  @media (min-width: 1400px){
+    .wrap{max-width:1120px;}
+    .hero-copy{max-width:1120px;}
+    body{font-size:18px;}
+    .eq{font-size:19px;}
+    .formula{font-size:18px;}
+  }
+
+  /* ===== 平板 ===== */
+  @media (max-width: 900px){
+    .wrap{padding:36px 22px 60px;}
+    .hero-copy{padding:0 22px 34px;margin-top:-90px;}
+    .abstract{padding:24px 22px;}
+    .grid{gap:16px;}
+  }
+
+  /* ===== 手机 ===== */
+  @media (max-width: 720px){
+    body{font-size:16px;}
+    .hero-art{min-height:auto;}
+    .hero-copy{margin-top:-40px;padding:0 18px 30px;}
+    .wrap{padding:30px 18px 56px;}
+    .grid,.verdict{grid-template-columns:1fr;}
+    .abstract{padding:20px 18px;}
+    .abstract h2{font-size:15px;}
+    .lede{font-size:17px;}
+    .lede:first-letter{font-size:52px;padding-right:8px;}
+    h2{margin-top:40px;}
+    .data-card{padding:16px 18px;}
+    .figure{padding:8px;}
+    .table-wrap table{min-width:520px;}
+    .back-button{top:10px;left:10px;padding:6px 12px;font-size:12px;}
+    .meta{gap:8px 16px;font-size:11px;}
+  }
+
+  /* ===== 极窄屏 ===== */
+  @media (max-width: 380px){
+    .hero-copy{padding:0 14px 24px;}
+    .wrap{padding:24px 14px 48px;}
+    h1{font-size:28px;}
+    .back-button{top:8px;left:8px;padding:5px 10px;font-size:11px;}
+    .data-card .big{font-size:24px;}
+  }
+
+  /* ===== 打印 ===== */
+  @media print{
+    .progress,.back-button{display:none;}
+    body{background:#fff;font-size:11pt;}
+    .hero{background:#fff;}
+    .reveal{opacity:1;transform:none;}
+    .table-wrap{overflow:visible;}
+    .table-wrap table{min-width:0;}
+    .abstract{box-shadow:none;}
+    .eq{box-shadow:none;}
+  }
+</style>
+</head>
+<body>
+
+<a href="/blogs/index.html" class="back-button">← Back to All Blogs</a>
+
+<div class="progress" id="progress"></div>
+
+<header class="hero">
+  <svg class="hero-art" viewBox="0 0 1200 360" role="img" aria-label="甩牌概率与信息熵的抽象插图">
+    <defs>
+      <linearGradient id="heroBg" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#efe4d2"/>
+        <stop offset="52%" stop-color="#f8f2e7"/>
+        <stop offset="100%" stop-color="#e8ddcb"/>
+      </linearGradient>
+      <linearGradient id="cardFace" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#fffdf7"/>
+        <stop offset="100%" stop-color="#f1e7d6"/>
+      </linearGradient>
+      <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+        <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#4a3522" flood-opacity=".15"/>
+      </filter>
+    </defs>
+    <rect width="1200" height="360" fill="url(#heroBg)"/>
+    <circle cx="1040" cy="70" r="130" fill="#a8442a" opacity=".055"/>
+    <circle cx="170" cy="310" r="170" fill="#315c63" opacity=".055"/>
+    <path d="M 620 292 C 700 120, 810 80, 930 120 S 1110 210, 1160 90" fill="none" stroke="#315c63" stroke-width="2" opacity=".38"/>
+    <path d="M 620 292 C 700 180, 790 150, 900 170 S 1080 250, 1160 160" fill="none" stroke="#a8442a" stroke-width="2" stroke-dasharray="7 7" opacity=".5"/>
+    <g transform="translate(92 88) rotate(-9)" filter="url(#soft)">
+      <rect x="0" y="0" width="104" height="148" rx="9" fill="url(#cardFace)" stroke="#cdbda8"/>
+      <text x="18" y="35" font-family="Georgia,serif" font-size="28" fill="#1e1b17">A</text>
+      <text x="46" y="94" font-family="Georgia,serif" font-size="46" fill="#a8442a">♠</text>
+    </g>
+    <g transform="translate(174 74) rotate(4)" filter="url(#soft)">
+      <rect x="0" y="0" width="104" height="148" rx="9" fill="url(#cardFace)" stroke="#cdbda8"/>
+      <text x="16" y="35" font-family="Georgia,serif" font-size="28" fill="#1e1b17">K</text>
+      <text x="46" y="94" font-family="Georgia,serif" font-size="46" fill="#a8442a">♠</text>
+    </g>
+    <g transform="translate(256 86) rotate(12)" filter="url(#soft)">
+      <rect x="0" y="0" width="104" height="148" rx="9" fill="url(#cardFace)" stroke="#cdbda8"/>
+      <text x="16" y="35" font-family="Georgia,serif" font-size="28" fill="#1e1b17">K</text>
+      <text x="46" y="94" font-family="Georgia,serif" font-size="46" fill="#a8442a">♠</text>
+    </g>
+    <g transform="translate(342 106) rotate(-4)" filter="url(#soft)">
+      <rect x="0" y="0" width="104" height="148" rx="9" fill="url(#cardFace)" stroke="#cdbda8"/>
+      <text x="18" y="35" font-family="Georgia,serif" font-size="28" fill="#1e1b17">6</text>
+      <text x="46" y="94" font-family="Georgia,serif" font-size="46" fill="#315c63">♠</text>
+    </g>
+    <g transform="translate(424 94) rotate(8)" filter="url(#soft)">
+      <rect x="0" y="0" width="104" height="148" rx="9" fill="url(#cardFace)" stroke="#cdbda8"/>
+      <text x="18" y="35" font-family="Georgia,serif" font-size="28" fill="#1e1b17">6</text>
+      <text x="46" y="94" font-family="Georgia,serif" font-size="46" fill="#315c63">♠</text>
+    </g>
+    <g opacity=".9">
+      <circle cx="675" cy="292" r="6" fill="#a8442a"/>
+      <text x="690" y="298" font-family="ui-sans-serif,system-ui,sans-serif" font-size="13" fill="#6f665b" letter-spacing="1.5">P actual 29.6%</text>
+      <circle cx="930" cy="170" r="6" fill="#315c63"/>
+      <text x="944" y="176" font-family="ui-sans-serif,system-ui,sans-serif" font-size="13" fill="#6f665b" letter-spacing="1.5">threshold 59.1%</text>
+    </g>
+  </svg>
+  <div class="hero-copy">
+    <p class="kicker">Editorial Report · Game Theory &amp; Card Play</p>
+    <h1>甩牌失败：合理试探，还是蓄意熵坍塌？</h1>
+    <p class="deck">升级（两副牌）中，甩牌既是一次概率下注，也是一次信息交易。本报告用全参数期望值模型，把“赌输了”与“故意明牌”区分开来。</p>
+    <div class="meta">
+      <span>研究对象：升级 / 八十分 / 拖拉机</span>
+      <span>牌例：副牌 A K K 6 6</span>
+      <span>判据：概率阈值 + 贝叶斯蓄意指数</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="abstract reveal">
+    <h2>摘要</h2>
+    <p>在升级（两副牌，108 张）中，甩牌是一种高风险、高收益的复合出牌。甩牌失败不仅导致牌权损失和罚分，还会造成严重的信息熵坍塌：隐藏手牌结构被迫暴露，对家与对手同时获得额外信息。若罚分不足，低成功率甩牌可能被恶意利用为“向对家泄露手牌”的作弊手段。</p>
+    <p>本报告建立包含成功率、收益、战术损失、罚分、信息损失和常规出牌期望的全参数模型，推导合理甩牌的概率阈值通项公式。随后以“打 2 为主、副牌未出、手牌 A K K Q 9 7 6 6、企图甩 A K K 6 6”为例，计算成功概率仅约 29.6%，而合理阈值约 59.1%，期望值约 −23.36，远低于常规出牌的 3.2。最后讨论线性罚分在开局与残局的结构性失衡，并给出“基础线性罚分 + 阶段缩放 + 单次封顶 + 恶意行为判罚”的规则建议。</p>
+  </section>
+
+  <section class="reveal">
+    <h2><span class="num">01 · Rules</span>规则与信息结构</h2>
+    <p class="lede">升级使用两副牌共 108 张，四名玩家两两结对。某一花色中，若玩家认为自己手中的多张牌已经是该花色剩余牌中的最大组合，就可以一次性甩出，称为“甩牌”。</p>
+    <p>甩牌成功的收益是节省轮次、快速跑分或控制牌权；失败则必须收回错牌，强制改出该花色最小的牌，并通常按错牌张数扣分。例如每张错牌扣 5 分，对子算 2 张，连对算 4 张。</p>
+    <div class="note">
+      <strong>关键点：</strong>甩牌不是单纯的点数交换。失败会把原本隐藏的花色长度、断门、控制力分布暴露给全场，尤其会改变同伴的后续决策。因此，甩牌失败同时具有“战术成本”和“信息外部性”。
+    </div>
+  </section>
+
+  <section class="reveal">
+    <h2><span class="num">02 · Vulnerability</span>潜在漏洞：信息熵坍塌</h2>
+    <p>未甩牌之前，对手只知道你出过哪些牌，不知道你该花色的完整结构。甩牌失败后，对手至少可以推断：你原本拥有哪些大牌、你误判了哪些位置、你后续在该花色中是否还有控制力。对家更可能由此获得接近“上帝视角”的信息。</p>
+    <p>如果规则不罚分或罚分极低，落后方就可能故意选择成功率极低的甩牌。表面上是“冒险失败”，实质上是用一次失败把关键信息传递给对家。这种行为破坏了不完全信息博弈的公平基础。</p>
+  </section>
+
+  <section class="reveal">
+    <h2><span class="num">03 · Model</span>动态博弈模型与阈值公式</h2>
+    <p>设当前牌局剩余战略价值为 <code>M</code>。定义：</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>符号</th><th>含义</th></tr></thead>
+        <tbody>
+          <tr><td><code>P</code></td><td>玩家基于记牌与贝叶斯推断得到的主观甩牌成功率</td></tr>
+          <tr><td><code>V_win</code></td><td>成功收益系数，成功收益为 V_win × M</td></tr>
+          <tr><td><code>C_lose</code></td><td>失败战术损失系数，不含罚分</td></tr>
+          <tr><td><code>N</code></td><td>错牌张数，对子算 2 张</td></tr>
+          <tr><td><code>f</code></td><td>单张错牌罚分因子，硬性罚分 F = Nf</td></tr>
+          <tr><td><code>ΔS</code></td><td>失败导致的信息熵坍塌量</td></tr>
+          <tr><td><code>λ</code></td><td>对手把信息优势转化为得分率的效率</td></tr>
+          <tr><td><code>α</code></td><td>常规出牌的期望收益系数</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>理性玩家只在甩牌期望值严格大于常规出牌时期望值时行动：</p>
+    <div class="eq">P(V<sub>win</sub>M) + (1−P)[ −C<sub>lose</sub>M − Nf − λΔS·M ] &gt; αM</div>
+    <p>两边除以 M，令 <code>γ = Nf/M</code>，整理得到通用阈值：</p>
+    <div class="formula">
+      P<sub>threshold</sub> =
+      ( α + C<sub>lose</sub> + λΔS + Nf/M )
+      /
+      ( V<sub>win</sub> + C<sub>lose</sub> + λΔS + Nf/M )
+    </div>
+    <p>当 <code>P ≥ P_threshold</code> 时，甩牌属于正期望值内的合理冒险；当 <code>P &lt; P_threshold</code> 时，甩牌属于非理性投机，若玩家又具备足够算牌能力，则蓄意泄露信息的嫌疑显著上升。</p>
+  </section>
+
+  <section class="reveal">
+    <h2><span class="num">04 · Example</span>实例：A K K 6 6 到底有多危险？</h2>
+    <p>假设打 2 为主，某副牌花色尚未出过。玩家手中该花色为：</p>
+    <div class="figure">
+      <svg viewBox="0 0 900 190" role="img" aria-label="手牌 A K K Q 9 7 6 6 与外部危险对子示意图">
+        <rect width="900" height="190" fill="none"/>
+        <g font-family="Georgia,serif" font-size="24" fill="#1e1b17">
+          <g transform="translate(30 55)">
+            <rect width="72" height="100" rx="7" fill="#fffaf0" stroke="#cdbda8"/>
+            <text x="12" y="32">A</text><text x="30" y="78" fill="#a8442a" font-size="30">♠</text>
+          </g>
+          <g transform="translate(112 55)">
+            <rect width="72" height="100" rx="7" fill="#fffaf0" stroke="#cdbda8"/>
+            <text x="12" y="32">K</text><text x="30" y="78" fill="#a8442a" font-size="30">♠</text>
+          </g>
+          <g transform="translate(194 55)">
+            <rect width="72" height="100" rx="7" fill="#fffaf0" stroke="#cdbda8"/>
+            <text x="12" y="32">K</text><text x="30" y="78" fill="#a8442a" font-size="30">♠</text>
+          </g>
+          <g transform="translate(276 55)">
+            <rect width="72" height="100" rx="7" fill="#fffaf0" stroke="#cdbda8"/>
+            <text x="12" y="32">Q</text><text x="30" y="78" fill="#315c63" font-size="30">♠</text>
+          </g>
+          <g transform="translate(358 55)">
+            <rect width="72" height="100" rx="7" fill="#fffaf0" stroke="#cdbda8"/>
+            <text x="12" y="32">9</text><text x="30" y="78" fill="#315c63" font-size="30">♠</text>
+          </g>
+          <g transform="translate(440 55)">
+            <rect width="72" height="100" rx="7" fill="#fffaf0" stroke="#cdbda8"/>
+            <text x="12" y="32">7</text><text x="30" y="78" fill="#315c63" font-size="30">♠</text>
+          </g>
+          <g transform="translate(522 55)">
+            <rect width="72" height="100" rx="7" fill="#fffaf0" stroke="#cdbda8"/>
+            <text x="12" y="32">6</text><text x="30" y="78" fill="#315c63" font-size="30">♠</text>
+          </g>
+          <g transform="translate(604 55)">
+            <rect width="72" height="100" rx="7" fill="#fffaf0" stroke="#cdbda8"/>
+            <text x="12" y="32">6</text><text x="30" y="78" fill="#315c63" font-size="30">♠</text>
+          </g>
+        </g>
+        <g font-family="ui-sans-serif,system-ui,sans-serif" font-size="13" fill="#6f665b">
+          <text x="718" y="82">外部危险对子：</text>
+          <text x="718" y="108" fill="#a8442a" font-weight="700">J J · 10 10 · 8 8</text>
+          <text x="718" y="134">任意一对成对即盖住 66</text>
+        </g>
+      </svg>
+    </div>
+    <p class="caption">图 1：手牌 A K K Q 9 7 6 6 与外部可能盖住 66 的三组危险对子。</p>
+    <p>玩家企图甩 <strong>A K K 6 6</strong>。A 是最大单牌，KK 是最大对子，但 66 不是。外面剩余 16 张为：</p>
+    <div class="formula">A, Q, 9, 7, J, J, 10, 10, 8, 8, 5, 5, 4, 4, 3, 3</div>
+    <p>能盖住 66 的对子只有 JJ、1010、88。对每一对而言，两张牌同在一名对手手中的概率约为 1/3，分散概率约为 2/3。甩牌成功要求三对全部分散：</p>
+    <div class="eq">P<sub>success</sub> = (2/3)<sup>3</sup> = 8/27 ≈ <span class="hl">29.6%</span></div>
+    <div class="eq">P<sub>failure</sub> = 19/27 ≈ <span class="hl">70.4%</span></div>
+    <p>也就是说，这个看起来“A 最大、KK 最大”的甩牌，实际上是一个约七成失败率的坏赌注。</p>
+  </section>
+
+  <section class="reveal">
+    <h2><span class="num">05 · Loss</span>失败后的损失分布与信息度量</h2>
+    <div class="grid">
+      <div class="data-card">
+        <div class="label">硬性罚分</div>
+        <div class="big">10 分</div>
+        <div class="small">错牌 66 两张，每张 5 分</div>
+      </div>
+      <div class="data-card">
+        <div class="label">强制出小</div>
+        <div class="big">单张 6</div>
+        <div class="small">收回组合后改出该花色最小牌，通常丢牌权</div>
+      </div>
+      <div class="data-card">
+        <div class="label">信息熵粗估</div>
+        <div class="big">≈15 bit</div>
+        <div class="small">失败后该花色结构接近全明</div>
+      </div>
+      <div class="data-card">
+        <div class="label">战术损失系数</div>
+        <div class="big">0.10</div>
+        <div class="small">按 M=160 计，约合 16 分价值</div>
+      </div>
+    </div>
+    <p>用组合数粗估信息量：该副牌花色共 24 张，玩家持有 8 张，可能的 8 张组合数为：</p>
+    <div class="formula">C(24,8) = 735,471 ≈ 2<sup>19.5</sup></div>
+    <p>失败后，玩家该花色结构基本透明，可粗略设信息损失 <code>ΔS ≈ 15 bit</code>。若信息价值转换系数 <code>λΔS = 0.15</code>，在 M=160 时等价于约 24 分价值。</p>
+  </section>
+
+  <section class="reveal">
+    <h2><span class="num">06 · Calculation</span>带入模型：阈值与期望值</h2>
+    <p>设当前剩余总分 <code>M = 160</code>，并给出以下参数估算：</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>参数</th><th>取值</th><th>说明</th></tr></thead>
+        <tbody>
+          <tr><td>V_win</td><td>0.25</td><td>成功可跑 K 分并获牌权</td></tr>
+          <tr><td>C_lose</td><td>0.10</td><td>失败丢牌权与节奏，约 16 分价值</td></tr>
+          <tr><td>α</td><td>0.02</td><td>常规出牌期望较低</td></tr>
+          <tr><td>Nf/M</td><td>10/160 = 0.0625</td><td>罚分相对密度</td></tr>
+          <tr><td>λΔS</td><td>0.15</td><td>信息熵坍塌损失，约 24 分价值</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="formula">
+      P<sub>threshold</sub> =
+      (0.02 + 0.10 + 0.15 + 0.0625)
+      /
+      (0.25 + 0.10 + 0.15 + 0.0625)
+      = 0.3325 / 0.5625 ≈ <strong>59.1%</strong>
+    </div>
+    <p>实际成功率仅 <strong>29.6%</strong>，远低于阈值 59.1%。期望值同样为负：</p>
+    <div class="eq">
+      EV<sub>甩</sub> = 0.296 × 40 − 0.704 × (16 + 10 + 24)
+      ≈ 11.84 − 35.2 = <span class="hl">−23.36</span>
+    </div>
+    <div class="eq">
+      EV<sub>常规</sub> = 0.02 × 160 = <span class="hl">3.2</span>
+    </div>
+    <p>因此，这次甩牌在数学上不是“接近合理”的冒险，而是明显负期望值行为。</p>
+  </section>
+
+  <section class="reveal">
+    <h2><span class="num">07 · Verdict</span>判定：合理试探，还是蓄意乱甩？</h2>
+    <div class="figure">
+      <svg viewBox="0 0 1000 260" role="img" aria-label="实际成功率与合理阈值对比仪表图">
+        <rect width="1000" height="260" fill="none"/>
+        <g font-family="ui-sans-serif,system-ui,sans-serif">
+          <text x="80" y="40" font-size="13" fill="#6f665b" letter-spacing="2">DECISION AXIS</text>
+          <rect x="80" y="82" width="840" height="26" rx="13" fill="#e5dac9"/>
+          <rect x="80" y="82" width="249" height="26" rx="13" fill="#a8442a" opacity=".88"/>
+          <rect x="329" y="82" width="247" height="26" fill="#d9c7ad" opacity=".75"/>
+          <rect x="576" y="82" width="344" height="26" rx="13" fill="#315c63" opacity=".78"/>
+          <line x1="329" y1="66" x2="329" y2="126" stroke="#a8442a" stroke-width="3"/>
+          <line x1="576" y1="60" x2="576" y2="132" stroke="#315c63" stroke-width="3"/>
+          <circle cx="329" cy="95" r="7" fill="#fffaf0" stroke="#a8442a" stroke-width="3"/>
+          <circle cx="576" cy="95" r="7" fill="#fffaf0" stroke="#315c63" stroke-width="3"/>
+          <text x="80" y="154" font-size="13" fill="#6f665b">0%</text>
+          <text x="890" y="154" font-size="13" fill="#6f665b" text-anchor="end">100%</text>
+          <text x="329" y="178" font-size="14" fill="#a8442a" text-anchor="middle" font-weight="700">P actual 29.6%</text>
+          <text x="576" y="178" font-size="14" fill="#315c63" text-anchor="middle" font-weight="700">P threshold 59.1%</text>
+          <text x="80" y="218" font-size="13" fill="#6f665b">负期望区 / 非理性投机</text>
+          <text x="500" y="218" font-size="13" fill="#6f665b" text-anchor="middle">灰色区：接近但未达阈值</text>
+          <text x="920" y="218" font-size="13" fill="#6f665b" text-anchor="end">正期望区 / 合理冒险</text>
+        </g>
+      </svg>
+    </div>
+    <p class="caption">图 2：实际成功率落在负期望区，明显低于合理阈值。</p>
+    <div class="verdict">
+      <div class="good">
+        <h4>合理试探</h4>
+        <p>P ≥ P_threshold。玩家在正期望值内冒险，失败属于概率事件，不应被判定为恶意。</p>
+      </div>
+      <div class="bad">
+        <h4>蓄意乱甩 / 熵坍塌</h4>
+        <p>P &lt; P_threshold，且玩家具备足够算牌能力，失败后对家获得显著信息增益，则高度疑似故意泄露。</p>
+      </div>
+    </div>
+    <p>单次失败不能直接定罪。可引入贝叶斯蓄意指数：</p>
+    <div class="formula">Ψ = P(D | H<sub>1</sub>) / P(D | H<sub>0</sub>)</div>
+    <p>其中 H<sub>0</sub> 为诚实冒险但判断失误，H<sub>1</sub> 为蓄意通过失败泄露信息。当 <code>Ψ ≥ Ψ0</code> 且 <code>P &lt; P_threshold</code> 时，应判定为高度疑似蓄意泄露；若玩家水平不足、主观误判 66 很大，则更可能是计算错误而非恶意。</p>
+  </section>
+
+  <section class="reveal">
+    <h2><span class="num">08 · Penalty</span>罚分机制：防乱甩与保创造性的平衡</h2>
+    <p>罚分因子 f 对阈值的影响可由偏导数刻画：</p>
+    <div class="formula">
+      ∂P<sub>threshold</sub>/∂f =
+      (N/M)(V<sub>win</sub> − α)
+      /
+      (V<sub>win</sub> + C<sub>lose</sub> + λΔS + Nf/M)<sup>2</sup>
+      &gt; 0
+    </div>
+    <p>因为 V_win 通常大于 α，所以罚分越高，合理甩牌门槛越高。罚分机制因此能抑制低成功率投机和恶意信息泄露。</p>
+    <p>但固定线性罚分存在阶段失衡。关键项是 <code>Nf/M</code>：开局 M 大，罚分密度小，可能偏松；残局 M 小，罚分密度急剧放大，可能把 85% 成功率的精密长甩也压成负期望值。于是形成结构性矛盾：</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>阶段</th><th>Nf/M</th><th>阈值</th><th>结果</th></tr></thead>
+        <tbody>
+          <tr><td>开局</td><td>较低</td><td>偏低</td><td>可能鼓励乱甩小对子</td></tr>
+          <tr><td>残局</td><td>较高</td><td>偏高</td><td>可能压制创造性长甩</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>更合理的规则不是“不罚”，也不是“线性到底”，而是：</p>
+    <div class="callout">
+      <span class="tag">Rule Design</span>
+      <p><strong>基础线性罚分 + 阶段缩放 + 单次封顶 + 恶意行为判罚。</strong></p>
+      <p>可用有效罚分：<code>F_eff = min(Nf, κM)</code>。这样既保留开局对乱甩的约束，又避免残局长甩因 N 过大而罚分失控。</p>
+    </div>
+  </section>
+
+  <section class="reveal">
+    <h2><span class="num">09 · Conclusion</span>结论与操作建议</h2>
+    <p>本报告的核心结论是：甩牌失败不是单纯的“赌输了”，它同时是一次信息释放。合理规则必须让释放信息的人支付足够价格，但又不能把高水平选手的精密算牌和大胆组合全部压死。</p>
+    <div class="callout">
+      <span class="tag">Decision Rule</span>
+      <p><strong>P ≥ P_threshold</strong>：合理博弈试探，属于正期望值内的战术冒险。</p>
+      <p><strong>P &lt; P_threshold 且 Ψ ≥ Ψ0</strong>：高度疑似蓄意抖露手牌，制造信息熵坍塌。</p>
+      <p><strong>P &lt; P_threshold 且 Ψ &lt; Ψ0</strong>：非理性冒险，但缺乏蓄意动机，更可能是判断失误。</p>
+    </div>
+    <p>对 A K K 6 6 这个牌例而言，实际成功率约 29.6%，合理阈值约 59.1%，期望值约 −23.36，远低于常规出牌的 3.2。若做出该选择的是具备记牌能力的熟练玩家，则应高度怀疑其利用失败向对家泄露该副牌结构；若是不熟练玩家误以为 66 安全，则更应判定为计算错误。</p>
+    <p>最终，罚分不是私刑，而是把信息外部性内部化的价格机制。好的规则应当让“恶意明牌”进入绝对亏损区，同时给“精密算牌后的合理长甩”留下正期望值的窗口。</p>
+  </section>
+
+  <div class="footnotes reveal">
+    <p>注：文中的信息熵 ΔS 与信息价值转换系数 λ 为模型化粗估，用于展示判定框架，不代表唯一取值。实际裁判可结合比赛级别、玩家历史行为、盘面可推断性和失败后的信息增益进行校准。</p>
+  </div>
+</main>
+
+<script>
+  (function(){
+    const progress = document.getElementById('progress');
+    function updateProgress(){
+      const h = document.documentElement;
+      const scrolled = h.scrollTop || document.body.scrollTop;
+      const height = h.scrollHeight - h.clientHeight;
+      const p = height > 0 ? (scrolled / height) * 100 : 0;
+      progress.style.width = p + '%';
+    }
+    window.addEventListener('scroll', updateProgress, {passive:true});
+    window.addEventListener('resize', updateProgress);
+    updateProgress();
+
+    const reveals = document.querySelectorAll('.reveal');
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries)=>{
+        entries.forEach(entry=>{
+          if(entry.isIntersecting){
+            entry.target.classList.add('visible');
+            io.unobserve(entry.target);
+          }
+        });
+      }, {threshold:0.08});
+      reveals.forEach(el=>io.observe(el));
+    } else {
+      reveals.forEach(el=>el.classList.add('visible'));
+    }
+  })();
+</script>
+</body>
+</html>

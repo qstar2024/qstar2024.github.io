@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>柔弱胜刚强？舆论场的传播学密码</title>
+<style>
+  :root{
+    --paper:#f7f4ee;
+    --ink:#1c1a17;
+    --ink-soft:#4a453d;
+    --ink-faint:#8a8377;
+    --rule:#ddd5c6;
+    --accent:#a8342a;
+    --accent-soft:#c45c50;
+    --teal:#2c4a52;
+    --serif:"Georgia","Times New Roman","Songti SC","Noto Serif SC","Source Han Serif SC",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:17px;
+    line-height:1.9;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  /* 纸张纹理 */
+  body::before{
+    content:"";
+    position:fixed;inset:0;pointer-events:none;z-index:0;
+    background-image:radial-gradient(rgba(160,140,110,.07) 1px,transparent 1px);
+    background-size:4px 4px;
+    opacity:.6;
+  }
+
+  /* 返回按钮 */
+  .back-button{
+    position:fixed;top:16px;left:16px;z-index:100;
+    display:inline-flex;align-items:center;gap:6px;
+    padding:8px 14px;
+    background:rgba(247,244,238,.82);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border:1px solid var(--rule);
+    border-radius:999px;
+    color:var(--ink-soft);
+    font-size:13px;letter-spacing:.02em;
+    text-decoration:none;
+    transition:all .25s ease;
+    box-shadow:0 2px 10px rgba(60,45,25,.06);
+  }
+  .back-button:hover{color:var(--accent);border-color:var(--accent-soft);transform:translateX(-2px);}
+
+  /* Hero */
+  .hero{
+    position:relative;
+    padding:clamp(90px,14vw,150px) clamp(20px,5vw,40px) clamp(60px,8vw,90px);
+    overflow:hidden;
+    border-bottom:1px solid var(--rule);
+  }
+  .hero-art{
+    position:absolute;inset:0;width:100%;height:100%;
+    z-index:0;opacity:.55;
+  }
+  .hero-inner{position:relative;z-index:1;max-width:760px;margin:0 auto;}
+  .kicker{
+    display:inline-block;
+    font-family:var(--sans);
+    font-size:12px;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent);
+    padding-bottom:10px;
+    border-bottom:2px solid var(--accent);
+    margin-bottom:26px;
+    font-weight:600;
+  }
+  h1{
+    font-family:var(--serif);
+    font-size:clamp(30px,5.4vw,54px);
+    line-height:1.24;
+    font-weight:700;
+    letter-spacing:-.01em;
+    color:var(--ink);
+    margin-bottom:22px;
+  }
+  h1 .hl{
+    background:linear-gradient(180deg,transparent 62%,rgba(168,52,42,.16) 62%);
+    padding:0 4px;
+  }
+  .dek{
+    font-family:var(--serif);
+    font-size:clamp(16px,2.1vw,19px);
+    line-height:1.75;
+    color:var(--ink-soft);
+    max-width:600px;
+  }
+  .byline{
+    margin-top:34px;padding-top:20px;border-top:1px solid var(--rule);
+    display:flex;flex-wrap:wrap;gap:10px 22px;
+    font-size:13px;color:var(--ink-faint);letter-spacing:.04em;
+  }
+  .byline span::before{content:"■ ";color:var(--accent-soft);font-size:9px;vertical-align:2px;}
+
+  /* 主体 */
+  .wrap{max-width:720px;margin:0 auto;padding:0 clamp(20px,5vw,32px);position:relative;z-index:1;}
+  article{padding:clamp(50px,8vw,80px) 0;}
+
+  article p{margin-bottom:1.5em;color:var(--ink);}
+  article p.lead{
+    font-family:var(--serif);
+    font-size:clamp(18px,2.4vw,21px);
+    line-height:1.8;
+    color:var(--ink);
+  }
+  article p.lead::first-letter{
+    float:left;
+    font-family:var(--serif);
+    font-size:4.2em;
+    line-height:.86;
+    padding:6px 12px 0 0;
+    color:var(--accent);
+    font-weight:700;
+  }
+  strong{font-weight:700;color:var(--ink);}
+  em{font-style:italic;color:var(--ink-soft);}
+
+  h2{
+    font-family:var(--serif);
+    font-size:clamp(22px,3.4vw,30px);
+    line-height:1.4;
+    font-weight:700;
+    color:var(--ink);
+    margin:2.6em 0 1em;
+    padding-top:1.1em;
+    border-top:1px solid var(--rule);
+    position:relative;
+  }
+  h2::before{
+    content:"";
+    position:absolute;top:-1px;left:0;
+    width:56px;height:3px;background:var(--accent);
+  }
+  h2 .num{
+    display:block;
+    font-family:var(--sans);
+    font-size:12px;letter-spacing:.24em;
+    color:var(--accent-soft);
+    font-weight:600;
+    margin-bottom:10px;
+  }
+
+  /* 引文 */
+  blockquote{
+    margin:2.2em 0;
+    padding:24px clamp(20px,4vw,34px);
+    border-left:4px solid var(--accent);
+    background:rgba(168,52,42,.045);
+    font-family:var(--serif);
+    font-size:clamp(17px,2.3vw,20px);
+    line-height:1.7;
+    color:var(--ink);
+    font-style:normal;
+    position:relative;
+  }
+  blockquote::before{
+    content:"“";
+    position:absolute;top:-14px;left:14px;
+    font-family:var(--serif);
+    font-size:64px;line-height:1;
+    color:var(--accent);opacity:.28;
+  }
+  blockquote p:last-child{margin-bottom:0;}
+
+  /* 列表卡片 */
+  .laws{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+    margin:2em 0;
+  }
+  @media(min-width:620px){.laws{grid-template-columns:1fr 1fr;}}
+  .law{
+    padding:18px 20px;
+    background:#fffdf8;
+    border:1px solid var(--rule);
+    border-radius:4px;
+    transition:all .3s ease;
+  }
+  .law:hover{border-color:var(--accent-soft);transform:translateY(-2px);box-shadow:0 8px 24px rgba(120,80,50,.08);}
+  .law b{
+    display:block;
+    font-family:var(--serif);
+    font-size:16px;
+    color:var(--accent);
+    margin-bottom:6px;
+    letter-spacing:.02em;
+  }
+  .law span{font-size:14.5px;line-height:1.75;color:var(--ink-soft);}
+
+  /* 插图 */
+  figure{margin:2.6em 0;}
+  figure svg{width:100%;height:auto;display:block;border-radius:4px;}
+  figcaption{
+    margin-top:12px;
+    font-size:13px;
+    color:var(--ink-faint);
+    line-height:1.6;
+    text-align:center;
+    letter-spacing:.02em;
+  }
+
+  /* 分隔符 */
+  .divider{
+    display:flex;align-items:center;justify-content:center;gap:14px;
+    margin:2.6em 0;color:var(--accent-soft);
+  }
+  .divider::before,.divider::after{
+    content:"";flex:1;height:1px;background:var(--rule);
+  }
+  .divider svg{width:20px;height:20px;flex:none;}
+
+  /* 结尾 */
+  .closing{
+    margin-top:2.4em;
+    padding:clamp(26px,5vw,40px);
+    background:linear-gradient(135deg,#fffdf8 0%,#f2ece0 100%);
+    border:1px solid var(--rule);
+    border-radius:6px;
+    position:relative;
+    overflow:hidden;
+  }
+  .closing::after{
+    content:"";
+    position:absolute;right:-40px;bottom:-40px;
+    width:160px;height:160px;border-radius:50%;
+    background:radial-gradient(circle,rgba(168,52,42,.10) 0%,transparent 70%);
+  }
+  .closing p{position:relative;z-index:1;margin-bottom:1em;}
+  /*.closing p:last-child{margin-bottom:0;font-family:var(--serif);font-size:clamp(17px,2.3vw,20px);line-height:1.7;}*/
+
+  /* 参考 */
+  .refs{
+    margin-top:clamp(50px,8vw,80px);
+    padding-top:30px;
+    border-top:2px solid var(--ink);
+  }
+  .refs h3{
+    font-family:var(--sans);
+    font-size:12px;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--ink-soft);font-weight:600;
+    margin-bottom:20px;
+  }
+  .refs ol{list-style:none;counter-reset:r;}
+  .refs li{
+    counter-increment:r;
+    position:relative;
+    padding-left:34px;
+    margin-bottom:16px;
+    font-size:14.5px;line-height:1.7;
+    color:var(--ink-soft);
+  }
+  .refs li::before{
+    content:counter(r,decimal-leading-zero);
+    position:absolute;left:0;top:1px;
+    font-family:var(--serif);
+    font-size:13px;color:var(--accent);font-weight:700;
+    letter-spacing:.04em;
+  }
+  .refs a{color:var(--teal);text-decoration:none;border-bottom:1px solid rgba(44,74,82,.3);transition:all .2s;}
+  .refs a:hover{color:var(--accent);border-color:var(--accent);}
+
+  footer{
+    margin-top:clamp(50px,8vw,80px);
+    padding:34px 0 60px;
+    border-top:1px solid var(--rule);
+    text-align:center;
+    font-size:13px;color:var(--ink-faint);letter-spacing:.04em;
+  }
+  footer .mark{font-family:var(--serif);font-size:15px;color:var(--ink-soft);margin-bottom:8px;}
+
+  /* 进度条 */
+  .progress{
+    position:fixed;top:0;left:0;height:3px;width:0%;
+    background:linear-gradient(90deg,var(--accent),var(--accent-soft));
+    z-index:200;transition:width .1s linear;
+  }
+</style>
+</head>
+<body>
+
+<div class="progress" id="progress"></div>
+<a href="/blogs/index.html" class="back-button">← Back to All Blogs</a>
+
+<!-- ================= HERO ================= -->
+<header class="hero">
+  <svg class="hero-art" viewBox="0 0 1200 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#f2ecdf"/>
+        <stop offset="100%" stop-color="#e2d7c1"/>
+      </linearGradient>
+      <linearGradient id="triG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#a8342a" stop-opacity=".85"/>
+        <stop offset="100%" stop-color="#a8342a" stop-opacity=".35"/>
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="560" fill="url(#skyG)"/>
+    <circle cx="920" cy="170" r="110" fill="#e8b45a" opacity=".13"/>
+    <circle cx="920" cy="170" r="58" fill="#e8b45a" opacity=".22"/>
+
+    <!-- 海浪层 -->
+    <path d="M0,360 Q150,336 300,360 T600,360 T900,360 T1200,360 L1200,560 L0,560 Z" fill="#cfc2a8" opacity=".38"/>
+    <path d="M0,400 Q150,376 300,400 T600,400 T900,400 T1200,400 L1200,560 L0,560 Z" fill="#bfb094" opacity=".42"/>
+    <path d="M0,445 Q150,422 300,445 T600,445 T900,445 T1200,445 L1200,560 L0,560 Z" fill="#ad9d80" opacity=".40"/>
+
+    <!-- 倒置三角 -->
+    <polygon points="470,150 700,470 240,470" fill="none" stroke="url(#triG)" stroke-width="2" stroke-dasharray="7 7" opacity=".65"/>
+    <circle cx="470" cy="180" r="5" fill="#a8342a" opacity=".55"/>
+    <circle cx="430" cy="250" r="4" fill="#a8342a" opacity=".45"/>
+    <circle cx="510" cy="250" r="4" fill="#a8342a" opacity=".45"/>
+    <circle cx="380" cy="330" r="4" fill="#a8342a" opacity=".35"/>
+    <circle cx="470" cy="330" r="4" fill="#a8342a" opacity=".35"/>
+    <circle cx="560" cy="330" r="4" fill="#a8342a" opacity=".35"/>
+    <circle cx="330" cy="410" r="4" fill="#a8342a" opacity=".28"/>
+    <circle cx="470" cy="410" r="4" fill="#a8342a" opacity=".28"/>
+    <circle cx="610" cy="410" r="4" fill="#a8342a" opacity=".28"/>
+  </svg>
+
+  <div class="hero-inner">
+    <span class="kicker">Editorial · Communication Theory</span>
+    <h1>柔弱胜刚强？<br>舆论场的<span class="hl">传播学密码</span></h1>
+    <p class="dek">从一张让整个欧洲改变政策的照片说起——厦门大学邹振东《弱传播：舆论世界的哲学》给所有人的一堂课。</p>
+    <div class="byline">
+      <span>约 3200 字</span>
+      <span>阅读 9 分钟</span>
+      <span>传播学 · 舆论学 · 先秦思想</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+<article>
+
+  <p class="lead">清晨，海滩，小男孩。当土耳其记者 Nilüfer Demir 在博德鲁姆附近按下了快门。一个两岁的叙利亚男孩，Alan Kurdi，脸朝下趴在沙滩上，红色 T 恤、深色短裤，海水还湿着。</p>
+
+  <p>照片在几个小时内传遍全网。三天之内，时任英国首相卡梅伦宣布：英国将再接收两万名难民。加拿大正在进行的联邦大选，被这张照片彻底改写了议题——因为 Kurdi 一家，本来申请的正是加拿大。</p>
+
+  <p>而在它之前，是数年之久的调查报道、白皮书、人道主义呼吁。全部收效甚微。</p>
+
+  <p><strong>一张照片，做到了所有「正规传播」都做不到的事。</strong></p>
+
+  <p>为什么？</p>
+
+  <div class="divider">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/></svg>
+  </div>
+
+  <!-- ============ 01 ============ -->
+  <h2><span class="num">SECTION 01</span>一个反常识的发现：我们活在两个世界里</h2>
+
+  <p>厦门大学教授邹振东写过一本书，叫《弱传播》，副标题很狂：<strong>「舆论世界的哲学」</strong>。</p>
+
+  <p>它的起点，是一个大胆的倒置。邹振东说，我们其实同时活在两个世界里：<strong>现实世界</strong>，和<strong>舆论世界</strong>。</p>
+
+  <p>而这两个世界的运行规则，是<strong>反的</strong>。</p>
+
+  <p>现实世界是金字塔。权力向上聚集：总裁压过员工，官方压过公民，机构压过个人。你越强，说话越有人听。</p>
+
+  <p>舆论世界是<strong>倒金字塔</strong>。注意力与道德评判的能量，是向下流动的——朝着看起来最没有权力的一方。</p>
+
+  <figure>
+    <svg viewBox="0 0 640 340" aria-label="现实世界金字塔与舆论世界倒金字塔对比">
+      <defs>
+        <linearGradient id="p1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#4a453d" stop-opacity=".85"/>
+          <stop offset="100%" stop-color="#4a453d" stop-opacity=".25"/>
+        </linearGradient>
+        <linearGradient id="p2" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#a8342a" stop-opacity=".25"/>
+          <stop offset="100%" stop-color="#a8342a" stop-opacity=".85"/>
+        </linearGradient>
+      </defs>
+
+      <!-- 左：现实世界 -->
+      <polygon points="160,50 250,270 70,270" fill="url(#p1)" stroke="#4a453d" stroke-width="1.2"/>
+      <circle cx="160" cy="62" r="6" fill="#f7f4ee" stroke="#4a453d" stroke-width="1.5"/>
+      <circle cx="130" cy="140" r="4" fill="#f7f4ee" stroke="#4a453d" stroke-width="1.2"/>
+      <circle cx="190" cy="140" r="4" fill="#f7f4ee" stroke="#4a453d" stroke-width="1.2"/>
+      <circle cx="112" cy="215" r="4" fill="#f7f4ee" stroke="#4a453d" stroke-width="1.2"/>
+      <circle cx="160" cy="215" r="4" fill="#f7f4ee" stroke="#4a453d" stroke-width="1.2"/>
+      <circle cx="208" cy="215" r="4" fill="#f7f4ee" stroke="#4a453d" stroke-width="1.2"/>
+      <text x="160" y="305" text-anchor="middle" font-family="Georgia,serif" font-size="15" fill="#4a453d" font-weight="700">现实世界</text>
+      <text x="160" y="326" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11.5" fill="#8a8377">强者在上</text>
+
+      <!-- 右：舆论世界 -->
+      <polygon points="480,270 570,50 390,50" fill="url(#p2)" stroke="#a8342a" stroke-width="1.2"/>
+      <circle cx="480" cy="258" r="6" fill="#f7f4ee" stroke="#a8342a" stroke-width="1.5"/>
+      <circle cx="450" cy="180" r="4" fill="#f7f4ee" stroke="#a8342a" stroke-width="1.2"/>
+      <circle cx="510" cy="180" r="4" fill="#f7f4ee" stroke="#a8342a" stroke-width="1.2"/>
+      <circle cx="432" cy="105" r="4" fill="#f7f4ee" stroke="#a8342a" stroke-width="1.2"/>
+      <circle cx="480" cy="105" r="4" fill="#f7f4ee" stroke="#a8342a" stroke-width="1.2"/>
+      <circle cx="528" cy="105" r="4" fill="#f7f4ee" stroke="#a8342a" stroke-width="1.2"/>
+      <text x="480" y="305" text-anchor="middle" font-family="Georgia,serif" font-size="15" fill="#a8342a" font-weight="700">舆论世界</text>
+      <text x="480" y="326" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11.5" fill="#8a8377">弱者在上</text>
+
+      <!-- 中间箭头 -->
+      <path d="M310 160 L340 160" stroke="#8a8377" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <path d="M334 155 L342 160 L334 165" fill="none" stroke="#8a8377" stroke-width="1.5"/>
+    </svg>
+    <figcaption>邹振东「两个世界说」示意：两个金字塔结构完全倒置。图片来源：作者绘制，基于《弱传播》第二章。</figcaption>
+  </figure>
+
+  <p>邹振东把这叫<strong>「弱定律」</strong>，全书的第一定律：</p>
+
+  <blockquote>
+    <p>现实中的强者，恰恰是舆论中的弱者。</p>
+  </blockquote>
+
+  <p>Alan Kurdi 弱吗？他不是「弱」——他是弱的<strong>极限</strong>：一个孩子，一个溺死的孩子，一个被多个国家拒之门外、坐着设计载八人却挤了十六人的小船的孩子。</p>
+
+  <p>这张照片没有论证。它只是<strong>定位</strong>——把一个生命放在道德坐标的绝对底部。而一旦定位完成，道德角色就被重新分配了：站在孩子这一边的人，是保护者；站在孩子对面的人，是怪物。</p>
+
+  <!-- ============ 02 ============ -->
+  <h2><span class="num">SECTION 02</span>四条定律，用大白话说</h2>
+
+  <p>《弱传播》的理论体系，由「两个世界说」奠基，由四条定律撑起。你不用背，你能感觉到它们：</p>
+
+  <div class="laws">
+    <div class="law">
+      <b>弱定律 · The Law of Weakness</b>
+      <span>那个趴在沙滩上的孩子。舆论的能量，永远朝现实中的弱者方向流动。</span>
+    </div>
+    <div class="law">
+      <b>情感律 · The Law of Emotion</b>
+      <span>为什么王石的逻辑，输给了一句「坟」。舆论爆发是情感的爆发，不是道理的爆发。</span>
+    </div>
+    <div class="law">
+      <b>轻规则 · The Law of Lightness</b>
+      <span>为什么网上吵得最凶的常是发型，不是医改。轻的东西跑得快，因为带着不累。</span>
+    </div>
+    <div class="law">
+      <b>次理论 · The Law of the Secondary</b>
+      <span>最会传播的从来不是官方声音，而是紧挨着中心、带点反骨的那个「次主流」。</span>
+    </div>
+  </div>
+
+  <p>2008 年汶川地震后，万科董事长王石在博客上写：捐 200 万是「合适的」，并建议员工捐款上限 10 元，理由是「不要让慈善成为负担」。</p>
+
+  <p>从理性上看，这话有它的逻辑——他在主张自愿，反对摊派。但舆论不看逻辑。评论区刷屏了一句话：</p>
+
+  <blockquote>
+    <p>你虽然登上了珠峰，但你的道德高度还不如一座坟。</p>
+  </blockquote>
+
+  <p>万科股价下跌，王石反复道歉，公司最终捐出一个亿。</p>
+
+  <p>邹振东的诊断只有一句：王石把舆论场当成了<strong>辩论场</strong>。他以为目标是「正确」。但舆论不是法庭，也不是研讨会。它是一块<strong>情绪场</strong>。它问的第一个问题从来不是「这合乎逻辑吗」，而是——<strong>你站在谁那边？</strong></p>
+
+  <!-- ============ 03 ============ -->
+  <h2><span class="num">SECTION 03</span>经典传播学，漏掉了什么？</h2>
+
+  <p>经典传播学不是不懂权力。它只是把权力放在了<strong>发送者</strong>这一边。</p>
+
+  <p>香农—韦弗模型把传播看作一条管道：来源编码，信道传输，接收者解码。议程设置理论告诉我们：是媒体，而不是受众，决定了公众「想什么」。框架理论告诉我们：消息的结构会塑造解释。</p>
+
+  <p>这些框架非常强大，至今不可替代。但它们有一个共同的前提，邹振东拒绝接受：</p>
+
+  <p><strong>传播优势，大致跟随现实优势。</strong></p>
+
+  <p>资源更多、覆盖更广、信誉更高的机构，平均来说，应该赢。</p>
+
+  <p>邹振东的赌注是：舆论不是覆盖率的比拼，是<strong>道德站位</strong>的比拼。而在这场比赛里，机构强大的标志，会变成负资产。</p>
+
+  <p>这不是说经典理论幼稚。议程设置和涵化理论，都深切关注影响力不对称。</p>
+  
+  <p>但它们描述的不对称，是从<strong>强者流向弱者</strong>。邹振东描述的，是反方向的不对称：强者，在道德合法性被授予的那块场地上，结构性地处于劣势。</p>
+
+  <div class="divider">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M2 12h20"/></svg>
+  </div>
+
+  <!-- ============ 04 ============ -->
+  <h2><span class="num">SECTION 04</span>传播学继承的遗产：名家的刀</h2>
+
+  <p>先秦名家，后世记得他们是逻辑怪人——「白马非马」，听着像诡辩。</p>
+
+  <p>以往将其窄化为“语言逻辑学”是片面的。还原到先秦大争之世，名家恰是那个时代掌握传播学内核的行动派。</p>
+
+  <div class="closing">
+    <p style="font-family:Georgia,serif;font-size:15px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:18px;">他们绝非书斋里的逻辑学家，其“名实之辩”本身就是最高层级的政治传播：</p>
+    <p><strong>以“正名”为变法造势：</strong><br>名家主流实为“名法派”，他们通过“循名责实”为变法确立传播学合法性，是战国变法的“影子功臣”。</p>
+    <p><strong>以“辩题”进行议程设置：</strong><br>公孙龙“白马非马”等诡辩，其本质是制造认知冲突，引爆舆论关注，是高明的“轻传播”和注意力管理。</p>
+    <p><strong>以“辩术”进行舆论实战：</strong><br>名家“诡辩”的深层目的，是确立一种普遍的“传播规则”，用以影响现实政治。他们是先秦最自觉进行传播方法论研究的群体。</p>
+  </div>
+
+  <p>因此，“传播”是名家研究的核心实践范畴，其内涵远大于“语言逻辑学”。在他们自己的时代，他们是一群<strong>符号战术工程师</strong>。</p>
+
+  <p>他们被称为「辩者」，教人在权力面前打赢官司。他们干的事真的有效，他们的悖论不是闲得无聊，而是一种<strong>范畴操纵术</strong>：让常识失灵，让注意力聚拢，让弱的语言位置打败强的。</p>
+
+  <p>名家：不仅是“语言逻辑”，更是“传播实效”的先驱。以「名实之辩」为武器，力图干预现实、并产生重大传播实效的行动派。</p>
+
+  <div class="closing">
+    <p style="font-family:Georgia,serif;font-size:15px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:18px;">他们的传播策略深刻且多层次：</p>
+    <p><strong>策略一：解构式破局——通过颠覆“常识”进行注意力管理</strong><br>这正是《弱传播》“轻规则”（轻者为重）的极致体现。公孙龙“白马非马”的本质，是一次完美的传播议程设置。在精英圈层，抛出高度凝练且看似荒谬的命题，能瞬间制造认知冲突，引爆关注，这正是先秦辩者高效的思想传播策略。</p>
+    <p><strong>策略二：建构式赋能——通过“循名责实”为变法提供传播学合法性</strong><br>名家是战国变法运动的“影子功臣”，其主流正是白奚先生指出的“名法派”，其理论为变法提供合法性，属于最顶层的政治传播设计。</p>
+    <p><strong>策略三：攻守式实战——“辩者”是那个时代的“舆论战专家”</strong><br>邓析是第一位有史可考的“舆论战专家”。他收徒教人诉讼，凭借高超辩论技巧与执政者进行舆论对抗，最终被杀害，这恰恰证明其“传播”的巨大威力。</p>
+  </div>
+  
+  <p>名家不是象牙塔里的逻辑学家，而是大争之世的“传播工程师”。</p>
+
+  <p>「名实之辩」的核心问题，其实是：<strong>符号能不能可靠地承载意义？</strong>——这恰恰是传播学的第一问。</p>
+
+  <p>他们通过「名实之辩」打通了思想建构、法律赋权与舆论攻防，本身就是一套完整的传播体系。</p>
+
+  <p>名家的答案，藏在他们的实践里：名与实的关系是<strong>不稳定的、可争夺的，因此是可以被战略介入的</strong>。</p>
+
+  <div class="closing">
+    <p style="font-family:Georgia,serif;font-size:15px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:18px;">The Four Inheritances</p>
+    <p>名家告诉你：<strong>范畴，是可以被翻转的。</strong></p>
+    <p>经典传播学告诉你：<strong>倒置是怎么被工程化的。</strong></p>
+    <p>老子告诉你：<strong>这种倒置不是花招，是比任何媒介都古老的规律。</strong></p>
+    <p>邹振东告诉你：<strong>站在倒置的哪一边。</strong></p>
+  </div>
+
+  <!-- ============ 05 ============ -->
+  <h2><span class="num">SECTION 05</span>两千年前，老子已经写好了预告</h2>
+
+  <figure>
+    <svg viewBox="0 0 640 220" aria-label="水波纹意象，象征老子上善若水">
+      <defs>
+        <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#2c4a52" stop-opacity="0"/>
+          <stop offset="100%" stop-color="#2c4a52" stop-opacity=".08"/>
+        </linearGradient>
+      </defs>
+      <rect width="640" height="220" fill="url(#wg)"/>
+      <g fill="none" stroke="#2c4a52" stroke-width="1.1" opacity=".5">
+        <ellipse cx="320" cy="150" rx="50" ry="10"/>
+        <ellipse cx="320" cy="150" rx="100" ry="20" opacity=".75"/>
+        <ellipse cx="320" cy="150" rx="160" ry="32" opacity=".55"/>
+        <ellipse cx="320" cy="150" rx="230" ry="46" opacity=".38"/>
+        <ellipse cx="320" cy="150" rx="300" ry="62" opacity=".22"/>
+      </g>
+      <circle cx="320" cy="150" r="4" fill="#a8342a" opacity=".9"/>
+      <text x="320" y="60" text-anchor="middle" font-family="Georgia,serif" font-size="17" fill="#2c4a52" opacity=".85" font-style="italic">上善若水</text>
+    </svg>
+    <figcaption>老子以水喻道：柔弱，却无坚不摧。水是《弱传播》全书的第一意象。</figcaption>
+  </figure>
+
+  <p>如果说，经典传播学从先秦<strong>名家</strong>那里拿到的，是<strong>方法</strong>，那么邹振东从老子那里拿到了<strong>方向</strong>。</p>
+
+  <p>邹振东教授自己说得很清楚，他的思想祖先是<strong>老子</strong>。</p>
+
+  <p>他称水为弱传播的「最佳代言人」。老子讲「柔弱胜强」，讲「上善若水」，讲「无为无不为」——这就是弱定律的哲学语法。</p>
+
+  <blockquote>
+    <p>天下莫柔弱於水而攻堅强者 莫之能勝也 以其无以易之也<br>水之勝剛也 弱之勝强也 天下莫弗知也 而莫能行也</p>
+  </blockquote>
+
+  <blockquote>
+    <p>江海之所以能爲百浴王者 以其善下之 是以能爲百浴王<br>是以聖人之欲上人也 必以其言下之<br>其欲先民也 必以其身後之</p>
+  </blockquote>
+
+  <blockquote>
+    <p>爲學者日益 聞道者日損<br>損之又損 以至于无爲<br>无爲而无以爲</p>
+  </blockquote>
+
+  <blockquote>
+    <p>天下之至柔 馳騁於天下之至堅 无有入於无間<br>吾是以知无爲之有益也<br>不言之教 无爲之益 天下希能及之矣</p>
+  </blockquote>
+
+
+  <p>但这条传承线是<strong>变形</strong>的，不是复读。</p>
+
+  <p>黄老之学，是给<strong>君王</strong>的。是一种「以退为进」的统治术——《汉书》里叫「君人南面之术」。它的目标是保住权力，而柔弱的姿态只是手段。</p>
+
+  <p>邹振东的理论，是<strong>大众注意力的社会学</strong>，是写给所有走进舆论场的人的。道家的圣人<strong>退出</strong>江湖；弱传播的行动者<strong>进入</strong>战场——把脆弱当作传播资源，而不是撤退策略。</p>
+
+  <p><strong>《弱传播》是从《道德经》里长出来的，但它的土壤，是现代媒介。</strong></p>
+
+  <!-- ============ 06 ============ -->
+  <h2><span class="num">SECTION 06</span>最后：那张照片为什么赢</h2>
+
+  <p>那张照片，不是靠更强的论证赢的。</p>
+
+  <p>它赢，是因为它占据了舆论世界唯一为「绝对弱者」保留的位置：孩子、溺水者、被拒绝的人。</p>
+
+  <p>它没有请求同情。它<strong>命令</strong>同情。因为在舆论的倒置丛林里，强者造不出来的道德能量，早就储存好了——存在弱者的身体里。</p>
+
+  <p>经典理论教你测量管道。邹振东教你读懂<strong>倒置</strong>。老子告诉你为什么倒置不是花招，而是比任何媒介都古老的规律。名家告诉你范畴如何被翻转。</p>
+
+  <p>倒置丛林的第一条规则，不是「变强」。是：</p>
+
+  <blockquote>
+    <p>先搞清楚，你站在哪个世界。</p>
+  </blockquote>
+
+  <p>第二条规则，是那张照片留下的：</p>
+
+  <blockquote>
+    <p>沙滩上的孩子，永远跑得赢算法。</p>
+  </blockquote>
+
+  <!-- ============ 参考 ============ -->
+  <section class="refs">
+    <h3>References · 延伸阅读</h3>
+    <ol>
+      <li>Wikipedia: <a href="https://en.wikipedia.org/wiki/Death_of_Alan_Kurdi" target="_blank" rel="noopener">Death of Alan Kurdi</a>. </li>
+      <li>邹振东：《弱传播：舆论世界的哲学》，国家行政学院出版社</li>
+    </ol>
+  </section>
+
+  <footer>
+    <div class="mark">◈</div>
+    <div>如果你觉得这篇文章有用，欢迎转发给那个「总在舆论场吃亏」的朋友。</div>
+    <div style="margin-top:10px;opacity:.7;">— End of Report —</div>
+  </footer>
+
+</article>
+</main>
+
+<script>
+  // 阅读进度条
+  (function(){
+    var bar = document.getElementById('progress');
+    function update(){
+      var h = document.documentElement;
+      var scrolled = h.scrollTop || document.body.scrollTop;
+      var total = h.scrollHeight - h.clientHeight;
+      var pct = total > 0 ? (scrolled / total) * 100 : 0;
+      bar.style.width = pct + '%';
+    }
+    window.addEventListener('scroll', update, {passive:true});
+    window.addEventListener('resize', update);
+    update();
+  })();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>山那边来的人：Wallace 与「外来」的思辨考古语言学</title>
+<style>
+  :root{
+    --paper:#f7f3ea;
+    --paper2:#efe7d5;
+    --ink:#1f1c18;
+    --ink-soft:#4d463c;
+    --line:#c9bfa8;
+    --vermilion:#a03a26;
+    --jade:#3f6f5e;
+    --ochre:#b07f2a;
+    --serif:"Noto Serif SC","Source Han Serif SC","Songti SC","STSong","SimSun",serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    background:var(--paper);
+    background-image:
+      radial-gradient(900px 340px at 50% -120px, rgba(176,127,42,.09), transparent 70%),
+      radial-gradient(700px 500px at 110% 60%, rgba(63,111,94,.05), transparent 70%);
+    color:var(--ink);
+    font-family:var(--serif);
+    line-height:1.95;
+    letter-spacing:.02em;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  /* ============ 阅读进度 ============ */
+  #progress{
+    position:fixed;top:0;left:0;height:3px;width:0%;
+    background:linear-gradient(90deg,var(--vermilion),var(--ochre));
+    z-index:99;transition:width .08s linear;
+  }
+
+  /* ============ 返回主页 ============ */
+  .back-bar{
+    max-width:960px;
+    margin:0 auto;
+    padding:16px 28px 0;
+  }
+  .back-button{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    letter-spacing:.08em;
+    color:var(--ink-soft);
+    text-decoration:none;
+    border:1px solid var(--line);
+    background:rgba(247,243,234,.72);
+    padding:6px 14px;
+    border-radius:100px;
+    transition:color .2s ease,border-color .2s ease,background .2s ease;
+    line-height:1.5;
+  }
+  .back-button:hover{
+    color:var(--vermilion);
+    border-color:var(--vermilion);
+    background:rgba(160,58,38,.04);
+  }
+
+  /* ============ 外框 ============ */
+  .frame{
+    max-width:960px;
+    margin:0 auto;
+    padding:0 28px 80px;
+    border-left:1px solid var(--line);
+    border-right:1px solid var(--line);
+  }
+
+  /* ============ 报头 ============ */
+  .masthead{
+    padding:34px 0 16px;
+    text-align:center;
+    border-bottom:3px double var(--ink);
+  }
+  .masthead .kicker{
+    font-size:11.5px;
+    letter-spacing:.5em;
+    text-indent:.5em;
+    color:var(--ink-soft);
+  }
+  .masthead .brand{
+    font-size:clamp(22px,3.2vw,28px);
+    font-weight:700;
+    letter-spacing:.42em;
+    text-indent:.42em;
+    margin-top:12px;
+  }
+  .masthead .meta{
+    display:flex;
+    justify-content:space-between;
+    max-width:560px;
+    margin:14px auto 0;
+    font-size:11px;
+    letter-spacing:.2em;
+    color:var(--ink-soft);
+  }
+
+  /* ============ 标题区 ============ */
+  .titleblock{
+    padding:clamp(40px,6vw,62px) 0 6px;
+    text-align:center;
+  }
+  .titleblock .overline{
+    font-size:12px;
+    letter-spacing:.46em;
+    text-indent:.46em;
+    color:var(--vermilion);
+  }
+  .titleblock h1{
+    font-size:clamp(27px,4.6vw,44px);
+    line-height:1.5;
+    font-weight:900;
+    margin:20px 0 6px;
+    letter-spacing:.03em;
+  }
+  .titleblock h1 .thin{
+    display:block;
+    font-size:clamp(15px,2.2vw,21px);
+    font-weight:400;
+    color:var(--ink-soft);
+    letter-spacing:.16em;
+    margin-top:14px;
+    line-height:1.8;
+  }
+  .titleblock .deck{
+    max-width:620px;
+    margin:24px auto 0;
+    font-size:clamp(14px,1.7vw,15.5px);
+    color:var(--ink-soft);
+    line-height:2;
+  }
+  .byline{
+    margin-top:24px;
+    font-size:11.5px;
+    letter-spacing:.28em;
+    color:var(--ink-soft);
+  }
+  .byline::before,.byline::after{
+    content:"";
+    display:inline-block;
+    width:48px;
+    height:1px;
+    background:var(--line);
+    vertical-align:middle;
+    margin:0 14px;
+  }
+
+  /* ============ 题图 ============ */
+  figure.hero{margin:40px 0 8px;}
+  figure.hero svg{width:100%;height:auto;display:block;}
+  figcaption{
+    text-align:center;
+    font-size:11px;
+    letter-spacing:.26em;
+    color:var(--ink-soft);
+    margin-top:12px;
+  }
+
+  /* ============ 正文 ============ */
+  article{
+    max-width:700px;
+    margin:0 auto;
+    padding:0 4px;
+  }
+  article p{
+    margin:1.55em 0;
+    font-size:clamp(15.5px,1.9vw,16.5px);
+    text-align:justify;
+  }
+  article p.lede::first-letter{
+    float:left;
+    font-size:56px;
+    line-height:.95;
+    padding:4px 12px 0 0;
+    color:var(--vermilion);
+    font-weight:900;
+  }
+  strong{font-weight:700;color:var(--ink);}
+
+  .ipa{
+    font-family:"Charis SIL","Doulos SIL","Times New Roman",serif;
+    font-style:italic;
+    font-size:.97em;
+    color:var(--jade);
+    letter-spacing:0;
+    border-bottom:1px dotted var(--jade);
+    padding-bottom:1px;
+  }
+
+  /* 小节标题 */
+  .sec{
+    display:flex;
+    align-items:baseline;
+    gap:14px;
+    margin:clamp(2.6em,5vw,3.4em) 0 1.1em;
+    padding-bottom:12px;
+    border-bottom:1px solid var(--line);
+    flex-wrap:wrap;
+  }
+  .sec .num{
+    flex:0 0 auto;
+    width:36px;
+    height:36px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1.5px solid var(--vermilion);
+    color:var(--vermilion);
+    font-size:17px;
+    font-weight:700;
+    transform:rotate(45deg);
+  }
+  .sec .num span{
+    transform:rotate(-45deg);
+    display:block;
+  }
+  .sec h2{
+    font-size:clamp(20px,2.6vw,22px);
+    font-weight:800;
+    letter-spacing:.06em;
+  }
+  .sec .en{
+    margin-left:auto;
+    font-size:10.5px;
+    letter-spacing:.26em;
+    color:var(--ink-soft);
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+
+  /* 引言块 */
+  blockquote.pull{
+    margin:2.4em 0;
+    padding:24px 28px 24px 32px;
+    position:relative;
+    border-left:4px solid var(--vermilion);
+    background:var(--paper2);
+    font-size:clamp(16px,2vw,17.5px);
+    line-height:2;
+    font-weight:700;
+  }
+  blockquote.pull::before{
+    content:"“";
+    position:absolute;
+    left:8px;
+    top:-8px;
+    font-size:60px;
+    color:var(--vermilion);
+    opacity:.85;
+  }
+  blockquote.pull .src{
+    display:block;
+    margin-top:12px;
+    font-size:11.5px;
+    font-weight:400;
+    letter-spacing:.22em;
+    color:var(--ink-soft);
+  }
+
+  /* 中间插图 */
+  figure.mid{margin:2.8em 0 1.2em;}
+  figure.mid svg{
+    width:100%;
+    height:auto;
+    display:block;
+    border:1px solid var(--line);
+    background:var(--paper2);
+  }
+
+  /* 分隔符 */
+  .rule{
+    display:flex;
+    justify-content:center;
+    margin:3.2em 0;
+  }
+  .rule svg{display:block;}
+
+  /* ============ 尾注（默认折叠） ============ */
+  details.colophon{
+    max-width:700px;
+    margin:3.2em auto 0;
+    border-top:3px double var(--ink);
+  }
+  details.colophon > summary{
+    list-style:none;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:22px 0 0;
+    user-select:none;
+    outline:none;
+  }
+  details.colophon > summary::-webkit-details-marker{display:none;}
+  details.colophon > summary::marker{content:"";}
+  .colophon-title{
+    font-size:13px;
+    letter-spacing:.38em;
+    color:var(--vermilion);
+    font-weight:700;
+  }
+  .toggle-icon{
+    flex:0 0 auto;
+    width:26px;
+    height:26px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border:1px solid var(--line);
+    border-radius:50%;
+    font-size:15px;
+    line-height:1;
+    color:var(--ink-soft);
+    transition:transform .25s ease,color .2s ease,border-color .2s ease;
+  }
+  details.colophon[open] .toggle-icon{
+    transform:rotate(45deg);
+    color:var(--vermilion);
+    border-color:var(--vermilion);
+  }
+  details.colophon .colophon-body{
+    padding-top:16px;
+  }
+  details.colophon ol{
+    padding-left:1.35em;
+    font-size:13px;
+    color:var(--ink-soft);
+    line-height:1.95;
+  }
+  details.colophon ol li{margin:.55em 0;}
+  details.colophon ol li i{font-style:italic;color:var(--jade);}
+
+  .endmark{
+    text-align:center;
+    margin-top:56px;
+    font-size:11.5px;
+    letter-spacing:.46em;
+    text-indent:.46em;
+    color:var(--ink-soft);
+  }
+
+  /* ============ 揭示动画 ============ */
+  .rv{
+    opacity:0;
+    transform:translateY(20px);
+    transition:opacity .85s cubic-bezier(.22,.7,.3,1),
+               transform .85s cubic-bezier(.22,.7,.3,1);
+  }
+  .rv.on{opacity:1;transform:none;}
+
+  /* ============ 响应式 ============ */
+  @media(max-width:900px){
+    .frame{padding:0 20px 64px;}
+    .back-bar{padding:14px 20px 0;}
+  }
+  @media(max-width:640px){
+    .frame{padding:0 16px 56px;}
+    .back-bar{padding:12px 16px 0;}
+    .back-button{font-size:11.5px;padding:5px 12px;}
+    article p{font-size:15.5px;}
+    .masthead .brand{font-size:20px;letter-spacing:.3em;text-indent:.3em;}
+    .masthead .meta{font-size:10px;letter-spacing:.14em;}
+    .sec .en{display:none;}
+    .sec{gap:10px;}
+    .sec .num{width:30px;height:30px;font-size:15px;}
+    blockquote.pull{font-size:15.5px;padding:20px 20px 20px 26px;}
+    .byline::before,.byline::after{width:28px;margin:0 8px;}
+    figcaption{font-size:10px;letter-spacing:.18em;}
+  }
+  @media(prefers-reduced-motion:reduce){
+    .rv{opacity:1;transform:none;transition:none;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+<div id="progress"></div>
+
+<!-- ==================== 返回主页 ==================== -->
+<div class="back-bar">
+  <a href="/blogs/index.html" class="back-button">← Back to All Blogs</a>
+</div>
+
+<div class="frame">
+
+  <!-- ==================== 报头 ==================== -->
+  <header class="masthead">
+    <div class="kicker">SPECULATIVE ARCHAEOLINGUISTICS · 思辨考古语言学手记</div>
+    <div class="brand">语言的化石</div>
+    <div class="meta">
+      <span>约 12 分钟</span>
+    </div>
+  </header>
+
+  <!-- ==================== 标题 ==================== -->
+  <div class="titleblock">
+    <div class="overline">ARCHAEOLINGUISTIC ESSAY · 思辨长文</div>
+    <h1>
+      山那边来的人
+      <span class="thin">Wallace 与「外来」的思辨考古语言学</span>
+    </h1>
+    <p class="deck">
+      隔着整整一个大洋的两个音节，裹着同一个语义内核：从外面来的那个人。
+      语音的双胞胎或许是幽灵，但语义的双胞胎，已经四千岁了。
+    </p>
+  </div>
+
+  <!-- ==================== 题图 ==================== -->
+  <figure class="hero rv">
+    <svg viewBox="0 0 1200 440" preserveAspectRatio="xMidYMid meet" role="img" aria-label="欧亚大陆群山之间的旅人">
+      <defs>
+        <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f8f4ea"/>
+          <stop offset="100%" stop-color="#ede2c9"/>
+        </linearGradient>
+        <pattern id="hatchG" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="0" x2="0" y2="8" stroke="#8a7f68" stroke-width="1"/>
+        </pattern>
+      </defs>
+
+      <rect width="1200" height="440" fill="url(#skyG)"/>
+
+      <!-- 太阳 -->
+      <g>
+        <circle cx="600" cy="104" r="46" fill="none" stroke="#a03a26" stroke-width="2"/>
+        <circle cx="600" cy="104" r="33" fill="#a03a26" opacity="0.10"/>
+        <g stroke="#a03a26" stroke-width="1.8" stroke-linecap="round">
+          <line x1="600" y1="38" x2="600" y2="52"/>
+          <line x1="600" y1="156" x2="600" y2="170"/>
+          <line x1="534" y1="104" x2="548" y2="104"/>
+          <line x1="652" y1="104" x2="666" y2="104"/>
+          <line x1="554" y1="58" x2="564" y2="68"/>
+          <line x1="636" y1="140" x2="646" y2="150"/>
+          <line x1="646" y1="58" x2="636" y2="68"/>
+          <line x1="564" y1="140" x2="554" y2="150"/>
+        </g>
+      </g>
+
+      <text x="600" y="30" text-anchor="middle" font-size="12" fill="#4d463c"
+            letter-spacing="7" font-family="serif">4,000 YEARS · 四 千 年</text>
+
+      <!-- 远山 · 莱茵 -->
+      <path d="M0 302 L110 205 L200 272 L300 190 L400 282 L470 240 L560 302"
+            fill="none" stroke="#211e1a" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M0 302 L110 205 L200 272 L300 190 L400 282 L470 240 L560 302 L560 440 L0 440 Z"
+            fill="url(#hatchG)" opacity="0.5"/>
+
+      <!-- 远山 · 黄河 -->
+      <path d="M640 302 L740 235 L830 288 L920 198 L1020 278 L1110 222 L1200 292"
+            fill="none" stroke="#211e1a" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M640 302 L740 235 L830 288 L920 198 L1020 278 L1110 222 L1200 292 L1200 440 L640 440 Z"
+            fill="url(#hatchG)" opacity="0.5"/>
+
+      <!-- 商路虚线 -->
+      <path d="M60 250 C 240 170, 420 292, 600 268 C 780 244, 960 188, 1140 238"
+            fill="none" stroke="#3f6f5e" stroke-width="2.4"
+            stroke-dasharray="2 9" stroke-linecap="round"/>
+
+      <text x="48" y="168" font-size="14" fill="#3f6f5e" letter-spacing="3"
+            font-family="serif">莱茵 RHINE</text>
+      <text x="1046" y="176" font-size="14" fill="#3f6f5e" letter-spacing="3"
+            font-family="serif">黄河</text>
+      <text x="1046" y="196" font-size="10.5" fill="#3f6f5e" letter-spacing="2"
+            font-family="serif">YELLOW R.</text>
+
+      <!-- 近山 -->
+      <path d="M0 440 L0 372 L150 340 L300 382 L450 352 L600 392 L760 348 L920 386 L1060 346 L1200 380 L1200 440 Z"
+            fill="#211e1a" opacity="0.88"/>
+
+      <!-- 山口中的旅人 -->
+      <g stroke="#a03a26" stroke-width="3" fill="none" stroke-linecap="round">
+        <circle cx="600" cy="250" r="7" fill="#a03a26"/>
+        <line x1="600" y1="257" x2="600" y2="290"/>
+        <line x1="600" y1="266" x2="584" y2="278"/>
+        <line x1="600" y1="266" x2="615" y2="276"/>
+        <line x1="600" y1="290" x2="590" y2="318"/>
+        <line x1="600" y1="290" x2="610" y2="318"/>
+        <line x1="616" y1="242" x2="625" y2="318"/>
+      </g>
+
+      <text x="600" y="356" text-anchor="middle" font-size="13" fill="#a03a26"
+            letter-spacing="7" font-family="serif">山 那 边 来 的 人</text>
+    </svg>
+    <figcaption>题图 · 莱茵—黄河：一条横贯欧亚的想象商路</figcaption>
+  </figure>
+
+  <!-- ==================== 正文 ==================== -->
+  <article>
+
+    <p class="lede rv">
+      上世纪中叶，两个都叫华莱士 Wallace 的男人同时占据了美国人的注意力。一位是亨利·华莱士，罗斯福手下那位理想主义的副总统；另一位是迈克·华莱士，CBS《60分钟》里以犀利提问闻名的传奇记者。
+    </p>
+
+    <p class="rv">
+      两家人八竿子打不着。亨利来自爱荷华州一个阿尔斯特—苏格兰裔的长老会世家；迈克出生在马萨诸塞州，父母是俄国犹太移民，姓氏 Wallechinsky 入境时被英语化，缩成了 Wallace。乍一看，这不过是美国大熔炉的标准剧本——几股不同的移民支流，最后汇进同一个盎格鲁—撒克逊姓氏的入海口。
+    </p>
+
+    <p class="rv">
+      可要是把镜头从二十世纪的曼哈顿拉开，一直拉到欧亚大陆的“深时”尺度，一面更让人心里发毛的语言学镜子就浮出来了。汉语南方方言——最典型的是粤语——把「外来」说成 <span class="ipa">wai6 loi4</span>。那发音跟 Wallace 像得，怎么说呢，有点邪门。
+    </p>
+
+    <p class="rv">
+      Wallace 这个姓来自古诺曼法语 <span class="ipa">Waleis</span>（“威尔士人／外来者”），再往上追是原始日耳曼语 <span class="ipa">*walhaz</span>——用来指外来者、凯尔特人乃至罗马人的词，很可能最终源自古代凯尔特部落名 Volcae。
+    </p>
+
+    <p class="rv">
+      Wallace 和「外来」。隔着整整一个大洋的两个音节，裹着同一个语义内核：<strong>从外面来的那个人。</strong>
+    </p>
+
+    <blockquote class="pull rv">
+      \n\n主流历史语言学马上会跳出来反对，而且反对得完全在理：没有任何公认的“欧亚贸易共通语”能同时生出 <span class="ipa">*walhaz</span> 和「外来」。它们是一对教科书级的“假同源”，是发声器官一次宇宙级的巧合。
+      <span class="src">— 但假同源，恰恰是本文的起点，而非终点</span>
+    </blockquote>
+
+    <p class="rv">
+      可是，如果我们往“思辨考古语言学”那边偏一偏，越过传统语系树的硬边界，会发现真正的故事可能更耐人寻味：Wallace 和「外来」确实不共享任何语音祖先，但它们确实编码着<strong>同一个青铜时代的社会现实</strong>——定居的农人，给“从山那边来的人”起名字。
+    </p>
+
+    <!-- ==================== 壹 ==================== -->
+    <div class="sec rv">
+      <div class="num"><span>壹</span></div>
+      <h2>四世纪：大陆的碎裂</h2>
+      <div class="en">The 4th-Century Shattering</div>
+    </div>
+
+    <p class="rv">
+      要理解这两个概念怎么被“冻结”在地球的两端，得先回到公元四世纪——一个气候转冷、地缘政治像多米诺骨牌一样倒下的时代。
+    </p>
+
+    <p class="rv">
+      东方，西晋王朝的崩溃在公元 311 年的永嘉之乱中到了顶点。北方游牧部族——包括匈奴——打碎了中原的心脏地带，士族、农民、商贾被迫大规模南逃，史称“衣冠南渡”。这批流亡者落脚在长江流域，后来的移民浪潮又把汉语带进福建、广东和台湾的群山，那里的方言从此跟北方平原其后发生的语言演变隔绝开来。
+    </p>
+
+    <p class="rv">
+      几乎同一时刻，世界的另一端，蛮族大迁徙正在撕扯罗马帝国。最大的推手是匈人突然向西推进——不少学者相信，匈人跟打碎中国的匈奴本是同源的联盟。匈人把日耳曼诸部落往西赶，驱使盎格鲁—撒克逊人渡海征服不列颠，把岛上的原住民凯尔特人围困起来，管他们叫 <span class="ipa">*walhaz</span>——“外来者”。
+    </p>
+
+    <!-- ==================== 贰 ==================== -->
+    <div class="sec rv">
+      <div class="num"><span>贰</span></div>
+      <h2>草原网络的暗影</h2>
+      <div class="en">Shadow of the Steppe</div>
+    </div>
+
+    <p class="rv">
+      两拨逃难的人，隔着整片欧亚草原，怎么会发展出如此对称的“外人”概念？
+    </p>
+
+    <p class="rv">
+      我们假设的桥梁，藏在匈奴与匈人把它打碎之前那个更深时的网络里。早在丝绸之路正式开通之前，欧亚大陆的中心就是一条由牧人和商旅组成的流动高速公路。其中就有吐火罗人——一支住在今天新疆塔里木盆地的印欧语族群，正是那批著名的“塔里木木乃伊”的族属。
+    </p>
+
+    <p class="rv">
+      从语言学上看，吐火罗语属于印欧语系西边的 Centum 语支，它的词根反而跟凯尔特语、日耳曼语更近，比跟它的近邻还近。这些人是终极的中间商，向早期的华夏先民贩运马匹、车轮和冶金技术。主流语言学不承认存在一种统一的“欧亚贸易语”，但完全接受：深时接触能让核心概念渗过语言的边界。已经有学者论证，上古汉语的“蜜”（旧拟音 <span class="ipa">*mit</span>，跟英语 mead 同源）和“犬”（旧拟音 <span class="ipa">*kʷʰen</span>，跟 canine、hound 同源），很可能就是在这场史前的“大陆合成”里被吸收进来的。就在这片“我们与他们”的共享基质里——绿洲和河谷的定居者，对上草原上骑马的流动者——“外人”的原型被锻造出来了。
+    </p>
+
+    <!-- ==================== 叁 ==================== -->
+    <div class="sec rv">
+      <div class="num"><span>叁</span></div>
+      <h2>消散的幽灵</h2>
+      <div class="en">The Disappearing Phantom</div>
+    </div>
+
+    <p class="rv">
+      在这里，南方的证据朝两个方向同时发力，而诚实要求我们跟着它走到头。
+    </p>
+
+    <p class="rv">
+      闽南语——它的闽语方言以保存了别处几乎尽失的古老特征而闻名：入声的喉塞韵尾、上古的疑母声母——把「外来」读作 <span class="ipa">gōa-lâi</span>，声母是个浊塞音，直接承继自上古汉语的软腭鼻音 <span class="ipa">*ŋ-</span>。
+    </p>
+
+    <p class="rv">
+      也就是说：<strong>我们挖出的读音越古老，它就越不像 Wallace。</strong>就连全世界最接近的粤语 <span class="ipa">wai6 loi4</span>，它的 <span class="ipa">w-</span> 也是近一千年里、较老的 <span class="ipa">ŋw-</span> 掉了鼻音之后的创新。当然，在日常闽南口语的懒散流变里，硬邦邦的 <span class="ipa">[g]</span> 确实常常软化成 <span class="ipa">[w]</span>，这份相似未必全是错觉；可要是从历史音韵往回看，它更像一件披着旧外套的年轻巧合。
+    </p>
+
+    <!-- ==================== 图二：Wallace 与「外来」双线对比 ==================== -->
+    <figure class="mid rv">
+      <svg viewBox="0 0 1100 580" preserveAspectRatio="xMidYMid meet" role="img"
+           aria-label="Wallace 与「外来」的两条语言线：语音各走各路，语义殊途同归">
+        <rect width="1100" height="580" fill="#efe7d5"/>
+
+        <text x="550" y="44" text-anchor="middle" font-size="18" fill="#211e1a"
+              letter-spacing="4" font-weight="bold" font-family="serif">WALLACE 与「外来」· 两条线的四千年</text>
+
+        <!-- 左列标签 -->
+        <text x="260" y="92" text-anchor="middle" font-size="13" fill="#b07f2a"
+              letter-spacing="3" font-family="serif">语音层 · 日耳曼—诺曼线</text>
+
+        <!-- 右列标签 -->
+        <text x="840" y="92" text-anchor="middle" font-size="13" fill="#a03a26"
+              letter-spacing="3" font-family="serif">语音层 · 汉语南方线</text>
+
+        <!-- ===== 左列 ===== -->
+        <rect x="120" y="106" width="280" height="54" fill="none"
+              stroke="#211e1a" stroke-width="2"/>
+        <text x="260" y="130" text-anchor="middle" font-size="15" fill="#211e1a"
+              font-family="serif" font-weight="bold">*walhaz</text>
+        <text x="260" y="150" text-anchor="middle" font-size="11.5" fill="#4d463c"
+              font-family="serif">原始日耳曼语 · 外来者／凯尔特人／罗马人</text>
+
+        <line x1="260" y1="160" x2="260" y2="188" stroke="#211e1a" stroke-width="1.8"/>
+        <polygon points="260,196 255,186 265,186" fill="#211e1a"/>
+
+        <rect x="120" y="198" width="280" height="54" fill="none"
+              stroke="#b07f2a" stroke-width="2"/>
+        <text x="260" y="222" text-anchor="middle" font-size="15" fill="#b07f2a"
+              font-family="serif" font-weight="bold">古诺曼法语 Waleis</text>
+        <text x="260" y="242" text-anchor="middle" font-size="11.5" fill="#4d463c"
+              font-family="serif">“威尔士人／外来者”</text>
+
+        <line x1="260" y1="252" x2="260" y2="280" stroke="#211e1a" stroke-width="1.8"/>
+        <polygon points="260,288 255,278 265,278" fill="#211e1a"/>
+
+        <rect x="120" y="290" width="280" height="58" fill="#211e1a"/>
+        <text x="260" y="316" text-anchor="middle" font-size="16" fill="#f7f3ea"
+              font-family="serif" font-weight="bold">Wallace（w-）</text>
+        <text x="260" y="337" text-anchor="middle" font-size="11.5" fill="#e6dcc7"
+              font-family="serif">现代英语姓氏 · 埃利斯岛英语化</text>
+
+        <!-- ===== 右列 ===== -->
+        <rect x="700" y="106" width="280" height="54" fill="none"
+              stroke="#211e1a" stroke-width="2"/>
+        <text x="840" y="130" text-anchor="middle" font-size="15" fill="#211e1a"
+              font-family="serif" font-weight="bold">上古汉语 *ŋ-（外）</text>
+        <text x="840" y="150" text-anchor="middle" font-size="11.5" fill="#4d463c"
+              font-family="serif">疑母 · 软腭鼻音</text>
+
+        <!-- 三条分支 -->
+        <path d="M840 160 L720 206" fill="none" stroke="#a03a26" stroke-width="1.8"/>
+        <path d="M840 160 L960 206" fill="none" stroke="#3f6f5e" stroke-width="1.8"/>
+        <path d="M840 160 L840 206" fill="none" stroke="#b07f2a" stroke-width="1.8" stroke-dasharray="4 4"/>
+
+        <!-- 闽南 -->
+        <rect x="614" y="208" width="196" height="64" fill="none"
+              stroke="#a03a26" stroke-width="2"/>
+        <text x="712" y="234" text-anchor="middle" font-size="15" fill="#a03a26"
+              font-family="serif" font-weight="bold">闽南语 gōa-lâi</text>
+        <text x="712" y="255" text-anchor="middle" font-size="11.5" fill="#4d463c"
+              font-family="serif">疑母留存 · 承自 *ŋ-</text>
+
+        <!-- 粤语 -->
+        <rect x="862" y="208" width="196" height="64" fill="none"
+              stroke="#3f6f5e" stroke-width="2"/>
+        <text x="960" y="234" text-anchor="middle" font-size="15" fill="#3f6f5e"
+              font-family="serif" font-weight="bold">粤语 wai6 loi4</text>
+        <text x="960" y="255" text-anchor="middle" font-size="11.5" fill="#4d463c"
+              font-family="serif">ŋw- 脱鼻化 · 语音流变</text>
+
+        <!-- 客家小注 -->
+        <text x="840" y="298" text-anchor="middle" font-size="11.5" fill="#b07f2a"
+              font-family="serif">客家话 ngoi· 鼻音完整保留</text>
+
+        <!-- ===== 中间标注：相似但非同源 ===== -->
+        <path d="M420 360 Q 550 318 680 360" fill="none"
+              stroke="#4d463c" stroke-width="1.5" stroke-dasharray="3 6"/>
+        <text x="550" y="352" text-anchor="middle" font-size="12.5" fill="#4d463c"
+              letter-spacing="1.5" font-family="serif">发音相近 · 语义相通 · 疑似同源</text>
+
+        <!-- ===== 汇合线 ===== -->
+        <line x1="260" y1="348" x2="260" y2="414" stroke="#211e1a" stroke-width="1.8"/>
+        <polygon points="260,422 255,412 265,412" fill="#211e1a"/>
+
+        <line x1="840" y1="304" x2="840" y2="414" stroke="#211e1a" stroke-width="1.8"/>
+        <polygon points="840,422 835,412 845,412" fill="#211e1a"/>
+
+        <!-- ===== 语义层 ===== -->
+        <rect x="110" y="424" width="880" height="86" fill="#3f6f5e"/>
+        <text x="550" y="458" text-anchor="middle" font-size="18" fill="#f7f3ea"
+              letter-spacing="3" font-family="serif" font-weight="bold">语义内核 · 从山那边来的人</text>
+        <text x="550" y="486" text-anchor="middle" font-size="11.5" fill="#d9e6df"
+              letter-spacing="2" font-family="serif">THE ONE FROM OVER THE MOUNTAIN · 定居农人的共同命名</text>
+
+        <!-- ===== 底部箴言 ===== -->
+        <text x="550" y="552" text-anchor="middle" font-size="13.5" fill="#211e1a"
+              letter-spacing="2" font-family="serif">语音的双胞胎是幽灵 · 语义的双胞胎已四千岁</text>
+      </svg>
+      <figcaption>插图 · Wallace 与「外来」：语音各走各路，语义殊途同归</figcaption>
+    </figure>
+
+    <p class="rv">
+      然而，剥掉声音，化石还在。<span class="ipa">*walhaz</span> 和「外来」，都是定居农人铸造的词：黄河边种麦的人，莱茵河畔种大麦的人，给同一个形象命名——<strong>从山那边来的人</strong>。语音的双胞胎是幽灵；语义的双胞胎，已经四千岁了。
+    </p>
+
+    <!-- ==================== 肆 ==================== -->
+    <div class="sec rv">
+      <div class="num"><span>肆</span></div>
+      <h2>演播室里的幽灵</h2>
+      <div class="en">The Ghost in the Studio</div>
+    </div>
+
+    <p class="rv">
+      当 Myron Wallechinsky 的父亲在埃利斯岛把姓氏缩短成 Wallace 时，他以为自己选了一个标准的盎格鲁—撒克逊名字，好融入纽约社会。他以为这个名字属于苏格兰边境。
+    </p>
+
+    <p class="rv">
+      他不可能知道，自己无意间召唤出的，是一个古老的、泛欧亚的心理结构。
+    </p>
+
+    <p class="rv">
+      下次你再看迈克·华莱士盘问政客的老录像，或者翻副总统亨利·华莱士的传记，不妨越过二十世纪演播室的灯光看进去：你看到的这个名字，编码着一段莱茵河与黄河共同拥有的四千年记忆——那是定居农人望向黑黢黢的草原时的剪影，看着“山那边来的人”一步步走近。语言在我们脚下变迁，而这份命名，从未改变。
+    </p>
+
+    <!-- ==================== 分隔 ==================== -->
+    <div class="rule rv">
+      <svg width="130" height="38" viewBox="0 0 130 38" aria-hidden="true">
+        <line x1="0" y1="30" x2="42" y2="30" stroke="#c9bfa8" stroke-width="1"/>
+        <path d="M46 30 L65 8 L84 30" fill="none" stroke="#a03a26"
+              stroke-width="2" stroke-linejoin="round"/>
+        <line x1="88" y1="30" x2="130" y2="30" stroke="#c9bfa8" stroke-width="1"/>
+        <circle cx="65" cy="34" r="2" fill="#a03a26"/>
+      </svg>
+    </div>
+
+  </article>
+
+  <!-- ==================== 编辑注释（默认折叠） ==================== -->
+  <details class="colophon rv">
+    <summary>
+      <span class="colophon-title">编辑注释 · EDITOR'S NOTES</span>
+      <span class="toggle-icon" aria-hidden="true">＋</span>
+    </summary>
+
+    <div class="colophon-body">
+
+      <blockquote class="pull rv">
+        美国的华莱士 那比你们不知道高到哪里去了
+        <span class="src">— 长者</span>
+      </blockquote>
+
+      <ol>
+        <li>Wallace 的谱系：古诺曼法语 <i>Waleis</i>（威尔士人／外来者）→ 原始日耳曼语 <i>*walhaz</i>（外来者、凯尔特人、罗马人），可能源自凯尔特部落名 Volcae；与 PIE <i>*wal-</i>（“强有力”，即 Walter 一词的词根）无关。</li>
+        <li>“假同源”判定为本文刻意保留的框架：作者承认 <i>*walhaz</i> 与「外来」并无谱系关系，本文属思辨考古语言学写作，而非语源学论证。</li>
+        <li>粤语 <i>wai6</i> 的 <i>w-</i> 来自中古 <i>ŋw-</i> 的脱鼻化；闽南语 <i>gōa</i> 保留了疑母（上古 <i>*ŋ-</i>），客家话（如梅县 <i>ngoi</i>）亦然。越古老的层次，与 Wallace 的 <i>w-</i> 差距越大。</li>
+        <li>匈人与匈奴的同一性，目前仍是有争议的学术假说（支持者与反对者都大有人在），并非定论。</li>
+        <li>“蜜”（上古 <i>*mit</i>）与“犬”（上古 <i>*kʷʰen</i>）的跨语系对应，为学界提出并仍在讨论的接触／借贷假说；方向与细节尚无共识。</li>
+        <li>“衣冠南渡”的移民主力落脚于长江流域；闽语的形成与后世多波入闽移民相关，闽南语保存上古汉语特征的说法宜理解为渐进积淀，而非一次性“冰封”。</li>
+        <li>文中 Mike Wallace 家族姓氏 Wallechinsky 之英语化，依据公开传记资料。</li>
+      </ol>
+    </div>
+  </details>
+
+  <div class="endmark">— 全 文 完 · FIN —</div>
+
+</div>
+
+<script>
+  /* ---------- 阅读进度条 ---------- */
+  (function () {
+    var bar = document.getElementById('progress');
+    function update() {
+      var el = document.documentElement;
+      var max = el.scrollHeight - el.clientHeight;
+      var p = max > 0 ? (el.scrollTop / max) * 100 : 0;
+      bar.style.width = p + '%';
+    }
+    document.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+  })();
+
+  /* ---------- 滚动揭示 ---------- */
+  (function () {
+    var nodes = document.querySelectorAll('.rv');
+    if (!('IntersectionObserver' in window)) {
+      nodes.forEach(function (el) { el.classList.add('on'); });
+      return;
+    }
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('on');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+    nodes.forEach(function (el) { io.observe(el); });
+  })();
+</script>
+</body>
+</html>
